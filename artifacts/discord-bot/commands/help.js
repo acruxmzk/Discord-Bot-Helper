@@ -1,84 +1,46 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { defaultColor } = require('../config/config');
 
-const commands = [
-  {
-    name: '/setup-squads',
-    usage: '/setup-squads',
-    description: 'Cria automaticamente os 25 cargos de Squad (Squad 1 ao Squad 25) com a cor padrão laranja. Ignora cargos que já existem.',
-    permission: 'Administrador',
-    emoji: '⚙️',
-  },
-  {
-    name: '/create-role',
-    usage: '/create-role nome:Líderes cor:#FF5733',
-    description: 'Cria um cargo completamente customizado. Valida a cor no formato HEX e evita duplicatas.',
-    permission: 'Administrador',
-    emoji: '🎨',
-  },
-  {
-    name: '/add-to-squad',
-    usage: '/add-to-squad membro:@usuário numero:3',
-    description: 'Adiciona um membro ao cargo de um Squad específico. Verifica se o Squad existe e se o membro já está nele.',
-    permission: 'Administrador',
-    emoji: '➕',
-  },
-  {
-    name: '/remove-from-squad',
-    usage: '/remove-from-squad membro:@usuário numero:3',
-    description: 'Remove um membro do cargo de um Squad específico. Avisa caso o membro não esteja no Squad.',
-    permission: 'Administrador',
-    emoji: '➖',
-  },
-  {
-    name: '/private-category',
-    usage: '/private-category nome:Reuniões cargo:@Líderes',
-    description: 'Torna uma categoria invisível para @everyone. Aceita um cargo opcional que terá acesso exclusivo. Aplica a todos os canais dentro da categoria.',
-    permission: 'Administrador',
-    emoji: '🔒',
-  },
-  {
-    name: '/limit-voice',
-    usage: '/limit-voice canal:#sala-geral limite:5',
-    description: 'Define o número máximo de usuários em um canal de voz (0 = sem limite, máx. 99).',
-    permission: 'Administrador',
-    emoji: '🔊',
-  },
-  {
-    name: '/help',
-    usage: '/help',
-    description: 'Exibe este manual com todos os comandos disponíveis.',
-    permission: 'Todos',
-    emoji: '📖',
-  },
-];
-
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('help')
-    .setDescription('Exibe o manual de todos os comandos disponíveis'),
+    .setDescription('Exibe o manual de comandos do bot'),
 
   async execute(interaction) {
     const embed = new EmbedBuilder()
-      .setTitle('📖 Manual de Comandos')
-      .setDescription('Lista completa de comandos disponíveis neste servidor.\n\u200b')
+      .setTitle('📋 Manual de Comandos')
       .setColor(defaultColor)
-      .setFooter({ text: 'Bot de Administração • Apenas Admins podem executar comandos de gestão' })
+      .setDescription('Todos os comandos exigem permissão de **Administrador**, exceto `/help`.')
+      .addFields(
+        {
+          name: '🏷️ Cargos',
+          value: [
+            '`/setup-squads` — Cria os 25 cargos de Squad automaticamente',
+            '`/create-role [nome] [cor]` — Cria um cargo com cor personalizada (HEX)',
+          ].join('\n'),
+        },
+        {
+          name: '👥 Gestão de Squads',
+          value: [
+            '`/add-to-squad [@membro] [número]` — Adiciona alguém a um Squad',
+            '`/remove-from-squad [@membro] [número]` — Remove alguém de um Squad',
+          ].join('\n'),
+        },
+        {
+          name: '🏠 Servidor',
+          value: [
+            '`/private-category [nome] [cargo?]` — Torna uma categoria privada',
+            '`/limit-voice [canal] [limite]` — Limita usuários em canal de voz (0 = sem limite)',
+          ].join('\n'),
+        },
+        {
+          name: '❓ Ajuda',
+          value: '`/help` — Exibe este manual',
+        }
+      )
+      .setFooter({ text: 'Bot de Administração' })
       .setTimestamp();
 
-    for (const cmd of commands) {
-      embed.addFields({
-        name: `${cmd.emoji} ${cmd.name}`,
-        value: [
-          `${cmd.description}`,
-          `> **Uso:** \`${cmd.usage}\``,
-          `> **Permissão:** ${cmd.permission}`,
-          '\u200b',
-        ].join('\n'),
-        inline: false,
-      });
-    }
-
-    await interaction.reply({ embeds: [embed], ephemeral: false });
+    await interaction.reply({ embeds: [embed] });
   },
 };
