@@ -3,7 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, ChannelType, Ove
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('private-category')
-    .setDescription('Torna uma categoria privada (invisível para membros sem cargo)')
+    .setDescription('Deixa categoria visível para todos, mas só o cargo certo pode interagir')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(option =>
       option
@@ -14,45 +14,60 @@ module.exports = {
     .addRoleOption(option =>
       option
         .setName('cargo')
-        .setDescription('Cargo que terá acesso à categoria (opcional)')
-        .setRequired(false)
+        .setDescription('Cargo que terá acesso total à categoria')
+        .setRequired(true)
     ),
 
   async execute(interaction) {
     const nome = interaction.options.getString('nome');
-    const roleAllow = interaction.options.getRole('cargo');
+    const role = interaction.options.getRole('cargo');
 
     await interaction.deferReply();
 
     try {
-      const categories = await interaction.guild.channels.fetch();
-      const category = categories.find(
+      const channels = await interaction.guild.channels.fetch();
+      const category = channels.find(
         c => c.type === ChannelType.GuildCategory && c.name.toLowerCase() === nome.toLowerCase()
       );
 
       if (!category) {
-        const errorEmbed = new EmbedBuilder()
-          .setTitle('❌ Categoria não encontrada')
-          .setColor('#FF0000')
-          .setDescription(`Nenhuma categoria com o nome **${nome}** foi encontrada.\nVerifique o nome e tente novamente.`)
-          .setTimestamp();
-
-        return interaction.editReply({ embeds: [errorEmbed] });
+        return interaction.editReply({
+          embeds: [
+            new EmbedBuilder()
+              .setTitle('❌ Categoria não encontrada')
+              .setColor('#FF0000')
+              .setDescription(`Nenhuma categoria com o nome **${nome}** foi encontrada.`)
+              .setTimestamp(),
+          ],
+        });
       }
 
       await category.permissionOverwrites.set([
         {
           id: interaction.guild.roles.everyone.id,
           type: OverwriteType.Role,
-          deny: [PermissionFlagsBits.ViewChannel],
+          allow: [PermissionFlagsBits.ViewChannel],
+          deny: [
+            PermissionFlagsBits.SendMessages,
+            PermissionFlagsBits.Connect,
+            PermissionFlagsBits.Speak,
+            PermissionFlagsBits.AddReactions,
+            PermissionFlagsBits.CreatePublicThreads,
+            PermissionFlagsBits.CreatePrivateThreads,
+          ],
         },
-        ...(roleAllow
-          ? [{
-              id: roleAllow.id,
-              type: OverwriteType.Role,
-              allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.Connect],
-            }]
-          : []),
+        {
+          id: role.id,
+          type: OverwriteType.Role,
+          allow: [
+            PermissionFlagsBits.ViewChannel,
+            PermissionFlagsBits.SendMessages,
+            PermissionFlagsBits.Connect,
+            PermissionFlagsBits.Speak,
+            PermissionFlagsBits.AddReactions,
+            PermissionFlagsBits.ReadMessageHistory,
+          ],
+        },
       ]);
 
       const canais = category.children.cache;
@@ -60,37 +75,40 @@ module.exports = {
         await channel.lockPermissions();
       }
 
-      const successEmbed = new EmbedBuilder()
-        .setTitle('🔒 Categoria tornada privada')
-        .setColor('#FFA500')
-        .addFields(
-          { name: '📁 Categoria', value: category.name, inline: true },
-          { name: '📺 Canais afetados', value: `${canais.size}`, inline: true },
-          {
-            name: '🔓 Acesso liberado para',
-            value: roleAllow ? `<@&${roleAllow.id}>` : 'Nenhum cargo específico',
-            inline: true,
-          },
-        )
-        .setDescription('@everyone não pode mais ver esta categoria.')
-        .setFooter({ text: 'Bot de Administração' })
-        .setTimestamp();
-
-      await interaction.editReply({ embeds: [successEmbed] });
+      await interaction.editReply({
+        embeds: [
+          new EmbedBuilder()
+            .setTitle('🔐 Categoria configurada')
+            .setColor('#FFA500')
+            .setDescription(
+              `A categoria **${category.name}** agora é **visível para todos**, mas só <@&${role.id}> pode interagir.`
+            )
+            .addFields(
+              { name: '📁 Categoria', value: category.name, inline: true },
+              { name: '👁️ Visível para', value: '@everyone', inline: true },
+              { name: '✅ Acesso total', value: `<@&${role.id}>`, inline: true },
+              { name: '📺 Canais afetados', value: `${canais.size}`, inline: true },
+            )
+            .setFooter({ text: 'Bot de Administração' })
+            .setTimestamp(),
+        ],
+      });
     } catch (error) {
       console.error('[private-category] Erro:', error);
 
       const msg = error.code === 50013
-        ? 'O bot não tem permissão para gerenciar canais. Certifique-se que o bot possui a permissão **Gerenciar Canais**.'
+        ? 'O bot não tem permissão para gerenciar canais. Adicione a permissão **Gerenciar Canais** ao bot.'
         : error.message;
 
-      const errorEmbed = new EmbedBuilder()
-        .setTitle('❌ Erro ao tornar categoria privada')
-        .setColor('#FF0000')
-        .setDescription(msg)
-        .setTimestamp();
-
-      await interaction.editReply({ embeds: [errorEmbed] });
+      await interaction.editReply({
+        embeds: [
+          new EmbedBuilder()
+            .setTitle('❌ Erro')
+            .setColor('#FF0000')
+            .setDescription(msg)
+            .setTimestamp(),
+        ],
+      });
     }
   },
 };
