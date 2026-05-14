@@ -15,21 +15,21 @@ module.exports = {
         {
           name: '🏷️ Cargos',
           value: [
-            '`/setup-squads` — Cria os 25 cargos de Squad automaticamente',
+            '`/setup-squads` — Cria os 25 cargos UNIT¹ até UNIT²⁵ automaticamente',
             '`/create-role [nome] [cor]` — Cria um cargo com cor personalizada (HEX)',
           ].join('\n'),
         },
         {
-          name: '👥 Gestão de Squads',
+          name: '👥 Gestão de UNITs',
           value: [
-            '`/add-to-squad [@membro] [número]` — Adiciona alguém a um Squad',
-            '`/remove-from-squad [@membro] [número]` — Remove alguém de um Squad',
+            '`/add-to-squad [@membro] [número]` — Adiciona alguém a uma UNIT',
+            '`/remove-from-squad [@membro] [número]` — Remove alguém de uma UNIT',
           ].join('\n'),
         },
         {
           name: '🏠 Servidor',
           value: [
-            '`/private-category [nome] [cargo?]` — Torna uma categoria privada',
+            '`/private-category [nome] [cargo]` — Canal visível para todos, acesso só para o cargo definido',
             '`/limit-voice [canal] [limite]` — Limita usuários em canal de voz (0 = sem limite)',
           ].join('\n'),
         },

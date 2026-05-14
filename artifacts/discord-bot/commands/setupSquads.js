@@ -1,11 +1,11 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
-const { createRole } = require('../utils/createRoleUtil');
+const { createRole, toSuperscript } = require('../utils/createRoleUtil');
 const { defaultColor, squadCount, squadPrefix } = require('../config/config');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('setup-squads')
-    .setDescription(`Cria ${squadCount} cargos de squad no servidor`)
+    .setDescription(`Cria ${squadCount} cargos de UNIT no servidor`)
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
@@ -16,7 +16,7 @@ module.exports = {
 
     try {
       for (let i = 1; i <= squadCount; i++) {
-        const name = `${squadPrefix} ${i}`;
+        const name = `${squadPrefix}${toSuperscript(i)}`;
         const { role, created: wasCreated } = await createRole(interaction.guild, name, defaultColor);
 
         if (wasCreated) {
@@ -29,7 +29,7 @@ module.exports = {
       }
 
       const embed = new EmbedBuilder()
-        .setTitle('✅ Setup de Squads concluído')
+        .setTitle('✅ Setup de UNITs concluído')
         .setColor(defaultColor)
         .addFields(
           {
@@ -50,13 +50,15 @@ module.exports = {
     } catch (error) {
       console.error('[setup-squads] Erro:', error);
 
-      const errorEmbed = new EmbedBuilder()
-        .setTitle('❌ Erro ao criar squads')
-        .setColor('#FF0000')
-        .setDescription(`Ocorreu um erro: ${error.message}`)
-        .setTimestamp();
-
-      await interaction.editReply({ embeds: [errorEmbed] });
+      await interaction.editReply({
+        embeds: [
+          new EmbedBuilder()
+            .setTitle('❌ Erro ao criar UNITs')
+            .setColor('#FF0000')
+            .setDescription(`Ocorreu um erro: ${error.message}`)
+            .setTimestamp(),
+        ],
+      });
     }
   },
 };
