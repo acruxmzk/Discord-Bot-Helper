@@ -29,8 +29,11 @@ module.exports = {
     await interaction.deferReply();
 
     try {
-      const member = await interaction.guild.members.fetch(user.id);
-      const role = interaction.guild.roles.cache.find(r => r.name === roleName);
+      const [member, roles] = await Promise.all([
+        interaction.guild.members.fetch({ user: user.id, force: true }),
+        interaction.guild.roles.fetch(),
+      ]);
+      const role = roles.find(r => r.name === roleName);
 
       if (!role) {
         const errorEmbed = new EmbedBuilder()
