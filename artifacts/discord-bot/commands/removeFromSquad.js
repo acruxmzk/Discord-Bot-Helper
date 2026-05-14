@@ -55,6 +55,20 @@ module.exports = {
         return interaction.editReply({ embeds: [warnEmbed] });
       }
 
+      const botMember = await interaction.guild.members.fetchMe();
+      if (role.position >= botMember.roles.highest.position) {
+        const hierEmbed = new EmbedBuilder()
+          .setTitle('❌ Erro de hierarquia')
+          .setColor('#FF0000')
+          .setDescription(
+            `Não consigo remover o cargo **${roleName}** pois ele está **acima ou igual** ao cargo mais alto do bot na hierarquia.\n\n` +
+            `**Solução:** No Discord, vá em **Configurações do Servidor → Cargos** e arraste o cargo do bot (**Lima.gg**) para **acima** de todos os cargos de Squad.`
+          )
+          .setTimestamp();
+
+        return interaction.editReply({ embeds: [hierEmbed] });
+      }
+
       await member.roles.remove(role);
 
       const successEmbed = new EmbedBuilder()
@@ -69,12 +83,16 @@ module.exports = {
 
       await interaction.editReply({ embeds: [successEmbed] });
     } catch (error) {
-      console.error('[remove-from-squad] Erro:', error);
+      console.error('[remove-from-squad] Erro completo:', error);
+
+      const msg = error.code === 50013
+        ? 'O bot não tem permissão para gerenciar este cargo. Verifique a hierarquia de cargos no servidor.'
+        : error.message;
 
       const errorEmbed = new EmbedBuilder()
         .setTitle('❌ Erro ao remover membro')
         .setColor('#FF0000')
-        .setDescription(`Ocorreu um erro: ${error.message}`)
+        .setDescription(msg)
         .setTimestamp();
 
       await interaction.editReply({ embeds: [errorEmbed] });
