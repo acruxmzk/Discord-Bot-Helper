@@ -11,7 +11,7 @@ const commands = [
   },
   {
     name: '/create-role',
-    usage: '/create-role nome:#FF5733 cor:#FF5733',
+    usage: '/create-role nome:Líderes cor:#FF5733',
     description: 'Cria um cargo completamente customizado. Valida a cor no formato HEX e evita duplicatas.',
     permission: 'Administrador',
     emoji: '🎨',
@@ -29,6 +29,20 @@ const commands = [
     description: 'Remove um membro do cargo de um Squad específico. Avisa caso o membro não esteja no Squad.',
     permission: 'Administrador',
     emoji: '➖',
+  },
+  {
+    name: '/private-category',
+    usage: '/private-category nome:Reuniões cargo:@Líderes',
+    description: 'Torna uma categoria invisível para @everyone. Aceita um cargo opcional que terá acesso exclusivo. Aplica a todos os canais dentro da categoria.',
+    permission: 'Administrador',
+    emoji: '🔒',
+  },
+  {
+    name: '/limit-voice',
+    usage: '/limit-voice canal:#sala-geral limite:5',
+    description: 'Define o número máximo de usuários em um canal de voz (0 = sem limite, máx. 99).',
+    permission: 'Administrador',
+    emoji: '🔊',
   },
   {
     name: '/help',
