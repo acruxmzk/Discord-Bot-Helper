@@ -1,0 +1,13 @@
+{
+  "name": "@workspace/discord-bot",
+  "version": "1.0.0",
+  "description": "Bot de administração Discord com discord.js v14",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "deploy": "node deploy-commands.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.16.3"
+  }
+}
