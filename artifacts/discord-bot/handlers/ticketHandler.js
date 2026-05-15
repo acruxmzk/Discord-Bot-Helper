@@ -1,5 +1,4 @@
 const {
-  EmbedBuilder,
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
@@ -11,10 +10,14 @@ const {
   SeparatorBuilder,
   SeparatorSpacingSize,
   MessageFlags,
+  EmbedBuilder,
 } = require('discord.js');
 
-const CATEGORY_NAME = 'League Tickets';
-const STAFF_ROLE_NAME = 'STAFF';
+const { ticketLogChannelName } = require('../config/config');
+
+const CATEGORY_NAME  = 'League Tickets';
+const STAFF_ROLE     = 'STAFF';
+const ADMIN_ROLE     = 'Administrator';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -23,32 +26,125 @@ function ticketChannelName(user) {
 }
 
 async function findOrCreateCategory(guild) {
-  let category = guild.channels.cache.find(
+  let cat = guild.channels.cache.find(
     c => c.type === ChannelType.GuildCategory && c.name === CATEGORY_NAME
   );
-  if (!category) {
-    category = await guild.channels.create({
+  if (!cat) {
+    cat = await guild.channels.create({
       name: CATEGORY_NAME,
       type: ChannelType.GuildCategory,
       permissionOverwrites: [
-        {
-          id: guild.roles.everyone.id,
-          type: OverwriteType.Role,
-          deny: [PermissionFlagsBits.ViewChannel],
-        },
+        { id: guild.roles.everyone.id, type: OverwriteType.Role, deny: [PermissionFlagsBits.ViewChannel] },
       ],
     });
   }
-  return category;
+  return cat;
 }
 
-function buildCloseRow() {
-  return new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-      .setCustomId('ticket_close')
-      .setLabel('🔒 Fechar Ticket')
-      .setStyle(ButtonStyle.Danger)
-  );
+function findLogChannel(guild) {
+  return guild.channels.cache.find(
+    c => c.type === ChannelType.GuildText && c.name.toLowerCase().includes(ticketLogChannelName)
+  ) ?? null;
+}
+
+// ── Ficha de inscrição ─────────────────────────────────────────────────────
+
+const FICHA = [
+  '╭━━━〔 🏆 𝐎𝐁𝐋𝐈𝐕𝐈𝐎𝐍 𝐋𝐄𝐀𝐆𝐔𝐄 〕━━━╮',
+  '',
+  '📋 𝐅𝐎𝐑𝐌𝐔𝐋𝐀́𝐑𝐈𝐎 𝐃𝐄 𝐈𝐍𝐒𝐂𝐑𝐈𝐂̧𝐀̃𝐎',
+  '',
+  '• 𝑪𝒍𝒂̃:',
+  '• 𝑻𝒂𝒈:',
+  '• 𝑳𝒊𝒏𝒆:',
+  '• 𝑴𝒂𝒏𝒂𝒈𝒆𝒓:',
+  '',
+  '━━━━━━━━━━━━━━━━━━',
+  '',
+  '𝗣𝟭:',
+  '𝗨𝗜𝗗:',
+  '',
+  '𝗣𝟮:',
+  '𝗨𝗜𝗗:',
+  '',
+  '𝗣𝟯:',
+  '𝗨𝗜𝗗:',
+  '',
+  '𝗣𝟰:',
+  '𝗨𝗜𝗗:',
+  '',
+  '𝗣𝟱:',
+  '𝗨𝗜𝗗:',
+  '',
+  '━━━━━━━━━━━━━━━━━━',
+  '',
+  '⚠️ Preencha corretamente todas as informações.',
+  '',
+  '╰━━━〔 ⚔️ 𝐎𝐁𝐋𝐈𝐕𝐈𝐎𝐍 〕━━━╯',
+].join('\n');
+
+// ── Builders de container ──────────────────────────────────────────────────
+
+function buildTicketContainer(user, staffMention) {
+  return new ContainerBuilder()
+    .setAccentColor(0xFFA500)
+    .addTextDisplayComponents(
+      new TextDisplayBuilder().setContent(
+        `### 🎟️ Novo Ticket de Inscrição\n` +
+        `**Solicitante:** <@${user.id}> \`${user.tag}\`\n` +
+        `**Aberto em:** <t:${Math.floor(Date.now() / 1000)}:F>\n\n` +
+        `-# ${staffMention} — nova inscrição recebida.`
+      )
+    )
+    .addSeparatorComponents(
+      new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
+    )
+    .addTextDisplayComponents(
+      new TextDisplayBuilder().setContent(
+        `📋 **Copie a ficha abaixo, preencha e envie neste canal.**`
+      )
+    )
+    .addTextDisplayComponents(
+      new TextDisplayBuilder().setContent('```\n' + FICHA + '\n```')
+    )
+    .addSeparatorComponents(
+      new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
+    )
+    .addActionRowComponents(
+      new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId('ticket_close')
+          .setLabel('🔒 Fechar Ticket')
+          .setStyle(ButtonStyle.Danger)
+      )
+    );
+}
+
+function buildConfirmContainer() {
+  return new ContainerBuilder()
+    .setAccentColor(0xFF4444)
+    .addTextDisplayComponents(
+      new TextDisplayBuilder().setContent(
+        `### ⚠️ Confirmar fechamento\n` +
+        `Tem certeza que deseja fechar este ticket?\n` +
+        `-# O canal será deletado permanentemente.`
+      )
+    )
+    .addSeparatorComponents(
+      new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
+    )
+    .addActionRowComponents(
+      new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId('ticket_close_confirm')
+          .setLabel('✅ Confirmar')
+          .setStyle(ButtonStyle.Danger),
+        new ButtonBuilder()
+          .setCustomId('ticket_close_cancel')
+          .setLabel('❌ Cancelar')
+          .setStyle(ButtonStyle.Secondary)
+      )
+    );
 }
 
 // ── Open ticket ────────────────────────────────────────────────────────────
@@ -61,31 +157,48 @@ async function handleTicketOpen(interaction) {
 
   await guild.channels.fetch().catch(() => {});
 
+  // Anti-duplicação
   const duplicate = guild.channels.cache.find(c => c.name === chName);
   if (duplicate) {
     return interaction.editReply({
-      embeds: [
-        new EmbedBuilder()
-          .setTitle('⚠️ Ticket já aberto')
-          .setColor('#FFA500')
-          .setDescription(`Você já tem um ticket em análise pelo STAFF.\nAguarde o retorno da equipe.`)
-          .setTimestamp(),
+      components: [
+        new ContainerBuilder()
+          .setAccentColor(0xFFA500)
+          .addTextDisplayComponents(
+            new TextDisplayBuilder().setContent(
+              `### ⚠️ Ticket já aberto\n` +
+              `Você já tem um ticket ativo: <#${duplicate.id}>\n` +
+              `-# Preencha o formulário ou aguarde o retorno do STAFF.`
+            )
+          ),
       ],
+      flags: MessageFlags.IsComponentsV2,
     });
   }
 
   await guild.roles.fetch().catch(() => {});
-  const staffRole = guild.roles.cache.find(r => r.name === STAFF_ROLE_NAME);
-  const adminRole = guild.roles.cache.find(r => r.name === 'Administrator');
+  const staffRole = guild.roles.cache.find(r => r.name === STAFF_ROLE);
+  const adminRole = guild.roles.cache.find(r => r.name === ADMIN_ROLE);
 
   const category = await findOrCreateCategory(guild);
 
-  // ── Apenas STAFF e Administrator têm acesso ───────────────────────────
+  // ── Permissões: usuário + STAFF + Administrator ───────────────────────
   const overwrites = [
     {
       id: guild.roles.everyone.id,
       type: OverwriteType.Role,
       deny: [PermissionFlagsBits.ViewChannel],
+    },
+    {
+      id: user.id,
+      type: OverwriteType.Member,
+      allow: [
+        PermissionFlagsBits.ViewChannel,
+        PermissionFlagsBits.SendMessages,
+        PermissionFlagsBits.ReadMessageHistory,
+        PermissionFlagsBits.AttachFiles,
+        PermissionFlagsBits.EmbedLinks,
+      ],
     },
   ];
 
@@ -128,119 +241,121 @@ async function handleTicketOpen(interaction) {
     permissionOverwrites: overwrites,
   });
 
-  // ── Ficha de inscrição ────────────────────────────────────────────────
-  const ficha = [
-    '╔════════════════════╗',
-    '      🏆 𝐎𝐁𝐋𝐈𝐕𝐈𝐎𝐍 𝐋𝐄𝐀𝐆𝐔𝐄 🏆',
-    '╚════════════════════╝',
-    '',
-    '✦ 𝑪𝒍𝒂̃:',
-    '✦ 𝑻𝒂𝒈:',
-    '✦ 𝑳𝒊𝒏𝒆:',
-    '✦ 𝑴𝒂𝒏𝒂𝒈𝒆𝒓:',
-    '',
-    '━━━━━━━━━━━━━━━━━━',
-    '',
-    '𝗣𝟭:',
-    '𝗨𝗜𝗗:',
-    '',
-    '𝗣𝟮:',
-    '𝗨𝗜𝗗:',
-    '',
-    '𝗣𝟯:',
-    '𝗨𝗜𝗗:',
-    '',
-    '𝗣𝟰:',
-    '𝗨𝗜𝗗:',
-    '',
-    '𝗣𝟱:',
-    '𝗨𝗜𝗗:',
-    '',
-    '━━━━━━━━━━━━━━━━━━',
-  ].join('\n');
-
-  // ── Container V2 ──────────────────────────────────────────────────────
   const staffMention = staffRole ? `<@&${staffRole.id}>` : '@STAFF';
 
-  const container = new ContainerBuilder()
-    .setAccentColor(0xFFA500)
-    .addTextDisplayComponents(
-      new TextDisplayBuilder().setContent(
-        `### 🎟️ Novo Ticket de Inscrição\n` +
-        `**Jogador:** <@${user.id}> \`(${user.tag})\`\n` +
-        `**Aberto em:** <t:${Math.floor(Date.now() / 1000)}:F>`
-      )
-    )
-    .addSeparatorComponents(
-      new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
-    )
-    .addTextDisplayComponents(
-      new TextDisplayBuilder().setContent(
-        `-# Preencha a ficha abaixo e cole neste canal.`
-      )
-    )
-    .addSeparatorComponents(
-      new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(false)
-    )
-    .addTextDisplayComponents(
-      new TextDisplayBuilder().setContent('```\n' + ficha + '\n```')
-    )
-    .addSeparatorComponents(
-      new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
-    )
-    .addActionRowComponents(buildCloseRow());
-
   await ticketChannel.send({
-    content: `${staffMention} | Ticket de inscrição de **${user.tag}**`,
-    components: [container],
+    components: [buildTicketContainer(user, staffMention)],
     flags: MessageFlags.IsComponentsV2,
   });
 
-  // ── Confirmar ao jogador (ephemeral) ──────────────────────────────────
+  // Confirmação ephemeral para o jogador
   await interaction.editReply({
-    embeds: [
-      new EmbedBuilder()
-        .setTitle('🎟️ Inscrição recebida!')
-        .setColor('#00C851')
-        .setDescription(
-          `Sua solicitação de inscrição foi enviada ao **STAFF** da Oblivion League.\n\n` +
-          `Aguarde o contato da nossa equipe. ✅`
-        )
-        .setFooter({ text: 'Oblivion League • Sistema de Inscrições' })
-        .setTimestamp(),
+    components: [
+      new ContainerBuilder()
+        .setAccentColor(0x00C851)
+        .addTextDisplayComponents(
+          new TextDisplayBuilder().setContent(
+            `### ✅ Ticket criado!\n` +
+            `Seu ticket foi aberto em <#${ticketChannel.id}>.\n` +
+            `Copie a ficha, preencha e envie no canal.\n` +
+            `-# Nossa equipe analisará sua inscrição em breve.`
+          )
+        ),
     ],
+    flags: MessageFlags.IsComponentsV2,
   });
 }
 
-// ── Close ticket ───────────────────────────────────────────────────────────
+// ── Close ticket (pede confirmação) ───────────────────────────────────────
 
 async function handleTicketClose(interaction) {
+  if (!interaction.channel.name.startsWith('ticket-')) {
+    return interaction.reply({ content: '❌ Este botão só funciona dentro de um ticket.', ephemeral: true });
+  }
+
+  await interaction.reply({
+    components: [buildConfirmContainer()],
+    flags: MessageFlags.IsComponentsV2,
+    ephemeral: true,
+  });
+}
+
+// ── Close confirm (envia log + deleta) ────────────────────────────────────
+
+async function handleTicketCloseConfirm(interaction) {
   const channel = interaction.channel;
 
   if (!channel.name.startsWith('ticket-')) {
-    return interaction.reply({
-      content: '❌ Este botão só funciona dentro de um canal de ticket.',
-      ephemeral: true,
-    });
+    return interaction.reply({ content: '❌ Canal inválido.', ephemeral: true });
   }
 
-  const closeContainer = new ContainerBuilder()
-    .setAccentColor(0xFF4444)
-    .addTextDisplayComponents(
-      new TextDisplayBuilder().setContent(
-        `### 🔒 Ticket Encerrado\n` +
-        `Fechado por <@${interaction.user.id}> em <t:${Math.floor(Date.now() / 1000)}:F>.\n` +
-        `-# Este canal será removido em **5 segundos**.`
-      )
-    );
+  await interaction.deferUpdate();
 
-  await interaction.reply({
-    components: [closeContainer],
+  const closedAt = Math.floor(Date.now() / 1000);
+  const closedBy = interaction.user;
+  const topic    = channel.topic ?? 'Sem informações';
+
+  // ── Envia log no canal de staff-logs ─────────────────────────────────
+  const logChannel = findLogChannel(interaction.guild);
+  if (logChannel) {
+    await logChannel.send({
+      components: [
+        new ContainerBuilder()
+          .setAccentColor(0xFF4444)
+          .addTextDisplayComponents(
+            new TextDisplayBuilder().setContent(
+              `### 📁 Ticket Encerrado\n` +
+              `**Canal:** \`${channel.name}\`\n` +
+              `**Tópico:** ${topic}\n` +
+              `**Fechado por:** <@${closedBy.id}> \`${closedBy.tag}\`\n` +
+              `**Fechado em:** <t:${closedAt}:F>`
+            )
+          ),
+      ],
+      flags: MessageFlags.IsComponentsV2,
+    }).catch(() => {});
+  }
+
+  // ── Avisa no canal antes de deletar ───────────────────────────────────
+  await channel.send({
+    components: [
+      new ContainerBuilder()
+        .setAccentColor(0xFF4444)
+        .addTextDisplayComponents(
+          new TextDisplayBuilder().setContent(
+            `### 🔒 Ticket Encerrado\n` +
+            `Fechado por <@${closedBy.id}> em <t:${closedAt}:F>.\n` +
+            `-# Este canal será removido em **5 segundos**.`
+          )
+        ),
+    ],
     flags: MessageFlags.IsComponentsV2,
-  });
+  }).catch(() => {});
 
   await new Promise(r => setTimeout(r, 5000));
-  await channel.delete(`Ticket fechado por ${interaction.user.tag}`).catch(() => {});
+  await channel.delete(`Ticket fechado por ${closedBy.tag}`).catch(() => {});
 }
 
-module.exports = { handleTicketOpen, handleTicketClose };
+// ── Close cancel ──────────────────────────────────────────────────────────
+
+async function handleTicketCloseCancel(interaction) {
+  await interaction.update({
+    components: [
+      new ContainerBuilder()
+        .setAccentColor(0x5865F2)
+        .addTextDisplayComponents(
+          new TextDisplayBuilder().setContent(
+            `### ❌ Cancelado\nO ticket continua aberto.`
+          )
+        ),
+    ],
+    flags: MessageFlags.IsComponentsV2,
+  });
+}
+
+module.exports = {
+  handleTicketOpen,
+  handleTicketClose,
+  handleTicketCloseConfirm,
+  handleTicketCloseCancel,
+};
