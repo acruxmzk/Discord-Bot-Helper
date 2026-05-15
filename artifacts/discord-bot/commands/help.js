@@ -10,7 +10,7 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setTitle('📋 Manual de Comandos')
       .setColor(defaultColor)
-      .setDescription('Comandos marcados com 🔒 exigem permissão de **Administrador**. Comandos com 🛡️ exigem **Gerenciar Cargos**.')
+      .setDescription('Comandos marcados com 🔒 exigem **Administrador**. Comandos com 🛡️ exigem **Gerenciar Cargos**.')
       .addFields(
         {
           name: '⚙️ Setup de UNITs',
@@ -34,6 +34,13 @@ module.exports = {
             '🔒 `/add-to-squad [@membro] [número]` — Adiciona membro a uma UNIT',
             '🔒 `/remove-from-squad [@membro] [número]` — Remove membro de uma UNIT',
             '🔒 `/move-squad [@membro] [número]` — Move membro para outra UNIT (remove a anterior)',
+          ].join('\n'),
+        },
+        {
+          name: '🎟️ Inscrições',
+          value: [
+            '🔒 `/setup-league-ticket [#canal]` — Envia o painel de inscrições da League',
+            '> Jogadores clicam em **🎟️ Inscrever Time** para abrir um ticket privado',
           ].join('\n'),
         },
         {

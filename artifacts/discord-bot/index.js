@@ -1,6 +1,7 @@
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+const { handleTicketOpen, handleTicketClose } = require('./handlers/ticketHandler');
 
 const token = process.env.TOKEN;
 
@@ -10,7 +11,7 @@ if (!token) {
 }
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds],
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
 });
 
 client.commands = new Collection();
@@ -32,22 +33,45 @@ client.once('ready', () => {
 });
 
 client.on('interactionCreate', async interaction => {
-  if (!interaction.isChatInputCommand()) return;
+  // ── Slash commands ──────────────────────────────────────────────────────
+  if (interaction.isChatInputCommand()) {
+    const command = client.commands.get(interaction.commandName);
+    if (!command) return;
 
-  const command = client.commands.get(interaction.commandName);
-  if (!command) return;
+    try {
+      await command.execute(interaction);
+    } catch (error) {
+      console.error(`[ERRO] Comando /${interaction.commandName}:`, error);
 
-  try {
-    await command.execute(interaction);
-  } catch (error) {
-    console.error(`[ERRO] Comando /${interaction.commandName}:`, error);
-
-    const reply = { content: '❌ Ocorreu um erro ao executar este comando.', ephemeral: true };
-    if (interaction.deferred || interaction.replied) {
-      await interaction.editReply(reply);
-    } else {
-      await interaction.reply(reply);
+      const reply = { content: '❌ Ocorreu um erro ao executar este comando.', ephemeral: true };
+      if (interaction.deferred || interaction.replied) {
+        await interaction.editReply(reply);
+      } else {
+        await interaction.reply(reply);
+      }
     }
+    return;
+  }
+
+  // ── Botões ──────────────────────────────────────────────────────────────
+  if (interaction.isButton()) {
+    try {
+      if (interaction.customId === 'ticket_open') {
+        await handleTicketOpen(interaction);
+      } else if (interaction.customId === 'ticket_close') {
+        await handleTicketClose(interaction);
+      }
+    } catch (error) {
+      console.error(`[ERRO] Botão ${interaction.customId}:`, error);
+
+      const reply = { content: '❌ Ocorreu um erro ao processar este botão.', ephemeral: true };
+      if (interaction.deferred || interaction.replied) {
+        await interaction.editReply(reply);
+      } else {
+        await interaction.reply(reply);
+      }
+    }
+    return;
   }
 });
 
