@@ -40,6 +40,7 @@ module.exports = {
           name: '🎟️ Inscrições',
           value: [
             '🔒 `/setup-league-ticket [#canal]` — Envia o painel de inscrições da League',
+            '🔒 `/refresh-league-ticket [#canal]` — Remove o painel antigo e envia um novo',
             '> Jogadores clicam em **🎟️ Inscrever Time** para abrir um ticket privado',
           ].join('\n'),
         },
