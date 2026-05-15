@@ -6,6 +6,11 @@ const {
   ChannelType,
   PermissionFlagsBits,
   OverwriteType,
+  ContainerBuilder,
+  TextDisplayBuilder,
+  SeparatorBuilder,
+  SeparatorSpacingSize,
+  MessageFlags,
 } = require('discord.js');
 
 const CATEGORY_NAME = 'League Tickets';
@@ -25,6 +30,13 @@ async function findOrCreateCategory(guild) {
     category = await guild.channels.create({
       name: CATEGORY_NAME,
       type: ChannelType.GuildCategory,
+      permissionOverwrites: [
+        {
+          id: guild.roles.everyone.id,
+          type: OverwriteType.Role,
+          deny: [PermissionFlagsBits.ViewChannel],
+        },
+      ],
     });
   }
   return category;
@@ -56,7 +68,7 @@ async function handleTicketOpen(interaction) {
         new EmbedBuilder()
           .setTitle('⚠️ Ticket já aberto')
           .setColor('#FFA500')
-          .setDescription(`Você já tem um ticket aberto: <#${duplicate.id}>\nFinalize-o antes de abrir outro.`)
+          .setDescription(`Você já tem um ticket em análise pelo STAFF.\nAguarde o retorno da equipe.`)
           .setTimestamp(),
       ],
     });
@@ -68,22 +80,12 @@ async function handleTicketOpen(interaction) {
 
   const category = await findOrCreateCategory(guild);
 
+  // ── Apenas STAFF e Administrator têm acesso ───────────────────────────
   const overwrites = [
     {
       id: guild.roles.everyone.id,
       type: OverwriteType.Role,
       deny: [PermissionFlagsBits.ViewChannel],
-    },
-    {
-      id: user.id,
-      type: OverwriteType.Member,
-      allow: [
-        PermissionFlagsBits.ViewChannel,
-        PermissionFlagsBits.SendMessages,
-        PermissionFlagsBits.ReadMessageHistory,
-        PermissionFlagsBits.AttachFiles,
-        PermissionFlagsBits.EmbedLinks,
-      ],
     },
   ];
 
@@ -97,6 +99,7 @@ async function handleTicketOpen(interaction) {
         PermissionFlagsBits.ReadMessageHistory,
         PermissionFlagsBits.ManageMessages,
         PermissionFlagsBits.AttachFiles,
+        PermissionFlagsBits.EmbedLinks,
       ],
     });
   }
@@ -112,6 +115,7 @@ async function handleTicketOpen(interaction) {
         PermissionFlagsBits.ManageMessages,
         PermissionFlagsBits.ManageChannels,
         PermissionFlagsBits.AttachFiles,
+        PermissionFlagsBits.EmbedLinks,
       ],
     });
   }
@@ -120,20 +124,11 @@ async function handleTicketOpen(interaction) {
     name: chName,
     type: ChannelType.GuildText,
     parent: category.id,
-    topic: `Inscrição de ${user.tag} | Aberto em ${new Date().toLocaleDateString('pt-BR')}`,
+    topic: `Inscrição de ${user.tag} (${user.id}) | ${new Date().toLocaleDateString('pt-BR')}`,
     permissionOverwrites: overwrites,
   });
 
-  const welcomeEmbed = new EmbedBuilder()
-    .setColor('#FFA500')
-    .setDescription(
-      `Olá, <@${user.id}>! 👋\n\n` +
-      `Preencha a ficha abaixo com os dados do seu time e envie neste canal.\n` +
-      `Nossa equipe revisará sua inscrição em breve.`
-    )
-    .setFooter({ text: 'Oblivion League • Sistema de Inscrições' })
-    .setTimestamp();
-
+  // ── Ficha de inscrição ────────────────────────────────────────────────
   const ficha = [
     '╔════════════════════╗',
     '      🏆 𝐎𝐁𝐋𝐈𝐕𝐈𝐎𝐍 𝐋𝐄𝐀𝐆𝐔𝐄 🏆',
@@ -164,24 +159,54 @@ async function handleTicketOpen(interaction) {
     '━━━━━━━━━━━━━━━━━━',
   ].join('\n');
 
+  // ── Container V2 ──────────────────────────────────────────────────────
   const staffMention = staffRole ? `<@&${staffRole.id}>` : '@STAFF';
 
-  await ticketChannel.send({
-    content: `${staffMention} | Novo ticket de inscrição aberto por <@${user.id}>`,
-    embeds: [welcomeEmbed],
-  });
+  const container = new ContainerBuilder()
+    .setAccentColor(0xFFA500)
+    .addTextDisplayComponents(
+      new TextDisplayBuilder().setContent(
+        `### 🎟️ Novo Ticket de Inscrição\n` +
+        `**Jogador:** <@${user.id}> \`(${user.tag})\`\n` +
+        `**Aberto em:** <t:${Math.floor(Date.now() / 1000)}:F>`
+      )
+    )
+    .addSeparatorComponents(
+      new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
+    )
+    .addTextDisplayComponents(
+      new TextDisplayBuilder().setContent(
+        `-# Preencha a ficha abaixo e cole neste canal.`
+      )
+    )
+    .addSeparatorComponents(
+      new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(false)
+    )
+    .addTextDisplayComponents(
+      new TextDisplayBuilder().setContent('```\n' + ficha + '\n```')
+    )
+    .addSeparatorComponents(
+      new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
+    )
+    .addActionRowComponents(buildCloseRow());
 
   await ticketChannel.send({
-    content: '```\n' + ficha + '\n```',
-    components: [buildCloseRow()],
+    content: `${staffMention} | Ticket de inscrição de **${user.tag}**`,
+    components: [container],
+    flags: MessageFlags.IsComponentsV2,
   });
 
+  // ── Confirmar ao jogador (ephemeral) ──────────────────────────────────
   await interaction.editReply({
     embeds: [
       new EmbedBuilder()
-        .setTitle('🎟️ Ticket criado!')
+        .setTitle('🎟️ Inscrição recebida!')
         .setColor('#00C851')
-        .setDescription(`Seu ticket foi aberto em <#${ticketChannel.id}>.\nPreencha o formulário e aguarde nosso retorno!`)
+        .setDescription(
+          `Sua solicitação de inscrição foi enviada ao **STAFF** da Oblivion League.\n\n` +
+          `Aguarde o contato da nossa equipe. ✅`
+        )
+        .setFooter({ text: 'Oblivion League • Sistema de Inscrições' })
         .setTimestamp(),
     ],
   });
@@ -199,18 +224,22 @@ async function handleTicketClose(interaction) {
     });
   }
 
+  const closeContainer = new ContainerBuilder()
+    .setAccentColor(0xFF4444)
+    .addTextDisplayComponents(
+      new TextDisplayBuilder().setContent(
+        `### 🔒 Ticket Encerrado\n` +
+        `Fechado por <@${interaction.user.id}> em <t:${Math.floor(Date.now() / 1000)}:F>.\n` +
+        `-# Este canal será removido em **5 segundos**.`
+      )
+    );
+
   await interaction.reply({
-    embeds: [
-      new EmbedBuilder()
-        .setTitle('🔒 Fechando ticket...')
-        .setColor('#FF4444')
-        .setDescription(`Ticket encerrado por <@${interaction.user.id}>.\nEste canal será removido em **5 segundos**.`)
-        .setTimestamp(),
-    ],
+    components: [closeContainer],
+    flags: MessageFlags.IsComponentsV2,
   });
 
   await new Promise(r => setTimeout(r, 5000));
-
   await channel.delete(`Ticket fechado por ${interaction.user.tag}`).catch(() => {});
 }
 
