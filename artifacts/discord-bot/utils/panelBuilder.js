@@ -30,7 +30,6 @@ function buildTicketPanel() {
         '• Nome do Time\n' +
         '• Tag da Organização\n' +
         '• Lineup Completa\n' +
-        '• Captain\n' +
         '• Reservas\n' +
         '• UID de todos os jogadores'
       )
