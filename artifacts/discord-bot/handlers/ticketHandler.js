@@ -124,30 +124,55 @@ async function handleTicketOpen(interaction) {
     permissionOverwrites: overwrites,
   });
 
-  const formEmbed = new EmbedBuilder()
-    .setTitle('🏆 Inscrição — Oblivion League')
+  const welcomeEmbed = new EmbedBuilder()
     .setColor('#FFA500')
     .setDescription(
       `Olá, <@${user.id}>! 👋\n\n` +
-      `Preencha as informações abaixo para inscrever seu time na **Oblivion League**.\n` +
+      `Preencha a ficha abaixo com os dados do seu time e envie neste canal.\n` +
       `Nossa equipe revisará sua inscrição em breve.`
-    )
-    .addFields(
-      { name: '🏷️ Nome do Time', value: '> Responda aqui o nome do time', inline: false },
-      { name: '🔖 Tag', value: '> Responda aqui a tag (ex: [OBL])', inline: false },
-      { name: '👥 Lineup (jogadores titulares)', value: '> Liste os nomes dos jogadores titulares', inline: false },
-      { name: '👑 Captain', value: '> Nome do capitão do time', inline: false },
-      { name: '🔄 Reservas', value: '> Nome dos jogadores reservas (ou "Nenhum")', inline: false },
-      { name: '🆔 UID dos Jogadores', value: '> Cole aqui os UIDs de todos os jogadores', inline: false },
     )
     .setFooter({ text: 'Oblivion League • Sistema de Inscrições' })
     .setTimestamp();
+
+  const ficha = [
+    '╔════════════════════╗',
+    '      🏆 𝐎𝐁𝐋𝐈𝐕𝐈𝐎𝐍 𝐋𝐄𝐀𝐆𝐔𝐄 🏆',
+    '╚════════════════════╝',
+    '',
+    '✦ 𝑪𝒍𝒂̃:',
+    '✦ 𝑻𝒂𝒈:',
+    '✦ 𝑳𝒊𝒏𝒆:',
+    '✦ 𝑴𝒂𝒏𝒂𝒈𝒆𝒓:',
+    '',
+    '━━━━━━━━━━━━━━━━━━',
+    '',
+    '𝗣𝟭:',
+    '𝗨𝗜𝗗:',
+    '',
+    '𝗣𝟮:',
+    '𝗨𝗜𝗗:',
+    '',
+    '𝗣𝟯:',
+    '𝗨𝗜𝗗:',
+    '',
+    '𝗣𝟰:',
+    '𝗨𝗜𝗗:',
+    '',
+    '𝗣𝟱:',
+    '𝗨𝗜𝗗:',
+    '',
+    '━━━━━━━━━━━━━━━━━━',
+  ].join('\n');
 
   const staffMention = staffRole ? `<@&${staffRole.id}>` : '@STAFF';
 
   await ticketChannel.send({
     content: `${staffMention} | Novo ticket de inscrição aberto por <@${user.id}>`,
-    embeds: [formEmbed],
+    embeds: [welcomeEmbed],
+  });
+
+  await ticketChannel.send({
+    content: '```\n' + ficha + '\n```',
     components: [buildCloseRow()],
   });
 
