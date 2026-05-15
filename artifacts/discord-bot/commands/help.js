@@ -10,27 +10,37 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setTitle('📋 Manual de Comandos')
       .setColor(defaultColor)
-      .setDescription('Todos os comandos exigem permissão de **Administrador**, exceto `/help`.')
+      .setDescription('Comandos marcados com 🔒 exigem permissão de **Administrador**. Comandos com 🛡️ exigem **Gerenciar Cargos**.')
       .addFields(
+        {
+          name: '⚙️ Setup de UNITs',
+          value: [
+            '🔒 `/setup-squads` — Cria UNIT¹ até UNIT²⁵ (ignora duplicatas)',
+            '🔒 `/delete-squads` — Remove todos os cargos UNIT do servidor',
+            '🔒 `/clear-squads` — Remove todos os membros das UNITs, mantendo os cargos',
+          ].join('\n'),
+        },
         {
           name: '🏷️ Cargos',
           value: [
-            '`/setup-squads` — Cria os 25 cargos UNIT¹ até UNIT²⁵ automaticamente',
-            '`/create-role [nome] [cor]` — Cria um cargo com cor personalizada (HEX)',
+            '🔒 `/create-role [nome] [cor]` — Cria cargo customizado com cor HEX',
+            '🛡️ `/add-role [@membro] [cargo]` — Adiciona qualquer cargo a um membro',
+            '🛡️ `/remove-role [@membro] [cargo]` — Remove um cargo de um membro',
           ].join('\n'),
         },
         {
           name: '👥 Gestão de UNITs',
           value: [
-            '`/add-to-squad [@membro] [número]` — Adiciona alguém a uma UNIT',
-            '`/remove-from-squad [@membro] [número]` — Remove alguém de uma UNIT',
+            '🔒 `/add-to-squad [@membro] [número]` — Adiciona membro a uma UNIT',
+            '🔒 `/remove-from-squad [@membro] [número]` — Remove membro de uma UNIT',
+            '🔒 `/move-squad [@membro] [número]` — Move membro para outra UNIT (remove a anterior)',
           ].join('\n'),
         },
         {
           name: '🏠 Servidor',
           value: [
-            '`/private-category [nome] [cargo]` — Canal visível para todos, acesso só para o cargo definido',
-            '`/limit-voice [canal] [limite]` — Limita usuários em canal de voz (0 = sem limite)',
+            '🔒 `/private-category [nome] [cargo]` — Cria categoria visível só para o cargo',
+            '🔒 `/limit-voice [canal] [limite]` — Limita usuários em canal de voz (0 = sem limite)',
           ].join('\n'),
         },
         {
@@ -38,7 +48,7 @@ module.exports = {
           value: '`/help` — Exibe este manual',
         }
       )
-      .setFooter({ text: 'Bot de Administração' })
+      .setFooter({ text: 'Bot de Administração • Oblivion League' })
       .setTimestamp();
 
     await interaction.reply({ embeds: [embed] });
