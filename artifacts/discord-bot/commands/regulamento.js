@@ -90,10 +90,9 @@ function buildRegulamentoContainers() {
       .setAccentColor(COLOR.brand)
       .addTextDisplayComponents(txt('### 🏆  GRANDE FINAL — 11/07/2026 às 22h00'))
       .addSeparatorComponents(gap())
-      .addTextDisplayComponents(txt(
-        '👥  **24 equipes classificadas**\n' +
-        '> 12 da 1ª Classificatória  ·  12 da 2ª Classificatória'
-      ))
+      .addTextDisplayComponents(txt('👥  **24 equipes classificadas**'))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt('-# 📋  As regras a seguir se aplicam à Grande Final.'))
   );
 
   // ── 5. Premiação ──────────────────────────────────────────────────────────
