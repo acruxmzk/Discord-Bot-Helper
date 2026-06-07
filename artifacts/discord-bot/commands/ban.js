@@ -49,16 +49,23 @@ module.exports = {
     // ── Log no canal de staff ─────────────────────────────────────────────
     const logCh = findLogChannel(interaction.guild);
     if (logCh) {
+      await interaction.guild.roles.fetch().catch(() => {});
+      const staffRole = interaction.guild.roles.cache.find(
+        r => r.name.toLowerCase() === 'staff'
+      );
+      const staffMention = staffRole ? `<@&${staffRole.id}>` : '@STAFF';
+
       await logCh.send({
+        content: staffMention,
         components: [
           new ContainerBuilder()
             .setAccentColor(0xFF4444)
             .addTextDisplayComponents(txt(
-              `### 🚫 ${update ? 'Ban Atualizado' : 'Novo Ban'}\n` +
+              `### 🚨  PLAYER BANIDO DETECTADO\n` +
               `**UID:** \`${uid}\`\n` +
               `**Motivo:** ${reason}\n` +
-              `**Responsável:** <@${interaction.user.id}>\n` +
-              `**Registrado em:** <t:${agora}:F>`
+              `**Data:** ${new Date().toLocaleString('pt-BR')}\n` +
+              `**Responsável:** <@${interaction.user.id}>`
             )),
         ],
         flags: MessageFlags.IsComponentsV2,
