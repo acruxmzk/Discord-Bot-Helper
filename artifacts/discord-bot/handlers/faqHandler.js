@@ -7,7 +7,7 @@ const {
 } = require('discord.js');
 const { match } = require('../utils/faqMatcher');
 
-const FAQ_CHANNEL_NAMES = ['perguntas-frequentes', 'perguntas', 'faq', 'duvidas'];
+const FAQ_CHANNEL_NAMES = ['perguntas-frequentes', 'perguntas', 'faq', 'duvidas', 'dúvidas'];
 
 const sep = () => new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true);
 const gap = () => new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large).setDivider(false);
