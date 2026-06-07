@@ -8,6 +8,7 @@ const {
   handleTicketCloseCancel,
 } = require('./handlers/ticketHandler');
 const { handleFaqMessage } = require('./handlers/faqHandler');
+const { handleBanCheck }  = require('./handlers/banCheckHandler');
 
 const token = process.env.TOKEN;
 
@@ -50,12 +51,18 @@ const BUTTON_HANDLERS = {
   ticket_close_cancel:  handleTicketCloseCancel,
 };
 
-// ── Mensagens — FAQ automático ────────────────────────────────────────────────
+// ── Mensagens — FAQ automático + detecção de ban ──────────────────────────────
 client.on('messageCreate', async message => {
   try {
     await handleFaqMessage(message);
   } catch (err) {
     console.error('[ERRO] FAQ messageCreate:', err);
+  }
+
+  try {
+    await handleBanCheck(message);
+  } catch (err) {
+    console.error('[ERRO] BanCheck messageCreate:', err);
   }
 });
 
