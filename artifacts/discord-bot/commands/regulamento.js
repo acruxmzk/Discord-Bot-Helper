@@ -106,7 +106,23 @@ function buildRegulamentoContainers() {
       .addTextDisplayComponents(txt('-# 💵  Premiação Total: R$ 2.000,00'))
   );
 
-  // ── 4. Configurações ──────────────────────────────────────────────────────
+  // ── 4. Grande Final — Separador ───────────────────────────────────────────
+  containers.push(
+    new ContainerBuilder()
+      .setAccentColor(COLOR.brand)
+      .addTextDisplayComponents(txt('### 🏆  GRANDE FINAL — 11/07/2026 às 22h00'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt(
+        '👥  **24 equipes classificadas**\n' +
+        '> 12 da 1ª Classificatória  ·  12 da 2ª Classificatória'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt(
+        '-# 📋  As regras a seguir se aplicam à Grande Final.'
+      ))
+  );
+
+  // ── 5. Configurações ──────────────────────────────────────────────────────
   containers.push(
     new ContainerBuilder()
       .setAccentColor(COLOR.gameplay)
