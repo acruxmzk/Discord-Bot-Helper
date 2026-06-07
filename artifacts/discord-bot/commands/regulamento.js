@@ -296,7 +296,7 @@ function buildRegulamentoContainers() {
       .addTextDisplayComponents(txt('🩸  Kill → **+1 ponto**'))
   );
 
-  // ── 13. Pontuação — Com Habilidades + Classificação ───────────────────────
+  // ── 13. Pontuação — Com Habilidades ───────────────────────────────────────
   containers.push(
     new ContainerBuilder()
       .setAccentColor(COLOR.score2)
@@ -316,7 +316,12 @@ function buildRegulamentoContainers() {
       ))
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt('🩸  Kill → **+2 pontos**'))
-      .addSeparatorComponents(sep())
+  );
+
+  // ── 14. Classificatórias ──────────────────────────────────────────────────
+  containers.push(
+    new ContainerBuilder()
+      .setAccentColor(COLOR.score2)
       .addTextDisplayComponents(txt('### 🏆  CLASSIFICATÓRIAS'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
