@@ -1,0 +1,322 @@
+Atualize completamente o sistema de regulamento da Oblivion League utilizando o novo sistema de Containers do Discord.
+
+O objetivo é deixar o regulamento com aparência de campeonato profissional, organizado e otimizado para mobile.
+
+O regulamento atual já existe. Quero apenas substituir a versão atual por uma versão nova, mais limpa, mais profissional e melhor estruturada visualmente.
+
+═══════════════════════
+
+🌐 OBLIVION LEAGUE
+
+📅 Classificatórias:
+08/07/2026 e 09/07/2026
+
+🏆 Grande Final:
+11/07/2026
+
+🕒 Horários:
+Classificatórias — 20h00
+Grande Final — 22h00
+
+💰 Premiação Total:
+R$ 2.000,00
+
+👥 Modo:
+Squad
+
+═══════════════════════
+
+📅 CRONOGRAMA
+
+🗓️ 08/07/2026 — 1ª Classificatória
+
+• 20h00
+• 3 quedas
+
+🗓️ 09/07/2026 — 2ª Classificatória
+
+• 20h00
+• 3 quedas
+
+🏆 11/07/2026 — Grande Final
+
+• 22h00
+• 4 quedas
+
+═══════════════════════
+
+💰 PREMIAÇÃO
+
+🥇 1º Lugar — R$ 1.000,00
+
+🥈 2º Lugar — R$ 500,00
+
+🥉 3º Lugar — R$ 250,00
+
+🎖️ 4º Lugar — R$ 200,00
+
+🏅 MVP — R$ 50,00
+
+💵 Total — R$ 2.000,00
+
+═══════════════════════
+
+🎮 CONFIGURAÇÕES
+
+👥 Modo: Squad
+
+❤️ Reanimação Automática
+
+♾️ Munição Infinita
+
+🗺️ Mapas
+
+• Isolated
+• Blackout
+
+═══════════════════════
+
+⚡ FORMATO
+
+🎯 Classificatórias
+
+📅 08/07/2026
+• 3 quedas
+
+📅 09/07/2026
+• 3 quedas
+
+🏆 Grande Final — 11/07/2026
+
+• 4 quedas
+• 2 quedas Isolated
+• 2 quedas Blackout
+• 2 quedas com habilidades
+• 2 quedas sem habilidades
+
+═══════════════════════
+
+🏆 CLASSIFICAÇÃO
+
+📊 A classificação seguirá o padrão utilizado nos torneios XT.
+
+📈 As equipes serão classificadas de acordo com a pontuação acumulada durante toda a competição.
+
+🎯 A soma da colocação e das eliminações definirá a classificação geral das equipes.
+
+═══════════════════════
+
+📜 REGRAS GERAIS
+
+🏷️ Todos os jogadores deverão utilizar a mesma TAG da equipe.
+
+📸 Denúncias serão aceitas apenas mediante provas.
+
+👤 Jogadores não cadastrados na ficha de inscrição não poderão participar.
+
+🚫 Equipes que insistirem em utilizar jogadores não inscritos poderão ser desclassificadas.
+
+⚔️ Permitido até 3 lines por clã.
+
+═══════════════════════
+
+📌 REGRAS COMPLEMENTARES
+
+🆔 Alterações de UID serão permitidas apenas até 1 dia antes da Grande Final.
+
+📅 Prazo final:
+10/07/2026 às 23h59.
+
+🚫 Após esse prazo nenhuma alteração será aceita.
+
+📨 Solicitações deverão ser realizadas através dos canais oficiais da organização.
+
+🎥 Todos os vídeos deverão ser enviados após o término das partidas.
+
+⏰ Prazo máximo para envio:
+02h00 da manhã após o encerramento do campeonato.
+
+═══════════════════════
+
+🚫 PROIBIÇÕES
+
+💻 Programas de trapaça
+
+🖥️ Emuladores
+
+📱 Mobiladores
+
+🌐 VPN
+
+🚗 Atropelar
+
+📢 Call para todos
+
+😡 Comportamentos antidesportivos
+
+💬 Brigas no chat
+
+═══════════════════════
+
+🔫 ARMAS PROIBIDAS
+
+🎯 Munições especiais de sniper
+
+💣 Bazuca
+
+💥 Thumper
+
+⚡ Tempestade
+
+🎖️ Aniquilador
+
+🔫 Máquina de Guerra
+
+🔥 Purificador
+
+ℹ️ FHJ permitido apenas contra veículos.
+
+═══════════════════════
+
+🚫 HABILIDADES PROIBIDAS
+
+❌ Desperado
+
+❌ Onda de Choque
+
+❌ Desorientação
+
+❌ Bombado
+
+❌ Incendiário
+
+❌ Todas as torretas
+
+❌ Ataque de Dispersão
+
+═══════════════════════
+
+🚫 VEÍCULOS PROIBIDOS
+
+🚚 Caminhão
+
+🛡️ Tanque
+
+✈️ Jato
+
+🚀 Bike Voadora
+
+═══════════════════════
+
+🔎 VERIFICAÇÃO
+
+🎥 Vídeos obrigatórios de todas as quedas.
+
+📋 Requisitos dos vídeos
+
+• Mostrar barra de notificações
+• Mostrar horário
+• Mostrar aplicativos abertos
+• Mostrar HUD
+
+🎞️ 4 vídeos por jogador
+
+🎞️ 16 vídeos por equipe
+
+⏰ Prazo de envio:
+Até 02h00 da manhã após o encerramento do campeonato.
+
+⚠️ Nenhum jogador ou equipe estará isento de verificação.
+
+🖥️ A staff poderá solicitar abertura de tela antes, durante ou após o campeonato.
+
+🚫 A recusa em realizar qualquer procedimento solicitado pela staff poderá resultar em desclassificação e banimento.
+
+═══════════════════════
+
+🎙️ DISCORD
+
+👥 Todos os jogadores deverão estar presentes no Discord antes do início das partidas.
+
+🔍 A presença poderá ser utilizada para conferência de lineup e verificações.
+
+⚠️ Equipes ausentes poderão sofrer punições ou desclassificação.
+
+═══════════════════════
+
+❗ PENALIDADES
+
+🔫 Uso de armas ou habilidades proibidas
+➖ 50 pontos
+
+😡 Comportamento antidesportivo
+🚫 Expulsão do campeonato
+
+🌐 Uso de VPN
+🚫 Expulsão imediata
+
+💻 Uso de trapaças
+⛔ Banimento permanente
+
+💬 Brigas no chat
+
+1ª ocorrência
+⚠️ Advertência
+
+2ª ocorrência
+➖ 50 pontos
+
+🚗 Atropelar ou Call para Todos
+❌ Queda zerada
+
+═══════════════════════
+
+🏆 PONTUAÇÃO
+
+🎯 SEM HABILIDADES
+
+🥇 1º Lugar → 15 pts
+🥈 2º Lugar → 13 pts
+🥉 3º Lugar → 11 pts
+🏅 4º Lugar → 10 pts
+🏅 5º Lugar → 9 pts
+🏅 6º Lugar → 8 pts
+🏅 7º Lugar → 7 pts
+🏅 8º Lugar → 6 pts
+🏅 9º Lugar → 5 pts
+🏅 10º Lugar → 4 pts
+
+🩸 Kill → +1 ponto
+
+═══════════════════════
+
+⚡ COM HABILIDADES
+
+🥇 1º Lugar → 15 pts
+🥈 2º Lugar → 13 pts
+🥉 3º Lugar → 11 pts
+🏅 4º Lugar → 10 pts
+🏅 5º Lugar → 9 pts
+🏅 6º Lugar → 8 pts
+🏅 7º Lugar → 7 pts
+🏅 8º Lugar → 6 pts
+🏅 9º Lugar → 5 pts
+🏅 10º Lugar → 4 pts
+
+🩸 Kill → +2 pontos
+
+═══════════════════════
+
+REQUISITOS TÉCNICOS
+
+• Utilizar o novo sistema de Containers do Discord.
+• Criar um container separado para cada seção do regulamento.
+• Utilizar cores distintas para cada categoria.
+• Melhorar drasticamente a apresentação visual da seção de pontuação.
+• Destacar premiação e cronograma.
+• Priorizar leitura em dispositivos móveis.
+• Utilizar espaçamento consistente entre seções.
+• Utilizar emojis como elementos visuais principais.
+• Manter identidade visual premium da Oblivion League.
+• Substituir automaticamente o regulamento anterior.
+• O resultado final deve parecer uma liga profissional de esports e não um conjunt

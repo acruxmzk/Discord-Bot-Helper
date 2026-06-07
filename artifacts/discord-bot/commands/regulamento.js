@@ -12,141 +12,291 @@ const sep = () => new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).
 const gap = () => new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large).setDivider(false);
 const txt = (s) => new TextDisplayBuilder().setContent(s);
 
+// Cores por categoria
+const COLOR = {
+  brand:      0xFFA500, // laranja — identidade principal
+  schedule:   0x5865F2, // roxo Discord — cronograma
+  prize:      0xFFD700, // ouro — premiação
+  gameplay:   0x00B8D4, // ciano — config/formato
+  rules:      0x57F287, // verde — regras
+  forbidden:  0xFF4444, // vermelho — proibições
+  verify:     0x9B59B6, // violeta — verificação/discord
+  penalty:    0xFF6B35, // laranja-vermelho — penalidades
+  score1:     0x00CED1, // ciano-turquesa — pontuação sem hab.
+  score2:     0x7289DA, // azul Discord — pontuação com hab.
+};
+
 function buildRegulamentoContainers() {
+  const containers = [];
 
-  // ── 1. Cabeçalho + Cronograma + Premiação ─────────────────────────────
-  const c1 = new ContainerBuilder()
-    .setAccentColor(0xFFA500)
-    .addTextDisplayComponents(txt('# 🌐 OBLIVION LEAGUE'))
-    .addTextDisplayComponents(txt('-# Regulamento Oficial do Campeonato'))
-    .addSeparatorComponents(sep())
-    .addTextDisplayComponents(txt(
-      '### 📅 Cronograma\n' +
-      '🗓️ **08/07** — 1ª Classificatória\n' +
-      '🗓️ **09/07** — 2ª Classificatória\n' +
-      '🏆 **11/07** — Grande Final'
-    ))
-    .addSeparatorComponents(gap())
-    .addTextDisplayComponents(txt(
-      '### 🕒 Horários\n' +
-      '🎯 Classificatórias — **20h00**\n' +
-      '🏆 Grande Final — **22h00**'
-    ))
-    .addSeparatorComponents(sep())
-    .addTextDisplayComponents(txt(
-      '### 💰 Premiação\n' +
-      '1° — **R$ 1.000,00**\n' +
-      '2° — **R$ 500,00**\n' +
-      '3° — **R$ 250,00**\n' +
-      '4° — **R$ 200,00**\n' +
-      'MVP — **R$ 50,00**\n' +
-      '-# 💵 Total: R$ 2.000,00'
-    ));
+  // ── 1. Header ────────────────────────────────────────────────────────────
+  containers.push(
+    new ContainerBuilder()
+      .setAccentColor(COLOR.brand)
+      .addTextDisplayComponents(txt('# 🌐  OBLIVION LEAGUE'))
+      .addTextDisplayComponents(txt('-# Regulamento Oficial · Temporada 2026'))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt(
+        '📅  Classificatórias: **08/07** e **09/07/2026**\n' +
+        '🏆  Grande Final: **11/07/2026**\n' +
+        '💰  Premiação Total: **R$ 2.000,00**\n' +
+        '👥  Modo: **Squad**'
+      ))
+  );
 
-  // ── 2. Configurações + Formato + Regras Gerais ────────────────────────
-  const c2 = new ContainerBuilder()
-    .setAccentColor(0xFFA500)
-    .addTextDisplayComponents(txt(
-      '### 🎮 Configurações\n' +
-      '👥 Modo: **Squad**\n' +
-      '❤️ Reanimação Automática\n' +
-      '♾️ Munição Infinita\n' +
-      '🗺️ Mapas: **Isolated** · **Blackout**'
-    ))
-    .addSeparatorComponents(sep())
-    .addTextDisplayComponents(txt(
-      '### ⚡ Formato\n' +
-      '🎯 Classificatórias — **3 quedas**\n' +
-      '🏆 Final — **4 quedas**\n' +
-      '> 2 com habilidades · 2 sem habilidades'
-    ))
-    .addSeparatorComponents(sep())
-    .addTextDisplayComponents(txt(
-      '### 📜 Regras Gerais\n' +
-      '🏷️ Todos os membros devem usar a mesma **TAG**\n' +
-      '📸 Denúncias apenas com provas\n' +
-      '👤 Jogadores não cadastrados não podem participar\n' +
-      '🚫 Equipes com jogadores não inscritos podem ser desclassificadas\n' +
-      '⚔️ Permitido até **3 lines** por clã'
-    ));
+  // ── 2. Cronograma ─────────────────────────────────────────────────────────
+  containers.push(
+    new ContainerBuilder()
+      .setAccentColor(COLOR.schedule)
+      .addTextDisplayComponents(txt('### 📅  CRONOGRAMA'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt(
+        '🗓️  **08/07/2026 — 1ª Classificatória**\n' +
+        '> 🕒 20h00  ·  3 quedas'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt(
+        '🗓️  **09/07/2026 — 2ª Classificatória**\n' +
+        '> 🕒 20h00  ·  3 quedas'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt(
+        '🏆  **11/07/2026 — Grande Final**\n' +
+        '> 🕒 22h00  ·  4 quedas\n' +
+        '> 2 no Isolated  ·  2 no Blackout\n' +
+        '> 2 com habilidades  ·  2 sem habilidades'
+      ))
+  );
 
-  // ── 3. Proibições ─────────────────────────────────────────────────────
-  const c3 = new ContainerBuilder()
-    .setAccentColor(0xFF4444)
-    .addTextDisplayComponents(txt('### 🚫 Proibições'))
-    .addSeparatorComponents(gap())
-    .addTextDisplayComponents(txt(
-      '**Geral**\n' +
-      '💻 Trapaças · 🖥️ Emuladores · 📱 Mobiladores · 🌐 VPN\n' +
-      '🚗 Atropelar · 📢 Call para todos · 😡 Comportamentos antidesportivos · 💬 Brigas no chat'
-    ))
-    .addSeparatorComponents(sep())
-    .addTextDisplayComponents(txt(
-      '**🔫 Armas Proibidas**\n' +
-      'Munições especiais de snipers · Bazuca · Thumper · Tempestade · Aniquilador · Máquina de Guerra · Purificador\n' +
-      '-# ℹ️ FHJ permitido apenas contra veículos.'
-    ))
-    .addSeparatorComponents(sep())
-    .addTextDisplayComponents(txt(
-      '**🚫 Habilidades Proibidas**\n' +
-      'Desperado · Onda de Choque · Desorientação · Bombado · Incendiário · Todas as torretas · Ataque de Dispersão'
-    ))
-    .addSeparatorComponents(sep())
-    .addTextDisplayComponents(txt(
-      '**🚗 Veículos Proibidos**\n' +
-      'Caminhão · Tanque · Jato · Bike Voadora'
-    ));
+  // ── 3. Premiação ──────────────────────────────────────────────────────────
+  containers.push(
+    new ContainerBuilder()
+      .setAccentColor(COLOR.prize)
+      .addTextDisplayComponents(txt('### 💰  PREMIAÇÃO'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt(
+        '🥇  **1º Lugar** — R$ 1.000,00\n' +
+        '🥈  **2º Lugar** — R$ 500,00\n' +
+        '🥉  **3º Lugar** — R$ 250,00\n' +
+        '🎖️  **4º Lugar** — R$ 200,00\n' +
+        '⭐  **MVP** — R$ 50,00'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt('-# 💵  Premiação Total: R$ 2.000,00'))
+  );
 
-  // ── 4. Verificação + Discord + Penalidades ────────────────────────────
-  const c4 = new ContainerBuilder()
-    .setAccentColor(0xFFA500)
-    .addTextDisplayComponents(txt(
-      '### 🔎 Verificação\n' +
-      '🎥 Vídeos obrigatórios de todas as quedas\n' +
-      '📋 Mostrar: barra de notificações · horário · apps abertos · HUD\n' +
-      '🎞️ **4 vídeos** por jogador · **16** por equipe\n' +
-      '⏰ Prazo: até **02h00** da manhã após o campeonato\n' +
-      '-# A staff pode solicitar abertura de tela a qualquer momento. Recusa = desclassificação.'
-    ))
-    .addSeparatorComponents(sep())
-    .addTextDisplayComponents(txt(
-      '### 🎙️ Discord\n' +
-      '👥 Todos os jogadores devem estar presentes antes do início\n' +
-      '🔍 Presença usada para conferência de lineup e verificações\n' +
-      '⚠️ Equipes ausentes podem sofrer punições ou desclassificação'
-    ))
-    .addSeparatorComponents(sep())
-    .addTextDisplayComponents(txt(
-      '### ❗ Penalidades\n' +
-      '🔫 Armas/habilidades proibidas — **−50 pts**\n' +
-      '😡 Comportamento antidesportivo — **Expulsão**\n' +
-      '🌐 VPN — **Expulsão imediata**\n' +
-      '💻 Trapaças — **Banimento permanente**\n' +
-      '💬 Brigas no chat — Advertência → **−50 pts**\n' +
-      '🚗 Atropelar / Call para Todos — **Queda zerada**'
-    ));
+  // ── 4. Configurações + Formato ────────────────────────────────────────────
+  containers.push(
+    new ContainerBuilder()
+      .setAccentColor(COLOR.gameplay)
+      .addTextDisplayComponents(txt('### 🎮  CONFIGURAÇÕES'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt(
+        '👥  Modo: **Squad**\n' +
+        '❤️  Reanimação Automática\n' +
+        '♾️  Munição Infinita'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt(
+        '🗺️  **Mapas**\n' +
+        '🏝️  Isolated  ·  🌆  Blackout'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt('### ⚡  FORMATO'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt(
+        '🎯  **Classificatórias** — 3 quedas por rodada\n' +
+        '🏆  **Grande Final** — 4 quedas\n' +
+        '> 2 quedas com habilidades\n' +
+        '> 2 quedas sem habilidades'
+      ))
+  );
 
-  // ── 5. Pontuação ──────────────────────────────────────────────────────
-  const c5 = new ContainerBuilder()
-    .setAccentColor(0xFFA500)
-    .addTextDisplayComponents(txt('### 🏆 Pontuação'))
-    .addSeparatorComponents(gap())
-    .addTextDisplayComponents(txt(
-      '**🎯 Sem Habilidades**\n' +
-      '`1°` **15**  ·  `2°` **13**  ·  `3°` **11**  ·  `4°` **10**  ·  `5°` **9**\n' +
-      '`6°` **8**  ·  `7°` **7**  ·  `8°` **6**  ·  `9°` **5**  ·  `10°` **4**\n' +
-      '🩸 Kill — **1 ponto**'
-    ))
-    .addSeparatorComponents(sep())
-    .addTextDisplayComponents(txt(
-      '**⚡ Com Habilidades**\n' +
-      '`1°` **15**  ·  `2°` **13**  ·  `3°` **11**  ·  `4°` **10**  ·  `5°` **9**  ·  `6°` **8**\n' +
-      '🩸 Kill — **1 ponto**'
-    ))
-    .addSeparatorComponents(gap())
-    .addTextDisplayComponents(txt('-# 🌐 Oblivion League · Regulamento Oficial'));
+  // ── 5. Classificação ──────────────────────────────────────────────────────
+  containers.push(
+    new ContainerBuilder()
+      .setAccentColor(COLOR.rules)
+      .addTextDisplayComponents(txt('### 🏆  CLASSIFICAÇÃO'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt(
+        '📊  A classificação seguirá o padrão utilizado nos torneios XT.\n' +
+        '📈  Equipes classificadas pela pontuação acumulada durante toda a competição.\n' +
+        '🎯  A soma da colocação e das eliminações definirá a classificação geral.'
+      ))
+  );
 
-  return [c1, c2, c3, c4, c5];
+  // ── 6. Regras Gerais + Complementares ────────────────────────────────────
+  containers.push(
+    new ContainerBuilder()
+      .setAccentColor(COLOR.rules)
+      .addTextDisplayComponents(txt('### 📜  REGRAS GERAIS'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt(
+        '🏷️  Todos os jogadores deverão utilizar a mesma **TAG** da equipe\n' +
+        '📸  Denúncias aceitas apenas mediante provas\n' +
+        '👤  Jogadores não cadastrados não poderão participar\n' +
+        '🚫  Equipes com jogadores não inscritos podem ser desclassificadas\n' +
+        '⚔️  Permitido até **3 lines** por clã'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt('### 📌  REGRAS COMPLEMENTARES'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt(
+        '🆔  Alterações de UID permitidas até **1 dia antes** da Grande Final\n' +
+        '📅  Prazo final: **10/07/2026 às 23h59**\n' +
+        '🚫  Após esse prazo nenhuma alteração será aceita\n' +
+        '📨  Solicitações via canais oficiais da organização'
+      ))
+  );
+
+  // ── 7. Proibições Gerais ──────────────────────────────────────────────────
+  containers.push(
+    new ContainerBuilder()
+      .setAccentColor(COLOR.forbidden)
+      .addTextDisplayComponents(txt('### 🚫  PROIBIÇÕES'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt(
+        '💻  Programas de trapaça\n' +
+        '🖥️  Emuladores\n' +
+        '📱  Mobiladores\n' +
+        '🌐  VPN\n' +
+        '🚗  Atropelar\n' +
+        '📢  Call para todos\n' +
+        '😡  Comportamentos antidesportivos\n' +
+        '💬  Brigas no chat'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt('**🔫  Armas Proibidas**'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt(
+        '🎯  Munições especiais de sniper\n' +
+        '💣  Bazuca\n' +
+        '💥  Thumper\n' +
+        '⚡  Tempestade\n' +
+        '🎖️  Aniquilador\n' +
+        '🔫  Máquina de Guerra\n' +
+        '🔥  Purificador\n' +
+        '-# ℹ️  FHJ permitido apenas contra veículos.'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt('**🚫  Habilidades Proibidas**'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt(
+        '❌  Desperado  ·  ❌  Onda de Choque  ·  ❌  Desorientação\n' +
+        '❌  Bombado  ·  ❌  Incendiário  ·  ❌  Todas as torretas  ·  ❌  Ataque de Dispersão'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt('**🚗  Veículos Proibidos**'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt(
+        '🚚  Caminhão  ·  🛡️  Tanque  ·  ✈️  Jato  ·  🚀  Bike Voadora'
+      ))
+  );
+
+  // ── 8. Verificação + Discord ──────────────────────────────────────────────
+  containers.push(
+    new ContainerBuilder()
+      .setAccentColor(COLOR.verify)
+      .addTextDisplayComponents(txt('### 🔎  VERIFICAÇÃO'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt(
+        '🎥  Vídeos obrigatórios de **todas** as quedas\n\n' +
+        '📋  **Requisitos do vídeo:**\n' +
+        '> Mostrar barra de notificações\n' +
+        '> Mostrar horário\n' +
+        '> Mostrar aplicativos abertos\n' +
+        '> Mostrar HUD'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt(
+        '🎞️  **4 vídeos** por jogador  ·  **16 vídeos** por equipe\n' +
+        '⏰  Prazo: até **02h00** da manhã após o campeonato\n\n' +
+        '⚠️  Nenhum jogador ou equipe estará isento de verificação\n' +
+        '🖥️  A staff pode solicitar abertura de tela a qualquer momento\n' +
+        '-# 🚫  Recusa = desclassificação e possível banimento.'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt('### 🎙️  DISCORD'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt(
+        '👥  Todos os jogadores devem estar presentes no Discord antes do início\n' +
+        '🔍  Presença usada para conferência de lineup e verificações\n' +
+        '⚠️  Equipes ausentes podem sofrer punições ou desclassificação'
+      ))
+  );
+
+  // ── 9. Penalidades ────────────────────────────────────────────────────────
+  containers.push(
+    new ContainerBuilder()
+      .setAccentColor(COLOR.penalty)
+      .addTextDisplayComponents(txt('### ❗  PENALIDADES'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt(
+        '🔫  Armas ou habilidades proibidas\n' +
+        '> ➖  **−50 pontos**\n\n' +
+        '😡  Comportamento antidesportivo\n' +
+        '> 🚫  **Expulsão do campeonato**\n\n' +
+        '🌐  Uso de VPN\n' +
+        '> 🚫  **Expulsão imediata**\n\n' +
+        '💻  Uso de trapaças\n' +
+        '> ⛔  **Banimento permanente**\n\n' +
+        '💬  Brigas no chat\n' +
+        '> 1ª ocorrência → ⚠️  Advertência\n' +
+        '> 2ª ocorrência → ➖  **−50 pontos**\n\n' +
+        '🚗  Atropelar ou Call para Todos\n' +
+        '> ❌  **Queda zerada**'
+      ))
+  );
+
+  // ── 10. Pontuação — Sem Habilidades ───────────────────────────────────────
+  containers.push(
+    new ContainerBuilder()
+      .setAccentColor(COLOR.score1)
+      .addTextDisplayComponents(txt('### 🏆  PONTUAÇÃO'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt('**🎯  Sem Habilidades**'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt(
+        '🥇  **1º Lugar** → 15 pts\n' +
+        '🥈  **2º Lugar** → 13 pts\n' +
+        '🥉  **3º Lugar** → 11 pts\n' +
+        '▫️  **4º Lugar** → 10 pts\n' +
+        '▫️  **5º Lugar** → 9 pts\n' +
+        '▫️  **6º Lugar** → 8 pts\n' +
+        '▫️  **7º Lugar** → 7 pts\n' +
+        '▫️  **8º Lugar** → 6 pts\n' +
+        '▫️  **9º Lugar** → 5 pts\n' +
+        '▫️  **10º Lugar** → 4 pts'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt('🩸  Kill → **+1 ponto**'))
+  );
+
+  // ── 11. Pontuação — Com Habilidades ───────────────────────────────────────
+  containers.push(
+    new ContainerBuilder()
+      .setAccentColor(COLOR.score2)
+      .addTextDisplayComponents(txt('**⚡  Com Habilidades**'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt(
+        '🥇  **1º Lugar** → 15 pts\n' +
+        '🥈  **2º Lugar** → 13 pts\n' +
+        '🥉  **3º Lugar** → 11 pts\n' +
+        '▫️  **4º Lugar** → 10 pts\n' +
+        '▫️  **5º Lugar** → 9 pts\n' +
+        '▫️  **6º Lugar** → 8 pts\n' +
+        '▫️  **7º Lugar** → 7 pts\n' +
+        '▫️  **8º Lugar** → 6 pts\n' +
+        '▫️  **9º Lugar** → 5 pts\n' +
+        '▫️  **10º Lugar** → 4 pts'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt('🩸  Kill → **+2 pontos**'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt('-# 🌐  Oblivion League · Regulamento Oficial · 2026'))
+  );
+
+  return containers;
 }
 
 module.exports = {
