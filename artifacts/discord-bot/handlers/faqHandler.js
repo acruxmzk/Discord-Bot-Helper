@@ -13,8 +13,15 @@ const sep = () => new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).
 const gap = () => new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large).setDivider(false);
 const txt = (s) => new TextDisplayBuilder().setContent(s);
 
+function normalizeName(str) {
+  return str
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
 function isFaqChannel(channel) {
-  const name = channel.name?.toLowerCase() ?? '';
+  const name = normalizeName(channel.name ?? '');
   return FAQ_CHANNEL_NAMES.some(n => name.includes(n));
 }
 
