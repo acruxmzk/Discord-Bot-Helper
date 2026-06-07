@@ -13,6 +13,26 @@ module.exports = {
       .setDescription('Comandos marcados com 🔒 exigem **Administrador**. Comandos com 🛡️ exigem **Gerenciar Cargos**.')
       .addFields(
         {
+          name: '🏆 Campeonato',
+          value: [
+            '🔒 `/pontuacao add` — Registrar colocação e kills de uma equipe',
+            '🔒 `/pontuacao tabela` — Ver tabela de pontuação por fase',
+            '🔒 `/pontuacao zerar` — Zerar pontuação de uma fase',
+            '🔒 `/checkin confirmar` — Marcar equipe como presente',
+            '🔒 `/checkin lista` — Ver lista de check-in de uma fase',
+            '🔒 `/checkin remover` — Remover check-in de uma equipe',
+            '🔒 `/checkin resetar` — Limpar check-in de uma fase',
+          ].join('\n'),
+        },
+        {
+          name: '📢 Comunicação',
+          value: [
+            '🔒 `/anuncio` — Enviar anúncio formatado em qualquer canal',
+            '`/regulamento [canal]` — Postar o regulamento completo do campeonato',
+            '`/faq` — Exibir perguntas frequentes',
+          ].join('\n'),
+        },
+        {
           name: '⚙️ Setup de UNITs',
           value: [
             '🔒 `/setup-squads` — Cria UNIT¹ até UNIT²⁵ (ignora duplicatas)',
