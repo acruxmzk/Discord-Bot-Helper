@@ -16,12 +16,21 @@ module.exports = {
           name: '🏆 Campeonato',
           value: [
             '🔒 `/pontuacao add` — Registrar colocação e kills de uma equipe',
-            '🔒 `/pontuacao tabela` — Ver tabela de pontuação por fase',
+            '🔒 `/pontuacao tabela [canal]` — Ver/publicar tabela de pontuação',
             '🔒 `/pontuacao zerar` — Zerar pontuação de uma fase',
             '🔒 `/checkin confirmar` — Marcar equipe como presente',
             '🔒 `/checkin lista` — Ver lista de check-in de uma fase',
             '🔒 `/checkin remover` — Remover check-in de uma equipe',
             '🔒 `/checkin resetar` — Limpar check-in de uma fase',
+          ].join('\n'),
+        },
+        {
+          name: '🚫 Sistema de Banimentos',
+          value: [
+            '🔒 `/ban [uid] [motivo]` — Banir jogador permanentemente pelo UID',
+            '🔒 `/desbanir [uid]` — Remover banimento de um jogador',
+            '🔒 `/bans [busca]` — Listar ou buscar jogadores banidos',
+            '`/verificar [uid]` — Verificar se um UID está banido',
           ].join('\n'),
         },
         {
