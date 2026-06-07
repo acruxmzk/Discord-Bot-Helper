@@ -170,16 +170,17 @@ function buildRegulamentoContainers() {
     .addTextDisplayComponents(
       new TextDisplayBuilder().setContent(
         '**🎯  Sem Habilidades**\n' +
-        '🥇 15  🥈 13  🥉 11  🎖️ 10  🏅 9  🏅 8  🏅 7  🏅 6  🏅 5  🏅 4\n' +
-        '🩸  Kill = **1 ponto**'
+        '① 15ᵖᵗˢ  ② 13ᵖᵗˢ  ③ 11ᵖᵗˢ  ④ 10ᵖᵗˢ  ⑤ 9ᵖᵗˢ\n' +
+        '⑥ 8ᵖᵗˢ  ⑦ 7ᵖᵗˢ  ⑧ 6ᵖᵗˢ  ⑨ 5ᵖᵗˢ  ⑩ 4ᵖᵗˢ\n' +
+        '🩸  Kill = 1ᵖᵗˢ'
       )
     )
     .addSeparatorComponents(sep())
     .addTextDisplayComponents(
       new TextDisplayBuilder().setContent(
         '**⚡  Com Habilidades**\n' +
-        '🥇 15  🥈 13  🥉 11  🎖️ 10  🏅 9  🏅 8\n' +
-        '🩸  Kill = **1 ponto**'
+        '① 15ᵖᵗˢ  ② 13ᵖᵗˢ  ③ 11ᵖᵗˢ  ④ 10ᵖᵗˢ  ⑤ 9ᵖᵗˢ  ⑥ 8ᵖᵗˢ\n' +
+        '🩸  Kill = 1ᵖᵗˢ'
       )
     )
     .addSeparatorComponents(sepLg())
