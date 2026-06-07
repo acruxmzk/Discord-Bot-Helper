@@ -101,16 +101,29 @@ const FAQ_DB = [
   // ── Classificação ───────────────────────────────────────────────────────────
   {
     id: 'classificacao',
-    keywords: ['classificacao', 'ranking', 'funciona', 'sistema', 'pontuacao', 'criterio'],
+    keywords: ['classificacao', 'ranking', 'funciona', 'sistema', 'pontuacao', 'criterio', 'xt'],
     response:
-      '🏆 A classificação segue o padrão dos **torneios XT**.\n\n' +
-      '📊 A posição final é definida pela **soma da colocação + eliminações** acumuladas durante toda a competição.',
+      '🎯 **Sistema XT**\n\n' +
+      '📊 O ranking é definido pela **soma de:**\n' +
+      '> • Pontos de colocação\n' +
+      '> • Eliminações (kills)',
   },
   {
     id: 'passa_final',
-    keywords: ['passa', 'passam', 'classificar', 'avancar', 'ir', 'final', 'quantas', 'equipes'],
+    keywords: ['passa', 'passam', 'classificar', 'avancar', 'ir', 'final', 'quantas', 'equipes', 'top', 'vagas'],
     response:
-      '📈 As equipes avançam com base na **pontuação acumulada** durante as classificatórias.',
+      '📈 **Classificação para a Final:**\n\n' +
+      '📅 **1ª Classificatória (08/07)** → Top 12 avançam\n' +
+      '📅 **2ª Classificatória (09/07)** → Top 12 avançam\n\n' +
+      '🏆 **Grande Final:** 24 equipes classificadas',
+  },
+  {
+    id: 'equipes_final',
+    keywords: ['quantas', 'equipes', 'times', 'final', 'total', '24'],
+    response:
+      '👥 A **Grande Final** contará com **24 equipes** classificadas.\n\n' +
+      '> 12 da 1ª Classificatória\n' +
+      '> 12 da 2ª Classificatória',
   },
 
   // ── Inscrição / UID ─────────────────────────────────────────────────────────
