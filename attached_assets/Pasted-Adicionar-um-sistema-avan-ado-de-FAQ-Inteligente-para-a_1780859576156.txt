@@ -1,0 +1,466 @@
+Adicionar um sistema avançado de FAQ Inteligente para a Oblivion League.
+
+Objetivo:
+
+Reduzir ao máximo a abertura de tickets para dúvidas repetidas.
+
+O bot deverá responder automaticamente utilizando as informações oficiais do regulamento.
+
+Caso não encontre resposta adequada, deverá orientar o usuário a abrir um ticket.
+
+═══════════════════════
+
+❓ CANAL FAQ
+
+Criar canal:
+
+❓・perguntas-frequentes
+
+Os usuários poderão enviar perguntas normalmente.
+
+O bot deverá interpretar a intenção da pergunta e responder automaticamente.
+
+Aceitar variações de escrita, erros de digitação, abreviações e gírias.
+
+Exemplo:
+
+“que dia é a final?”
+
+“quando é a final”
+
+“final é quando”
+
+“dia da final”
+
+Todas devem retornar a mesma resposta.
+
+═══════════════════════
+
+📅 CRONOGRAMA
+
+Pergunta:
+Quando é a primeira classificatória?
+
+Resposta:
+📅 A 1ª classificatória acontecerá em 08/07/2026 às 20h00.
+
+Pergunta:
+Quando é a segunda classificatória?
+
+Resposta:
+📅 A 2ª classificatória acontecerá em 09/07/2026 às 20h00.
+
+Pergunta:
+Quando é a final?
+
+Resposta:
+🏆 A Grande Final acontecerá em 11/07/2026 às 22h00.
+
+Pergunta:
+Quantos dias dura o campeonato?
+
+Resposta:
+📅 O campeonato será realizado nos dias 08, 09 e 11 de julho de 2026.
+
+═══════════════════════
+
+💰 PREMIAÇÃO
+
+Pergunta:
+Qual a premiação?
+
+Resposta:
+💰 Premiação Total: R$ 2.000,00
+
+🥇 1º Lugar — R$ 1.000,00
+🥈 2º Lugar — R$ 500,00
+🥉 3º Lugar — R$ 250,00
+🎖️ 4º Lugar — R$ 200,00
+🏅 MVP — R$ 50,00
+
+Pergunta:
+Tem premiação para MVP?
+
+Resposta:
+🏅 Sim. O MVP receberá R$ 50,00.
+
+═══════════════════════
+
+🎮 FORMATO
+
+Pergunta:
+Qual o modo?
+
+Resposta:
+👥 O campeonato será disputado no modo Squad.
+
+Pergunta:
+Quantas quedas tem?
+
+Resposta:
+🎯 Classificatórias:
+3 quedas por dia.
+
+🏆 Final:
+4 quedas.
+
+Pergunta:
+Quais mapas serão usados?
+
+Resposta:
+🗺️ Isolated e Blackout.
+
+Pergunta:
+Vai ter habilidade?
+
+Resposta:
+⚡ Sim.
+
+Na Final:
+• 2 quedas com habilidades.
+• 2 quedas sem habilidades.
+
+═══════════════════════
+
+🏆 CLASSIFICAÇÃO
+
+Pergunta:
+Como funciona a classificação?
+
+Resposta:
+🏆 A classificação segue o padrão utilizado nos torneios XT.
+
+A classificação é definida pela soma da colocação e das eliminações obtidas pelas equipes.
+
+Pergunta:
+Como passa para a final?
+
+Resposta:
+📈 As equipes serão classificadas pela pontuação acumulada durante a competição.
+
+═══════════════════════
+
+🆔 INSCRIÇÃO
+
+Pergunta:
+Posso alterar UID?
+
+Resposta:
+🆔 Sim.
+
+Alterações são permitidas até 10/07/2026 às 23h59.
+
+Pergunta:
+Até quando posso mudar UID?
+
+Resposta:
+📅 Até 10/07/2026 às 23h59.
+
+Após esse prazo nenhuma alteração será aceita.
+
+Pergunta:
+Posso jogar com outro UID?
+
+Resposta:
+🚫 Não.
+
+O UID utilizado deve ser o mesmo informado na inscrição.
+
+Pergunta:
+Posso trocar jogador?
+
+Resposta:
+🎫 Consulte a staff através de ticket.
+
+═══════════════════════
+
+🏷️ TAG
+
+Pergunta:
+Posso jogar sem TAG?
+
+Resposta:
+🚫 Não.
+
+Todos os jogadores deverão utilizar a TAG da equipe.
+
+Pergunta:
+Posso usar TAG diferente?
+
+Resposta:
+🚫 Não.
+
+Toda a equipe deverá utilizar a mesma TAG.
+
+═══════════════════════
+
+🎥 VERIFICAÇÃO
+
+Pergunta:
+Preciso gravar?
+
+Resposta:
+🎥 Sim.
+
+Todos os jogadores deverão possuir vídeos de verificação.
+
+Pergunta:
+Quantos vídeos preciso enviar?
+
+Resposta:
+🎞️ 4 vídeos por jogador.
+
+Totalizando 16 vídeos por equipe.
+
+Pergunta:
+Até quando envio os vídeos?
+
+Resposta:
+⏰ Até às 02h00 após o encerramento do campeonato.
+
+Pergunta:
+O que precisa aparecer no vídeo?
+
+Resposta:
+📋 O vídeo deverá mostrar:
+
+• Barra de notificações
+• Horário
+• Aplicativos abertos
+• HUD
+
+Pergunta:
+Posso ser chamado para abrir tela?
+
+Resposta:
+🖥️ Sim.
+
+A staff poderá solicitar abertura de tela antes, durante ou após o campeonato.
+
+Pergunta:
+Sou obrigado a abrir tela?
+
+Resposta:
+⚠️ Sim.
+
+A recusa poderá resultar em desclassificação e banimento.
+
+═══════════════════════
+
+🎙️ DISCORD
+
+Pergunta:
+Preciso entrar no Discord?
+
+Resposta:
+✅ Sim.
+
+Todos os jogadores deverão estar presentes no Discord antes do início das partidas.
+
+Pergunta:
+Posso jogar sem entrar na call?
+
+Resposta:
+🚫 Não é recomendado.
+
+A staff poderá utilizar o Discord para verificações e conferência das equipes.
+
+═══════════════════════
+
+🚫 PROIBIÇÕES
+
+Pergunta:
+Pode emulador?
+
+Resposta:
+🚫 Não.
+
+Emuladores são proibidos.
+
+Pergunta:
+Pode mobilador?
+
+Resposta:
+🚫 Não.
+
+Mobiladores são proibidos.
+
+Pergunta:
+Pode VPN?
+
+Resposta:
+🚫 Não.
+
+VPN é proibido.
+
+Pergunta:
+Pode call para todos?
+
+Resposta:
+🚫 Não.
+
+Call para todos é proibido.
+
+Pergunta:
+Pode atropelar?
+
+Resposta:
+🚫 Não.
+
+Atropelar é proibido.
+
+Pergunta:
+Pode hack?
+
+Resposta:
+⛔ Não.
+
+Qualquer programa de trapaça resulta em banimento.
+
+═══════════════════════
+
+🔫 ARMAS
+
+Pergunta:
+Quais armas são proibidas?
+
+Resposta:
+
+🚫 Munições especiais de sniper
+🚫 Bazuca
+🚫 Thumper
+🚫 Tempestade
+🚫 Aniquilador
+🚫 Máquina de Guerra
+🚫 Purificador
+
+FHJ apenas contra veículos.
+
+═══════════════════════
+
+⚡ HABILIDADES
+
+Pergunta:
+Quais habilidades são proibidas?
+
+Resposta:
+
+🚫 Desperado
+🚫 Onda de Choque
+🚫 Desorientação
+🚫 Bombado
+🚫 Incendiário
+🚫 Todas as torretas
+🚫 Ataque de Dispersão
+
+═══════════════════════
+
+🚗 VEÍCULOS
+
+Pergunta:
+Quais veículos são proibidos?
+
+Resposta:
+
+🚫 Caminhão
+🚫 Tanque
+🚫 Jato
+🚫 Bike Voadora
+
+═══════════════════════
+
+❗ PENALIDADES
+
+Pergunta:
+Qual a punição para VPN?
+
+Resposta:
+🚫 Expulsão imediata.
+
+Pergunta:
+Qual a punição para hack?
+
+Resposta:
+⛔ Banimento permanente.
+
+Pergunta:
+Qual a punição para armas proibidas?
+
+Resposta:
+➖ 50 pontos.
+
+Pergunta:
+Qual a punição para habilidades proibidas?
+
+Resposta:
+➖ 50 pontos.
+
+Pergunta:
+Qual a punição para atropelar?
+
+Resposta:
+❌ Queda zerada.
+
+Pergunta:
+Qual a punição para call para todos?
+
+Resposta:
+❌ Queda zerada.
+
+═══════════════════════
+
+🏆 PONTUAÇÃO
+
+Pergunta:
+Quanto vale kill?
+
+Resposta:
+
+🎯 Sem habilidades:
+🩸 Kill = 1 ponto
+
+⚡ Com habilidades:
+🩸 Kill = 2 pontos
+
+Pergunta:
+Quanto vale primeiro lugar?
+
+Resposta:
+🥇 1º Lugar = 15 pontos.
+
+Pergunta:
+Quanto vale segundo lugar?
+
+Resposta:
+🥈 2º Lugar = 13 pontos.
+
+Pergunta:
+Quanto vale terceiro lugar?
+
+Resposta:
+🥉 3º Lugar = 11 pontos.
+
+═══════════════════════
+
+🎫 RESPOSTA PADRÃO
+
+Caso o bot não encontre resposta ou tenha baixa confiança:
+
+❓ Não encontrei essa informação no regulamento oficial da Oblivion League.
+
+🎫 Abra um ticket para falar diretamente com a equipe administrativa.
+
+═══════════════════════
+
+COMANDOS
+
+/faq status
+
+Exibe:
+• Status do sistema
+• Quantidade de perguntas cadastradas
+• Última atualização
+
+/faq atualizar
+
+Atualiza automaticamente a base de respostas utilizando o regulamento atual publicado no Di

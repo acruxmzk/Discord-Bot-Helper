@@ -7,6 +7,7 @@ const {
   handleTicketCloseConfirm,
   handleTicketCloseCancel,
 } = require('./handlers/ticketHandler');
+const { handleFaqMessage } = require('./handlers/faqHandler');
 
 const token = process.env.TOKEN;
 
@@ -16,7 +17,12 @@ if (!token) {
 }
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ],
 });
 
 client.commands = new Collection();
@@ -44,6 +50,16 @@ const BUTTON_HANDLERS = {
   ticket_close_cancel:  handleTicketCloseCancel,
 };
 
+// ── Mensagens — FAQ automático ────────────────────────────────────────────────
+client.on('messageCreate', async message => {
+  try {
+    await handleFaqMessage(message);
+  } catch (err) {
+    console.error('[ERRO] FAQ messageCreate:', err);
+  }
+});
+
+// ── Interações ─────────────────────────────────────────────────────────────────
 client.on('interactionCreate', async interaction => {
   // ── Slash commands ──────────────────────────────────────────────────────
   if (interaction.isChatInputCommand()) {
