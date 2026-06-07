@@ -43,10 +43,18 @@ function buildFallbackContainer(question) {
 
 async function handleFaqMessage(message) {
   if (message.author.bot) return;
-  if (!isFaqChannel(message.channel)) return;
+
+  const channelName = message.channel.name ?? '(sem nome)';
+  const inFaq = isFaqChannel(message.channel);
+  console.log(`[FAQ] mensagem recebida | canal: "${channelName}" | faq-channel: ${inFaq} | conteúdo: "${message.content.slice(0, 60)}"`);
+
+  if (!inFaq) return;
 
   const question = message.content.trim();
-  if (!question || question.length < 3) return;
+  if (!question || question.length < 3) {
+    console.log(`[FAQ] mensagem ignorada — conteúdo vazio ou muito curto (length: ${question.length})`);
+    return;
+  }
 
   const result = match(question);
 
