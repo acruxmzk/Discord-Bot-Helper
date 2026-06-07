@@ -272,73 +272,63 @@ function buildRegulamentoContainers() {
       ))
   );
 
-  // ── 12. Pontuação — Sem Habilidades ───────────────────────────────────────
+  // ── 12. Pontuação ─────────────────────────────────────────────────────────
   containers.push(
     new ContainerBuilder()
       .setAccentColor(COLOR.score1)
-      .addTextDisplayComponents(txt('### 🏆  PONTUAÇÃO'))
-      .addSeparatorComponents(gap())
-      .addTextDisplayComponents(txt('### 🎯  SEM HABILIDADES'))
+      .addTextDisplayComponents(txt('### 🏆  PONTUAÇÃO — Sistema XT'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
-        '🥇  **1º Lugar** → 15 pts\n' +
-        '🥈  **2º Lugar** → 13 pts\n' +
-        '🥉  **3º Lugar** → 11 pts\n' +
-        '▫️  **4º Lugar** → 10 pts\n' +
-        '▫️  **5º Lugar** → 9 pts\n' +
-        '▫️  **6º Lugar** → 8 pts\n' +
-        '▫️  **7º Lugar** → 7 pts\n' +
-        '▫️  **8º Lugar** → 6 pts\n' +
-        '▫️  **9º Lugar** → 5 pts\n' +
-        '▫️  **10º Lugar** → 4 pts'
+        '```\n' +
+        'Colocação    Pontos\n' +
+        '─────────────────────\n' +
+        '🥇 1º Lugar   15 pts\n' +
+        '🥈 2º Lugar   13 pts\n' +
+        '🥉 3º Lugar   11 pts\n' +
+        '   4º Lugar   10 pts\n' +
+        '   5º Lugar    9 pts\n' +
+        '   6º Lugar    8 pts\n' +
+        '   7º Lugar    7 pts\n' +
+        '   8º Lugar    6 pts\n' +
+        '   9º Lugar    5 pts\n' +
+        '  10º Lugar    4 pts\n' +
+        '```'
       ))
       .addSeparatorComponents(sep())
-      .addTextDisplayComponents(txt('🩸  Kill → **+1 ponto**'))
+      .addTextDisplayComponents(txt(
+        '🩸  **Kill sem habilidades** → +1 ponto\n' +
+        '⚡  **Kill com habilidades** → +2 pontos'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt(
+        '-# 📌  Pontuação acumulada em todas as quedas da rodada.'
+      ))
   );
 
-  // ── 13. Pontuação — Com Habilidades + Classificação ───────────────────────
+  // ── 13. Classificação ─────────────────────────────────────────────────────
   containers.push(
     new ContainerBuilder()
       .setAccentColor(COLOR.score2)
-      .addTextDisplayComponents(txt('### ⚡  COM HABILIDADES'))
+      .addTextDisplayComponents(txt('### 📊  COMO FUNCIONA A CLASSIFICAÇÃO'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
-        '🥇  **1º Lugar** → 15 pts\n' +
-        '🥈  **2º Lugar** → 13 pts\n' +
-        '🥉  **3º Lugar** → 11 pts\n' +
-        '▫️  **4º Lugar** → 10 pts\n' +
-        '▫️  **5º Lugar** → 9 pts\n' +
-        '▫️  **6º Lugar** → 8 pts\n' +
-        '▫️  **7º Lugar** → 7 pts\n' +
-        '▫️  **8º Lugar** → 6 pts\n' +
-        '▫️  **9º Lugar** → 5 pts\n' +
-        '▫️  **10º Lugar** → 4 pts'
-      ))
-      .addSeparatorComponents(sep())
-      .addTextDisplayComponents(txt('🩸  Kill → **+2 pontos**'))
-      .addSeparatorComponents(sep())
-      .addTextDisplayComponents(txt(
-        '### 📊  CLASSIFICAÇÃO\n' +
-        '-# Sistema XT'
-      ))
-      .addSeparatorComponents(gap())
-      .addTextDisplayComponents(txt(
-        '📅  **1ª Classificatória (08/07)**\n' +
-        '> 🏆  Top 12 avançam para a Final\n\n' +
-        '📅  **2ª Classificatória (09/07)**\n' +
-        '> 🏆  Top 12 avançam para a Final'
+        '**1️⃣  Acumule pontos nas quedas**\n' +
+        '> Cada queda soma colocação + kills.\n' +
+        '> O total das quedas define a posição da equipe na rodada.'
       ))
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt(
-        '📈  Ranking definido pela soma de:\n' +
-        '> • Pontos de colocação\n' +
-        '> • Eliminações (kills)'
+        '**2️⃣  Classificatórias → Top 12 avançam**\n' +
+        '> 📅  1ª Classificatória — **08/07** às 20h00 · 3 quedas\n' +
+        '> 📅  2ª Classificatória — **09/07** às 20h00 · 3 quedas\n' +
+        '> As 12 melhores equipes de cada rodada vão para a Final.'
       ))
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt(
-        '🏆  **Grande Final**\n' +
-        '> 👥  24 equipes classificadas\n' +
-        '> 📅  11/07/2026 às 22h00'
+        '**3️⃣  Grande Final — 24 equipes**\n' +
+        '> 📅  **11/07** às 22h00 · 4 quedas\n' +
+        '> 12 equipes da 1ª + 12 equipes da 2ª Classificatória.\n' +
+        '> O ranking final é a soma de todas as quedas da Final.'
       ))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt('-# 🌐  Oblivion League · Regulamento Oficial · 2026'))
