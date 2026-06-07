@@ -12,11 +12,29 @@ function sep() { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.S
 function gap() { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(false); }
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
 
+// ── Normaliza texto Unicode bold (𝗨𝗜𝗗 → UID, 𝟭 → 1, etc.) ──────────────────
+function normalizeText(text) {
+  return text.normalize('NFKC');
+}
+
 // ── Extrai todos os UIDs de uma mensagem ──────────────────────────────────────
-// Aceita: "UID: 123456", "uid:123456", "uid : 123456789", etc.
+// Aceita: "UID: 123456", "𝗨𝗜𝗗: 123456", "uid:123456", "uid : 123456789", etc.
+// Também captura qualquer sequência de 6-20 dígitos após "uid" ou sozinha
 function extractUIDs(content) {
-  const matches = [...content.matchAll(/uid\s*:\s*(\d{4,20})/gi)];
-  return [...new Set(matches.map(m => m[1].trim()))];
+  const normalized = normalizeText(content);
+
+  // Captura "uid: XXXX" (formato ficha)
+  const fromLabel = [...normalized.matchAll(/uid\s*:\s*(\d{6,20})/gi)];
+
+  // Fallback: qualquer número ≥ 6 dígitos que apareça isolado (sem estar no meio de outro texto)
+  const standalone = [...normalized.matchAll(/(?<![.\d])(\d{8,20})(?![.\d])/g)];
+
+  const all = [
+    ...fromLabel.map(m => m[1]),
+    ...standalone.map(m => m[1]),
+  ];
+
+  return [...new Set(all.map(u => u.trim()))];
 }
 
 // ── Localiza o canal de log de staff ─────────────────────────────────────────
@@ -36,6 +54,7 @@ async function handleBanCheck(message) {
   if (!message.channel.name?.startsWith('ticket-')) return;
 
   const uids = extractUIDs(message.content);
+  console.log(`[BAN-CHECK] Canal: ${message.channel.name} | UIDs extraídos: [${uids.join(', ') || 'nenhum'}]`);
   if (uids.length === 0) return;
 
   // Verifica cada UID extraído
