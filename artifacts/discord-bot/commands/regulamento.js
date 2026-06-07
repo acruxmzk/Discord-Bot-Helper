@@ -89,23 +89,6 @@ function buildRegulamentoContainers() {
       .addTextDisplayComponents(txt('-# 🌐  Oblivion League · Regulamento Oficial · 2026'))
   );
 
-  // ── 4. Premiação ──────────────────────────────────────────────────────────
-  containers.push(
-    new ContainerBuilder()
-      .setAccentColor(COLOR.prize)
-      .addTextDisplayComponents(txt('### 💰  PREMIAÇÃO'))
-      .addSeparatorComponents(gap())
-      .addTextDisplayComponents(txt(
-        '🥇  **1º Lugar** — R$ 1.000,00\n' +
-        '🥈  **2º Lugar** — R$ 500,00\n' +
-        '🥉  **3º Lugar** — R$ 250,00\n' +
-        '🎖️  **4º Lugar** — R$ 200,00\n' +
-        '🏅  **MVP** — R$ 50,00'
-      ))
-      .addSeparatorComponents(sep())
-      .addTextDisplayComponents(txt('-# 💵  Premiação Total: R$ 2.000,00'))
-  );
-
   // ── 4. Grande Final — Separador ───────────────────────────────────────────
   containers.push(
     new ContainerBuilder()
@@ -120,6 +103,23 @@ function buildRegulamentoContainers() {
       .addTextDisplayComponents(txt(
         '-# 📋  As regras a seguir se aplicam à Grande Final.'
       ))
+  );
+
+  // ── 5. Premiação ──────────────────────────────────────────────────────────
+  containers.push(
+    new ContainerBuilder()
+      .setAccentColor(COLOR.prize)
+      .addTextDisplayComponents(txt('### 💰  PREMIAÇÃO'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt(
+        '🥇  **1º Lugar** — R$ 1.000,00\n' +
+        '🥈  **2º Lugar** — R$ 500,00\n' +
+        '🥉  **3º Lugar** — R$ 250,00\n' +
+        '🎖️  **4º Lugar** — R$ 200,00\n' +
+        '🏅  **MVP** — R$ 50,00'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt('-# 💵  Premiação Total: R$ 2.000,00'))
   );
 
   // ── 5. Configurações ──────────────────────────────────────────────────────
