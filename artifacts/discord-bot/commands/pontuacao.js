@@ -106,6 +106,9 @@ module.exports = {
             { name: '2ª Classificatória', value: 'Classificatória 2' },
             { name: 'Grande Final', value: 'Grande Final' },
           ))
+        .addChannelOption(o =>
+          o.setName('canal').setDescription('Publicar tabela neste canal (público)').setRequired(false)
+        )
     )
     .addSubcommand(sub =>
       sub.setName('zerar')
@@ -170,37 +173,52 @@ module.exports = {
 
     // ── TABELA ───────────────────────────────────────────────────────────────
     if (sub === 'tabela') {
-      const fase = interaction.options.getString('fase');
+      const fase   = interaction.options.getString('fase');
+      const canal  = interaction.options.getChannel('canal');
       const scores = loadScores();
 
+      // Monta os containers corretos
+      let containers;
       if (!fase) {
         const fases = ['Classificatória 1', 'Classificatória 2', 'Grande Final'];
-        const containers = fases
+        containers = fases
           .filter(f => scores[f] && Object.keys(scores[f]).length > 0)
           .map(f => buildTabela(f, scores[f]));
 
         if (containers.length === 0) {
-          await interaction.reply({
-            components: [
-              new ContainerBuilder()
-                .setAccentColor(0x5865F2)
-                .addTextDisplayComponents(txt('### 📊 Pontuação\n\n-# Nenhuma queda registrada ainda.')),
-            ],
-            flags: MessageFlags.IsComponentsV2,
-          });
-          return;
+          containers = [
+            new ContainerBuilder()
+              .setAccentColor(0x5865F2)
+              .addTextDisplayComponents(txt('### 📊 Pontuação\n\n-# Nenhuma queda registrada ainda.')),
+          ];
         }
+      } else {
+        containers = [buildTabela(fase, scores[fase] ?? {})];
+      }
 
-        await interaction.reply({
+      // ── Publica em canal externo ─────────────────────────────────────────
+      if (canal) {
+        await canal.send({
           components: containers,
           flags: MessageFlags.IsComponentsV2,
+        });
+        await interaction.reply({
+          components: [
+            new ContainerBuilder()
+              .setAccentColor(0x00C851)
+              .addTextDisplayComponents(txt(
+                `### ✅ Tabela publicada\nRanking postado em <#${canal.id}>.`
+              )),
+          ],
+          flags: MessageFlags.IsComponentsV2,
+          ephemeral: true,
         });
         return;
       }
 
-      const teams = scores[fase] ?? {};
+      // ── Resposta normal (visível no canal atual) ─────────────────────────
       await interaction.reply({
-        components: [buildTabela(fase, teams)],
+        components: containers,
         flags: MessageFlags.IsComponentsV2,
       });
       return;
