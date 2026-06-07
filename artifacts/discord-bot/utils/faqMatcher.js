@@ -362,6 +362,113 @@ const FAQ_DB = [
     response:
       '🥉 **3º Lugar** = **11 pontos**.',
   },
+
+  // ── Inscrição ─────────────────────────────────────────────────────────────────
+  {
+    id: 'inscricao_como',
+    keywords: ['inscrever', 'inscricao', 'participar', 'entrar', 'como', 'ticket', 'abrir'],
+    response:
+      '🎫 Para se inscrever, abra um **ticket** no canal de inscrições.\n\n' +
+      'Preencha a ficha com:\n' +
+      '> Clã · TAG · Line · Manager\n' +
+      '> Nome e UID de cada jogador (P1 a P5)',
+  },
+  {
+    id: 'inscricao_prazo',
+    keywords: ['prazo', 'inscricao', 'inscricoes', 'encerra', 'fechar', 'limite', 'ate'],
+    response:
+      '📅 O prazo de inscrições é divulgado nos canais oficiais da **Oblivion League**.\n' +
+      '🎫 Fique de olho nos anúncios e inscreva sua equipe com antecedência.',
+  },
+  {
+    id: 'inscricao_jogadores',
+    keywords: ['jogadores', 'quantos', 'squad', 'equipe', 'membros', 'integrantes', 'pessoas'],
+    response:
+      '👥 Cada equipe é composta por **4 jogadores** (modo Squad).\n\n' +
+      '-# ℹ️ A inscrição deve conter o nome e UID de todos os membros.',
+  },
+
+  // ── Lines / Clã ───────────────────────────────────────────────────────────────
+  {
+    id: 'lines_cla',
+    keywords: ['lines', 'line', 'cla', 'quantas', 'equipes', 'mesmo', 'permitido'],
+    response:
+      '⚔️ É permitido até **3 lines** por clã.',
+  },
+  {
+    id: 'manager',
+    keywords: ['manager', 'lider', 'responsavel', 'quem', 'representa', 'capiao', 'capitao'],
+    response:
+      '👤 O **Manager** é o responsável pela equipe.\n' +
+      'Ele representa o clã e é o contato oficial com a staff durante o campeonato.',
+  },
+
+  // ── Configurações ─────────────────────────────────────────────────────────────
+  {
+    id: 'reanimacao',
+    keywords: ['reanimacao', 'reanimar', 'reviver', 'ressuscitar', 'automatica'],
+    response:
+      '❤️ **Sim.** O campeonato utiliza **Reanimação Automática**.',
+  },
+  {
+    id: 'municao',
+    keywords: ['municao', 'bala', 'infinita', 'acaba', 'falta'],
+    response:
+      '♾️ **Sim.** A configuração é **Munição Infinita**.',
+  },
+  {
+    id: 'fhj',
+    keywords: ['fhj', 'lançador', 'lanca', 'rocket', 'launcher', 'missil', 'contra', 'veiculo'],
+    response:
+      '✅ O **FHJ** é **permitido**, mas **apenas contra veículos**.\n' +
+      '-# 🚫 Usar contra jogadores é proibido.',
+  },
+
+  // ── Denúncias ─────────────────────────────────────────────────────────────────
+  {
+    id: 'denuncia',
+    keywords: ['denuncia', 'denunciar', 'reportar', 'trapaça', 'trapaca', 'hack', 'prova', 'reclamar'],
+    response:
+      '📸 Denúncias são aceitas **apenas mediante provas** (vídeo ou print).\n' +
+      '🎫 Abra um **ticket** e envie as evidências para a staff analisar.',
+  },
+
+  // ── Comportamento ─────────────────────────────────────────────────────────────
+  {
+    id: 'antidesportivo',
+    keywords: ['antidesportivo', 'comportamento', 'tóxico', 'toxico', 'xingar', 'ofender', 'briga'],
+    response:
+      '😡 Comportamento antidesportivo resulta em **expulsão do campeonato**.\n' +
+      '💬 Brigas no chat:\n' +
+      '> 1ª ocorrência → ⚠️ Advertência\n' +
+      '> 2ª ocorrência → ➖ **−50 pontos**',
+  },
+
+  // ── Lineup ────────────────────────────────────────────────────────────────────
+  {
+    id: 'lineup',
+    keywords: ['lineup', 'conferencia', 'conferir', 'checar', 'verificar', 'antes', 'inicio'],
+    response:
+      '🔍 A staff realizará a **conferência de lineup** antes do início das partidas.\n' +
+      '📲 Todos os jogadores devem estar presentes no Discord no momento da verificação.',
+  },
+  {
+    id: 'jogador_nao_cadastrado',
+    keywords: ['nao', 'cadastrado', 'inscrito', 'fora', 'participar', 'jogar', 'substituto'],
+    response:
+      '🚫 Jogadores **não inscritos** não podem participar.\n' +
+      '⚠️ Equipes com jogadores não cadastrados podem ser **desclassificadas**.\n' +
+      '🎫 Para substituições, abra um **ticket** antes do prazo.',
+  },
+
+  // ── Ticket ────────────────────────────────────────────────────────────────────
+  {
+    id: 'ticket_duvida',
+    keywords: ['ticket', 'abrir', 'contato', 'staff', 'falar', 'ajuda', 'problema'],
+    response:
+      '🎫 Para falar com a staff, abra um **ticket** no canal de inscrições.\n' +
+      'Nossa equipe responderá o mais rápido possível.',
+  },
 ];
 
 // ─── Função de matching ───────────────────────────────────────────────────────

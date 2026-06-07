@@ -94,10 +94,6 @@ function buildRegulamentoContainers() {
         '👥  **24 equipes classificadas**\n' +
         '> 12 da 1ª Classificatória  ·  12 da 2ª Classificatória'
       ))
-      .addSeparatorComponents(sep())
-      .addTextDisplayComponents(txt(
-        '-# 📋  As regras a seguir se aplicam à Grande Final.'
-      ))
   );
 
   // ── 5. Premiação ──────────────────────────────────────────────────────────
@@ -117,7 +113,7 @@ function buildRegulamentoContainers() {
       .addTextDisplayComponents(txt('-# 💵  Premiação Total: R$ 2.000,00'))
   );
 
-  // ── 5. Configurações ──────────────────────────────────────────────────────
+  // ── 6. Configurações e Formato ────────────────────────────────────────────
   containers.push(
     new ContainerBuilder()
       .setAccentColor(COLOR.gameplay)
@@ -133,12 +129,7 @@ function buildRegulamentoContainers() {
         '🗺️  **Mapas**\n' +
         '🏝️  Isolated  ·  🌆  Blackout'
       ))
-  );
-
-  // ── 5. Formato ────────────────────────────────────────────────────────────
-  containers.push(
-    new ContainerBuilder()
-      .setAccentColor(COLOR.gameplay)
+      .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt('### ⚡  FORMATO'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
@@ -349,6 +340,8 @@ function buildRegulamentoContainers() {
       ))
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt('🩸  Kill → **+2 pontos**'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt('-# 🌐  Oblivion League · Regulamento Oficial · 2026'))
   );
 
 
