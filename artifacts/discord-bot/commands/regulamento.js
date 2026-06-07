@@ -317,24 +317,19 @@ function buildRegulamentoContainers() {
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt('🩸  Kill → **+2 pontos**'))
       .addSeparatorComponents(sep())
-      .addTextDisplayComponents(txt(
-        '### 📊  CLASSIFICAÇÃO\n' +
-        '-# Como as equipes são ranqueadas'
-      ))
+      .addTextDisplayComponents(txt('### 🏆  CLASSIFICATÓRIAS'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
-        '📈  Classificação pelo padrão dos torneios XT\n' +
-        '🎯  Soma de colocação + eliminações define o ranking final\n' +
-        '📋  Pontuação acumulada ao longo de toda a competição'
-      ))
-      .addSeparatorComponents(sep())
-      .addTextDisplayComponents(txt(
-        '📊  A classificação das Classificatórias seguirá o padrão oficial utilizado nos torneios XT.\n\n' +
-        '📅  **08/07/2026**\n' +
-        '🏆  As 12 melhores equipes avançam para a Grande Final.\n\n' +
-        '📅  **09/07/2026**\n' +
-        '🏆  As 12 melhores equipes avançam para a Grande Final.\n\n' +
-        '🏆  Total de classificados para a Grande Final: **24 equipes**.'
+        '📅  **1ª Classificatória — 08/07/2026**\n' +
+        '🎮  3 quedas\n' +
+        '🏆  Top 12 avançam para a Grande Final.\n\n' +
+        '📅  **2ª Classificatória — 09/07/2026**\n' +
+        '🎮  3 quedas\n' +
+        '🏆  Top 12 avançam para a Grande Final.\n\n' +
+        '👥  **Grande Final**\n' +
+        '🏆  24 equipes classificadas.\n\n' +
+        '📋  **Formato e Regulamento**\n' +
+        '📖  As Classificatórias seguirão as regras oficiais utilizadas nos torneios XT.'
       ))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt('-# 🌐  Oblivion League · Regulamento Oficial · 2026'))
