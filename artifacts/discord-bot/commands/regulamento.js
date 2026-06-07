@@ -12,24 +12,23 @@ const sep = () => new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).
 const gap = () => new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large).setDivider(false);
 const txt = (s) => new TextDisplayBuilder().setContent(s);
 
-// Cores por categoria
 const COLOR = {
-  brand:      0xFFA500, // laranja — identidade principal
-  schedule:   0x5865F2, // roxo Discord — cronograma
-  prize:      0xFFD700, // ouro — premiação
-  gameplay:   0x00B8D4, // ciano — config/formato
-  rules:      0x57F287, // verde — regras
-  forbidden:  0xFF4444, // vermelho — proibições
-  verify:     0x9B59B6, // violeta — verificação/discord
-  penalty:    0xFF6B35, // laranja-vermelho — penalidades
-  score1:     0x00CED1, // ciano-turquesa — pontuação sem hab.
-  score2:     0x7289DA, // azul Discord — pontuação com hab.
+  brand:     0xFFA500,
+  schedule:  0x5865F2,
+  prize:     0xFFD700,
+  gameplay:  0x00B8D4,
+  rules:     0x57F287,
+  forbidden: 0xFF4444,
+  verify:    0x9B59B6,
+  penalty:   0xFF6B35,
+  score1:    0x00CED1,
+  score2:    0x7289DA,
 };
 
 function buildRegulamentoContainers() {
   const containers = [];
 
-  // ── 1. Header ────────────────────────────────────────────────────────────
+  // ── 1. Header ─────────────────────────────────────────────────────────────
   containers.push(
     new ContainerBuilder()
       .setAccentColor(COLOR.brand)
@@ -79,13 +78,13 @@ function buildRegulamentoContainers() {
         '🥈  **2º Lugar** — R$ 500,00\n' +
         '🥉  **3º Lugar** — R$ 250,00\n' +
         '🎖️  **4º Lugar** — R$ 200,00\n' +
-        '⭐  **MVP** — R$ 50,00'
+        '🏅  **MVP** — R$ 50,00'
       ))
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt('-# 💵  Premiação Total: R$ 2.000,00'))
   );
 
-  // ── 4. Configurações + Formato ────────────────────────────────────────────
+  // ── 4. Configurações ──────────────────────────────────────────────────────
   containers.push(
     new ContainerBuilder()
       .setAccentColor(COLOR.gameplay)
@@ -101,7 +100,12 @@ function buildRegulamentoContainers() {
         '🗺️  **Mapas**\n' +
         '🏝️  Isolated  ·  🌆  Blackout'
       ))
-      .addSeparatorComponents(sep())
+  );
+
+  // ── 5. Formato ────────────────────────────────────────────────────────────
+  containers.push(
+    new ContainerBuilder()
+      .setAccentColor(COLOR.gameplay)
       .addTextDisplayComponents(txt('### ⚡  FORMATO'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
@@ -112,20 +116,7 @@ function buildRegulamentoContainers() {
       ))
   );
 
-  // ── 5. Classificação ──────────────────────────────────────────────────────
-  containers.push(
-    new ContainerBuilder()
-      .setAccentColor(COLOR.rules)
-      .addTextDisplayComponents(txt('### 🏆  CLASSIFICAÇÃO'))
-      .addSeparatorComponents(gap())
-      .addTextDisplayComponents(txt(
-        '📊  A classificação seguirá o padrão utilizado nos torneios XT.\n' +
-        '📈  Equipes classificadas pela pontuação acumulada durante toda a competição.\n' +
-        '🎯  A soma da colocação e das eliminações definirá a classificação geral.'
-      ))
-  );
-
-  // ── 6. Regras Gerais + Complementares ────────────────────────────────────
+  // ── 6. Regras Gerais ──────────────────────────────────────────────────────
   containers.push(
     new ContainerBuilder()
       .setAccentColor(COLOR.rules)
@@ -149,7 +140,7 @@ function buildRegulamentoContainers() {
       ))
   );
 
-  // ── 7. Proibições Gerais ──────────────────────────────────────────────────
+  // ── 7. Proibições — Comportamentos ────────────────────────────────────────
   containers.push(
     new ContainerBuilder()
       .setAccentColor(COLOR.forbidden)
@@ -165,7 +156,12 @@ function buildRegulamentoContainers() {
         '😡  Comportamentos antidesportivos\n' +
         '💬  Brigas no chat'
       ))
-      .addSeparatorComponents(sep())
+  );
+
+  // ── 8. Proibições — Armas, Habilidades e Veículos ─────────────────────────
+  containers.push(
+    new ContainerBuilder()
+      .setAccentColor(COLOR.forbidden)
       .addTextDisplayComponents(txt('**🔫  Armas Proibidas**'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
@@ -182,8 +178,13 @@ function buildRegulamentoContainers() {
       .addTextDisplayComponents(txt('**🚫  Habilidades Proibidas**'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
-        '❌  Desperado  ·  ❌  Onda de Choque  ·  ❌  Desorientação\n' +
-        '❌  Bombado  ·  ❌  Incendiário  ·  ❌  Todas as torretas  ·  ❌  Ataque de Dispersão'
+        '❌  Desperado\n' +
+        '❌  Onda de Choque\n' +
+        '❌  Desorientação\n' +
+        '❌  Bombado\n' +
+        '❌  Incendiário\n' +
+        '❌  Todas as torretas\n' +
+        '❌  Ataque de Dispersão'
       ))
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt('**🚗  Veículos Proibidos**'))
@@ -193,14 +194,14 @@ function buildRegulamentoContainers() {
       ))
   );
 
-  // ── 8. Verificação + Discord ──────────────────────────────────────────────
+  // ── 9. Verificação ────────────────────────────────────────────────────────
   containers.push(
     new ContainerBuilder()
       .setAccentColor(COLOR.verify)
       .addTextDisplayComponents(txt('### 🔎  VERIFICAÇÃO'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
-        '🎥  Vídeos obrigatórios de **todas** as quedas\n\n' +
+        '🎥  Vídeos obrigatórios de **todas** as quedas\n' +
         '📋  **Requisitos do vídeo:**\n' +
         '> Mostrar barra de notificações\n' +
         '> Mostrar horário\n' +
@@ -210,12 +211,20 @@ function buildRegulamentoContainers() {
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt(
         '🎞️  **4 vídeos** por jogador  ·  **16 vídeos** por equipe\n' +
-        '⏰  Prazo: até **02h00** da manhã após o campeonato\n\n' +
+        '⏰  Prazo: até **02h00** da manhã após o campeonato'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt(
         '⚠️  Nenhum jogador ou equipe estará isento de verificação\n' +
         '🖥️  A staff pode solicitar abertura de tela a qualquer momento\n' +
         '-# 🚫  Recusa = desclassificação e possível banimento.'
       ))
-      .addSeparatorComponents(sep())
+  );
+
+  // ── 10. Discord ───────────────────────────────────────────────────────────
+  containers.push(
+    new ContainerBuilder()
+      .setAccentColor(COLOR.verify)
       .addTextDisplayComponents(txt('### 🎙️  DISCORD'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
@@ -225,7 +234,7 @@ function buildRegulamentoContainers() {
       ))
   );
 
-  // ── 9. Penalidades ────────────────────────────────────────────────────────
+  // ── 11. Penalidades ───────────────────────────────────────────────────────
   containers.push(
     new ContainerBuilder()
       .setAccentColor(COLOR.penalty)
@@ -233,28 +242,43 @@ function buildRegulamentoContainers() {
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
         '🔫  Armas ou habilidades proibidas\n' +
-        '> ➖  **−50 pontos**\n\n' +
+        '> ➖  **−50 pontos**'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt(
         '😡  Comportamento antidesportivo\n' +
-        '> 🚫  **Expulsão do campeonato**\n\n' +
+        '> 🚫  **Expulsão do campeonato**'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt(
         '🌐  Uso de VPN\n' +
-        '> 🚫  **Expulsão imediata**\n\n' +
+        '> 🚫  **Expulsão imediata**'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt(
         '💻  Uso de trapaças\n' +
-        '> ⛔  **Banimento permanente**\n\n' +
+        '> ⛔  **Banimento permanente**'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt(
         '💬  Brigas no chat\n' +
         '> 1ª ocorrência → ⚠️  Advertência\n' +
-        '> 2ª ocorrência → ➖  **−50 pontos**\n\n' +
+        '> 2ª ocorrência → ➖  **−50 pontos**'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt(
         '🚗  Atropelar ou Call para Todos\n' +
         '> ❌  **Queda zerada**'
       ))
   );
 
-  // ── 10. Pontuação — Sem Habilidades ───────────────────────────────────────
+  // ── 12. Pontuação — Sem Habilidades ───────────────────────────────────────
   containers.push(
     new ContainerBuilder()
       .setAccentColor(COLOR.score1)
       .addTextDisplayComponents(txt('### 🏆  PONTUAÇÃO'))
       .addSeparatorComponents(gap())
-      .addTextDisplayComponents(txt('**🎯  Sem Habilidades**'))
+      .addTextDisplayComponents(txt('### 🎯  SEM HABILIDADES'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
         '🥇  **1º Lugar** → 15 pts\n' +
@@ -272,11 +296,11 @@ function buildRegulamentoContainers() {
       .addTextDisplayComponents(txt('🩸  Kill → **+1 ponto**'))
   );
 
-  // ── 11. Pontuação — Com Habilidades ───────────────────────────────────────
+  // ── 13. Pontuação — Com Habilidades + Classificação ───────────────────────
   containers.push(
     new ContainerBuilder()
       .setAccentColor(COLOR.score2)
-      .addTextDisplayComponents(txt('**⚡  Com Habilidades**'))
+      .addTextDisplayComponents(txt('### ⚡  COM HABILIDADES'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
         '🥇  **1º Lugar** → 15 pts\n' +
@@ -292,6 +316,17 @@ function buildRegulamentoContainers() {
       ))
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt('🩸  Kill → **+2 pontos**'))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt(
+        '### 📊  CLASSIFICAÇÃO\n' +
+        '-# Como as equipes são ranqueadas'
+      ))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt(
+        '📈  Classificação pelo padrão dos torneios XT\n' +
+        '🎯  Soma de colocação + eliminações define o ranking final\n' +
+        '📋  Pontuação acumulada ao longo de toda a competição'
+      ))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt('-# 🌐  Oblivion League · Regulamento Oficial · 2026'))
   );
