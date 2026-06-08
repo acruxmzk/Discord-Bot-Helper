@@ -287,48 +287,61 @@ async function handleFormInscricao(interaction) {
     parsePlayer(p45lines[1] || null),
   ].filter(Boolean);
 
-  // ── Monta blocos de jogadores ─────────────────────────────────────────────
-  const labels  = ['P1 — Titular', 'P2 — Titular', 'P3 — Titular', 'P4 — Titular', 'P5 — Reserva'];
-  const playerBlock = players.map((p, i) =>
-    `${labels[i] ?? `P${i + 1}`}\n> Nick: **${p.nome}**\n> UID:    \`${p.uid}\``
-  ).join('\n\n');
+  // ── ID de registro único ──────────────────────────────────────────────────
+  const agora      = Math.floor(Date.now() / 1000);
+  const datePart   = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+  const randPart   = Math.random().toString(36).slice(2, 6).toUpperCase();
+  const registroId = `OBL-${datePart}-${randPart}`;
+
+  // ── Blocos de jogadores ───────────────────────────────────────────────────
+  const tipoLabel = ['Titular', 'Titular', 'Titular', 'Titular', 'Reserva'];
+  const playerBlock = players.map((p, i) => {
+    const tipo = tipoLabel[i] ?? 'Titular';
+    return (
+      `**P${i + 1}  ·  ${tipo}**\n` +
+      `> \`Nick\`  ${p.nome}\n` +
+      `> \`UID \`  ${p.uid}`
+    );
+  }).join('\n\n');
+
+  const totalLabel = `${players.length} jogador${players.length !== 1 ? 'es' : ''}`;
 
   // ── Posta a ficha no canal ────────────────────────────────────────────────
   const channel = interaction.channel;
-  const agora   = Math.floor(Date.now() / 1000);
 
   const fichaContainers = [
-    // Cabeçalho
+
     new ContainerBuilder()
-      .setAccentColor(0xFFA500)
+      .setAccentColor(0xFFAA00)
       .addTextDisplayComponents(txt(
-        `### 🏆  FICHA DE INSCRIÇÃO\n` +
-        `-# Enviado por <@${interaction.user.id}> · <t:${agora}:F>`
+        `## 🏆  OBLIVION LEAGUE\n` +
+        `### 📋  Ficha de Inscrição\n\n` +
+        `> 🆔  **ID de Registro:** \`${registroId}\`\n` +
+        `> 📅  **Recebido em:** <t:${agora}:F>\n` +
+        `> 👤  **Solicitante:** <@${interaction.user.id}>`
       )),
 
-    // Dados do clã
     new ContainerBuilder()
       .setAccentColor(0x5865F2)
-      .addTextDisplayComponents(txt('### 🛡️  Dados do Clã'))
-      .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
-        `🏷️  **Clã:** ${cla}\n` +
-        `🔖  **TAG:** ${tag}\n` +
-        `⚔️  **Line:** ${line}\n` +
-        `👤  **Manager:** ${manager}`
+        `### 🛡️  Dados do Clã\n\n` +
+        `> 🏷️  **Clã** · ${cla}\n` +
+        `> 🔖  **TAG** · \`${tag}\`\n` +
+        `> ⚔️  **Line** · ${line}\n` +
+        `> 👤  **Manager** · ${manager}`
       )),
 
-    // Lineup
     new ContainerBuilder()
       .setAccentColor(0x00C851)
-      .addTextDisplayComponents(txt('### 👥  Lineup'))
-      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt(`### 👥  Lineup · ${totalLabel}`))
+      .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt(playerBlock))
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt(
-        '⏳  **Status:** Aguardando análise da staff\n' +
-        `-# Verifique se todos os dados estão corretos antes de confirmar.`
+        `> ⏳  **Status:** \`PENDENTE DE ANÁLISE\`\n` +
+        `-# 🤖 Registro automático · ${registroId} · Sistema OBL`
       )),
+
   ];
 
   await channel.send({
