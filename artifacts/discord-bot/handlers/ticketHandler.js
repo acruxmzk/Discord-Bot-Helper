@@ -18,6 +18,7 @@ const {
 const { findLogChannel, notifyBanDetected } = require('../utils/staffAlert');
 const banDB  = require('../utils/banDB');
 const fichaDB = require('../utils/fichaDB');
+const { parsePlayer } = require('../utils/parsePlayer');
 
 const CATEGORY_NAME = 'League Tickets';
 const STAFF_ROLE    = 'STAFF';
@@ -226,7 +227,7 @@ async function handleFormOpen(interaction) {
           .setLabel('Jogador 1 — Titular  (Nick | UID | @TikTok)')
           .setStyle(TextInputStyle.Short)
           .setRequired(true)
-          .setPlaceholder('NickIngame | 1234567890 | @tiktoknick')
+          .setPlaceholder('Nick  1234567890  @tiktok  (qualquer ordem)')
           .setMaxLength(100)
       ),
       new ActionRowBuilder().addComponents(
@@ -235,7 +236,7 @@ async function handleFormOpen(interaction) {
           .setLabel('Titulares 2 e 3  (Nick | UID | @TikTok)')
           .setStyle(TextInputStyle.Paragraph)
           .setRequired(true)
-          .setPlaceholder('NickP2 | 1234567890 | @tiktokp2\nNickP3 | 1234567890 | @tiktokp3')
+          .setPlaceholder('NickP2  1234567890  @tiktokp2\nNickP3  1234567890  @tiktokp3')
           .setMaxLength(300)
       ),
       new ActionRowBuilder().addComponents(
@@ -244,7 +245,7 @@ async function handleFormOpen(interaction) {
           .setLabel('Reservas 4 e 5  (Nick | UID | @TikTok)')
           .setStyle(TextInputStyle.Paragraph)
           .setRequired(false)
-          .setPlaceholder('NickP4 | 1234567890 | @tiktokp4\nNickP5 | 1234567890 | @tiktokp5  (opcional)')
+          .setPlaceholder('NickP4  1234567890  @tiktokp4\nNickP5  1234567890  @tiktokp5  (opcional)')
           .setMaxLength(300)
       ),
     );
@@ -267,17 +268,7 @@ async function handleFormInscricao(interaction) {
   const manager = lineManagerParts[1] || '—';
   const tiktok  = lineManagerParts[2] || '—';
 
-  // ── Parse jogadores ───────────────────────────────────────────────────────
-  function parsePlayer(raw) {
-    if (!raw || !raw.trim()) return null;
-    const parts    = raw.split('|').map(s => s.trim());
-    const nome     = parts[0] || '—';
-    const uidMatch = raw.match(/\d{6,20}/);
-    const uid      = uidMatch ? uidMatch[0] : (parts[1] || '—');
-    const tk       = parts[2] || '—';
-    return { nome, uid, tiktok: tk };
-  }
-
+  // ── Parse jogadores (detecção automática) ────────────────────────────────
   const p1raw   = interaction.fields.getTextInputValue('p1');
   const p23raw  = interaction.fields.getTextInputValue('p2_p3');
   const p45raw  = interaction.fields.getTextInputValue('p4_p5') || '';

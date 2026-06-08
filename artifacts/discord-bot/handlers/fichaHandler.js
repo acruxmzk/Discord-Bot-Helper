@@ -14,12 +14,21 @@ const {
   PermissionFlagsBits,
 } = require('discord.js');
 const fichaDB = require('../utils/fichaDB');
+const { parsePlayer } = require('../utils/parsePlayer');
 
 const sep = () => new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true);
 const gap = () => new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(false);
 const txt = (c) => new TextDisplayBuilder().setContent(c);
 
-// ── Encontra ou cria o canal #fichas-aprovadas ────────────────────────────────
+// ── Encontra a categoria "Oblivion League" (ou similar) ───────────────────────
+function findOblivionCategory(guild) {
+  return guild.channels.cache.find(
+    c => c.type === ChannelType.GuildCategory &&
+         c.name.toLowerCase().replace(/[^a-z]/g, '').includes('oblivion')
+  ) ?? null;
+}
+
+// ── Encontra ou cria o canal #fichas-aprovadas na categoria Oblivion League ───
 async function findOrCreateFichasChannel(guild) {
   await guild.channels.fetch().catch(() => {});
 
@@ -29,10 +38,11 @@ async function findOrCreateFichasChannel(guild) {
   );
   if (existing) return existing;
 
-  // Tenta criar o canal automaticamente
   try {
-    const staffRole = guild.roles.cache.find(r => r.name.toLowerCase() === 'staff');
-    const adminRole = guild.roles.cache.find(r => r.name.toLowerCase() === 'administrator');
+    await guild.roles.fetch().catch(() => {});
+    const staffRole  = guild.roles.cache.find(r => r.name.toLowerCase() === 'staff');
+    const adminRole  = guild.roles.cache.find(r => r.name.toLowerCase() === 'administrator');
+    const categoria  = findOblivionCategory(guild);
 
     const overwrites = [
       { id: guild.roles.everyone.id, deny: [PermissionFlagsBits.SendMessages] },
@@ -51,8 +61,9 @@ async function findOrCreateFichasChannel(guild) {
       type: ChannelType.GuildText,
       topic: '📋 Fichas de inscrição aprovadas pela staff da Oblivion League',
       permissionOverwrites: overwrites,
+      ...(categoria ? { parent: categoria.id } : {}),
     });
-    console.log(`[FICHA] Canal #fichas-aprovadas criado automaticamente: ${ch.id}`);
+    console.log(`[FICHA] Canal #fichas-aprovadas criado${categoria ? ` na categoria "${categoria.name}"` : ''}: ${ch.id}`);
     return ch;
   } catch (e) {
     console.error('[FICHA] Não foi possível criar #fichas-aprovadas:', e.message);
@@ -312,15 +323,6 @@ async function handleFichaEditarSubmit(interaction) {
 
   const claTag  = claTagRaw.split('|').map(s => s.trim());
   const lm      = lmRaw.split('|').map(s => s.trim());
-
-  function parsePlayer(raw) {
-    if (!raw?.trim()) return null;
-    const parts = raw.split('|').map(s => s.trim());
-    const nome  = parts[0] || '—';
-    const uid   = (raw.match(/\d{6,20}/) ?? [])[0] ?? parts[1] ?? '—';
-    const tk    = parts[2] || '—';
-    return { nome, uid, tiktok: tk };
-  }
 
   const p23Lines = p23Raw.split('\n').map(l => l.trim()).filter(Boolean);
   const jogadores = [
