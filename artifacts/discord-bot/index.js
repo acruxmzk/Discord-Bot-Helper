@@ -5,8 +5,7 @@ const path = require('path');
 const {
   handleTicketOpen,
   handleFormOpen,
-  handleFormCla,
-  handleFormJogadores,
+  handleFormInscricao,
   handleTicketClose,
   handleTicketCloseConfirm,
   handleTicketCloseCancel,
@@ -16,7 +15,7 @@ const { handleBanCheck }   = require('./handlers/banCheckHandler');
 
 const token = process.env.TOKEN;
 if (!token) {
-  console.error('[ERRO] A variável de ambiente TOKEN não está definida.');
+  console.error('[ERRO] TOKEN não definido.');
   process.exit(1);
 }
 
@@ -30,15 +29,12 @@ const client = new Client({
 });
 
 client.commands = new Collection();
-
-const commandsPath  = path.join(__dirname, 'commands');
-const commandFiles  = fs.readdirSync(commandsPath).filter(f => f.endsWith('.js'));
-
+const commandFiles = fs.readdirSync(path.join(__dirname, 'commands')).filter(f => f.endsWith('.js'));
 for (const file of commandFiles) {
-  const command = require(path.join(commandsPath, file));
-  if (command.data && command.execute) {
-    client.commands.set(command.data.name, command);
-    console.log(`[CMD] Carregado: /${command.data.name}`);
+  const cmd = require(path.join(__dirname, 'commands', file));
+  if (cmd.data && cmd.execute) {
+    client.commands.set(cmd.data.name, cmd);
+    console.log(`[CMD] Carregado: /${cmd.data.name}`);
   }
 }
 
@@ -47,7 +43,7 @@ client.once('ready', () => {
   console.log(`[BOT] Servidores: ${client.guilds.cache.size}`);
 });
 
-// ── Roteadores ─────────────────────────────────────────────────────────────────
+// ── Roteadores ────────────────────────────────────────────────────────────────
 const BUTTON_HANDLERS = {
   ticket_open:          handleTicketOpen,
   form_open:            handleFormOpen,
@@ -57,8 +53,7 @@ const BUTTON_HANDLERS = {
 };
 
 const MODAL_HANDLERS = {
-  form_cla:       handleFormCla,
-  form_jogadores: handleFormJogadores,
+  form_inscricao: handleFormInscricao,
 };
 
 // ── Mensagens ─────────────────────────────────────────────────────────────────
@@ -70,47 +65,44 @@ client.on('messageCreate', async message => {
 // ── Interações ────────────────────────────────────────────────────────────────
 client.on('interactionCreate', async interaction => {
 
-  // ── Slash commands ──────────────────────────────────────────────────────────
   if (interaction.isChatInputCommand()) {
     const command = client.commands.get(interaction.commandName);
     if (!command) return;
     try {
       await command.execute(interaction);
-    } catch (error) {
-      console.error(`[ERRO] /${interaction.commandName}:`, error);
-      const reply = { content: '❌ Ocorreu um erro ao executar este comando.', ephemeral: true };
-      if (interaction.deferred || interaction.replied) await interaction.editReply(reply);
-      else await interaction.reply(reply);
+    } catch (err) {
+      console.error(`[ERRO] /${interaction.commandName}:`, err);
+      const r = { content: '❌ Erro ao executar o comando.', ephemeral: true };
+      if (interaction.deferred || interaction.replied) await interaction.editReply(r);
+      else await interaction.reply(r);
     }
     return;
   }
 
-  // ── Botões ──────────────────────────────────────────────────────────────────
   if (interaction.isButton()) {
     const handler = BUTTON_HANDLERS[interaction.customId];
     if (!handler) return;
     try {
       await handler(interaction);
-    } catch (error) {
-      console.error(`[ERRO] Botão ${interaction.customId}:`, error);
-      const reply = { content: '❌ Ocorreu um erro ao processar este botão.', ephemeral: true };
-      if (interaction.deferred || interaction.replied) await interaction.editReply(reply);
-      else await interaction.reply(reply);
+    } catch (err) {
+      console.error(`[ERRO] Botão ${interaction.customId}:`, err);
+      const r = { content: '❌ Erro ao processar o botão.', ephemeral: true };
+      if (interaction.deferred || interaction.replied) await interaction.editReply(r);
+      else await interaction.reply(r);
     }
     return;
   }
 
-  // ── Modais ──────────────────────────────────────────────────────────────────
   if (interaction.isModalSubmit()) {
     const handler = MODAL_HANDLERS[interaction.customId];
     if (!handler) return;
     try {
       await handler(interaction);
-    } catch (error) {
-      console.error(`[ERRO] Modal ${interaction.customId}:`, error);
-      const reply = { content: '❌ Ocorreu um erro ao processar o formulário.', ephemeral: true };
-      if (interaction.deferred || interaction.replied) await interaction.editReply(reply);
-      else await interaction.reply(reply);
+    } catch (err) {
+      console.error(`[ERRO] Modal ${interaction.customId}:`, err);
+      const r = { content: '❌ Erro ao processar o formulário.', ephemeral: true };
+      if (interaction.deferred || interaction.replied) await interaction.editReply(r);
+      else await interaction.reply(r);
     }
     return;
   }
