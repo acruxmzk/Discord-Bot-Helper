@@ -199,51 +199,51 @@ async function handleTicketOpen(interaction) {
 async function handleFormOpen(interaction) {
   const modal = new ModalBuilder()
     .setCustomId('form_inscricao')
-    .setTitle('Ficha de Inscrição — Oblivion League')
+    .setTitle('📋 Inscrição — Oblivion League')
     .addComponents(
       new ActionRowBuilder().addComponents(
         new TextInputBuilder()
-          .setCustomId('cla_info')
-          .setLabel('Clã  ·  TAG  ·  Line  ·  Manager')
+          .setCustomId('cla_tag')
+          .setLabel('Nome do Clã  e  TAG')
           .setStyle(TextInputStyle.Short)
           .setRequired(true)
-          .setPlaceholder('Ex: Oblivion | OBL | Line 1 | NomeManager')
-          .setMaxLength(120)
+          .setPlaceholder('Oblivion | OBL')
+          .setMaxLength(60)
+      ),
+      new ActionRowBuilder().addComponents(
+        new TextInputBuilder()
+          .setCustomId('line_manager')
+          .setLabel('Line  e  Manager')
+          .setStyle(TextInputStyle.Short)
+          .setRequired(true)
+          .setPlaceholder('Line 1 | NomeDoManager')
+          .setMaxLength(60)
       ),
       new ActionRowBuilder().addComponents(
         new TextInputBuilder()
           .setCustomId('p1')
-          .setLabel('Jogador 1 — Nick In-Game | UID')
+          .setLabel('Jogador 1 — Titular  (Nick | UID)')
           .setStyle(TextInputStyle.Short)
           .setRequired(true)
-          .setPlaceholder('Ex: NickIngame | 1234567890')
+          .setPlaceholder('NickIngame | 1234567890')
           .setMaxLength(80)
       ),
       new ActionRowBuilder().addComponents(
         new TextInputBuilder()
-          .setCustomId('p2')
-          .setLabel('Jogador 2 — Nick In-Game | UID')
-          .setStyle(TextInputStyle.Short)
+          .setCustomId('p2_p3')
+          .setLabel('Jogadores 2 e 3 — Titulares  (Nick | UID)')
+          .setStyle(TextInputStyle.Paragraph)
           .setRequired(true)
-          .setPlaceholder('Ex: NickIngame | 1234567890')
-          .setMaxLength(80)
-      ),
-      new ActionRowBuilder().addComponents(
-        new TextInputBuilder()
-          .setCustomId('p3')
-          .setLabel('Jogador 3 — Nick In-Game | UID')
-          .setStyle(TextInputStyle.Short)
-          .setRequired(true)
-          .setPlaceholder('Ex: NickIngame | 1234567890')
-          .setMaxLength(80)
+          .setPlaceholder('NickP2 | 1234567890\nNickP3 | 1234567890')
+          .setMaxLength(200)
       ),
       new ActionRowBuilder().addComponents(
         new TextInputBuilder()
           .setCustomId('p4_p5')
-          .setLabel('Jogadores 4 e 5 — Nick | UID (um por linha)')
+          .setLabel('Jogadores 4 e 5 — Reservas  (Nick | UID)')
           .setStyle(TextInputStyle.Paragraph)
-          .setRequired(true)
-          .setPlaceholder('Nick4 | 1234567890\nNick5 | 1234567890  ← reserva (opcional)')
+          .setRequired(false)
+          .setPlaceholder('NickP4 | 1234567890\nNickP5 | 1234567890  (opcional)')
           .setMaxLength(200)
       ),
     );
@@ -255,12 +255,15 @@ async function handleFormInscricao(interaction) {
   await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   // ── Parse clã ────────────────────────────────────────────────────────────
-  const claRaw = interaction.fields.getTextInputValue('cla_info');
-  const claParts = claRaw.split('|').map(s => s.trim());
-  const cla     = claParts[0] || '—';
-  const tag     = claParts[1] || '—';
-  const line    = claParts[2] || '—';
-  const manager = claParts[3] || '—';
+  const claTagRaw = interaction.fields.getTextInputValue('cla_tag');
+  const claTagParts = claTagRaw.split('|').map(s => s.trim());
+  const cla = claTagParts[0] || '—';
+  const tag = claTagParts[1] || '—';
+
+  const lineManagerRaw = interaction.fields.getTextInputValue('line_manager');
+  const lineManagerParts = lineManagerRaw.split('|').map(s => s.trim());
+  const line    = lineManagerParts[0] || '—';
+  const manager = lineManagerParts[1] || '—';
 
   // ── Parse jogadores ───────────────────────────────────────────────────────
   function parsePlayer(raw) {
@@ -272,17 +275,17 @@ async function handleFormInscricao(interaction) {
     return { nome, uid };
   }
 
-  const p1raw = interaction.fields.getTextInputValue('p1');
-  const p2raw = interaction.fields.getTextInputValue('p2');
-  const p3raw = interaction.fields.getTextInputValue('p3');
-  const p45raw = interaction.fields.getTextInputValue('p4_p5');
+  const p1raw   = interaction.fields.getTextInputValue('p1');
+  const p23raw  = interaction.fields.getTextInputValue('p2_p3');
+  const p45raw  = interaction.fields.getTextInputValue('p4_p5') || '';
 
+  const p23lines = p23raw.split('\n').map(l => l.trim()).filter(Boolean);
   const p45lines = p45raw.split('\n').map(l => l.trim()).filter(Boolean);
 
   const players = [
     parsePlayer(p1raw),
-    parsePlayer(p2raw),
-    parsePlayer(p3raw),
+    parsePlayer(p23lines[0] || null),
+    parsePlayer(p23lines[1] || null),
     parsePlayer(p45lines[0] || null),
     parsePlayer(p45lines[1] || null),
   ].filter(Boolean);
