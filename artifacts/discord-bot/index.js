@@ -95,6 +95,18 @@ function resolveModalHandler(customId) {
   return null;
 }
 
+// ── Autocomplete ──────────────────────────────────────────────────────────────
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isAutocomplete()) return;
+  const command = client.commands.get(interaction.commandName);
+  if (!command?.autocomplete) return;
+  try {
+    await command.autocomplete(interaction);
+  } catch (err) {
+    console.error(`[ERRO] Autocomplete /${interaction.commandName}:`, err.message);
+  }
+});
+
 // ── Mensagens ─────────────────────────────────────────────────────────────────
 client.on('messageCreate', async message => {
   try { await handleFaqMessage(message); } catch (e) { console.error('[ERRO] FAQ:', e); }
