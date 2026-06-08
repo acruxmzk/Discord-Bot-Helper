@@ -1,17 +1,20 @@
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
-const fs = require('fs');
+const fs   = require('fs');
 const path = require('path');
+
 const {
   handleTicketOpen,
+  handleFormOpen,
+  handleFormCla,
+  handleFormJogadores,
   handleTicketClose,
   handleTicketCloseConfirm,
   handleTicketCloseCancel,
 } = require('./handlers/ticketHandler');
 const { handleFaqMessage } = require('./handlers/faqHandler');
-const { handleBanCheck }  = require('./handlers/banCheckHandler');
+const { handleBanCheck }   = require('./handlers/banCheckHandler');
 
 const token = process.env.TOKEN;
-
 if (!token) {
   console.error('[ERRO] A variável de ambiente TOKEN não está definida.');
   process.exit(1);
@@ -28,8 +31,8 @@ const client = new Client({
 
 client.commands = new Collection();
 
-const commandsPath = path.join(__dirname, 'commands');
-const commandFiles = fs.readdirSync(commandsPath).filter(f => f.endsWith('.js'));
+const commandsPath  = path.join(__dirname, 'commands');
+const commandFiles  = fs.readdirSync(commandsPath).filter(f => f.endsWith('.js'));
 
 for (const file of commandFiles) {
   const command = require(path.join(commandsPath, file));
@@ -44,39 +47,37 @@ client.once('ready', () => {
   console.log(`[BOT] Servidores: ${client.guilds.cache.size}`);
 });
 
+// ── Roteadores ─────────────────────────────────────────────────────────────────
 const BUTTON_HANDLERS = {
   ticket_open:          handleTicketOpen,
+  form_open:            handleFormOpen,
   ticket_close:         handleTicketClose,
   ticket_close_confirm: handleTicketCloseConfirm,
   ticket_close_cancel:  handleTicketCloseCancel,
 };
 
-// ── Mensagens — FAQ automático + detecção de ban ──────────────────────────────
-client.on('messageCreate', async message => {
-  try {
-    await handleFaqMessage(message);
-  } catch (err) {
-    console.error('[ERRO] FAQ messageCreate:', err);
-  }
+const MODAL_HANDLERS = {
+  form_cla:       handleFormCla,
+  form_jogadores: handleFormJogadores,
+};
 
-  try {
-    await handleBanCheck(message);
-  } catch (err) {
-    console.error('[ERRO] BanCheck messageCreate:', err);
-  }
+// ── Mensagens ─────────────────────────────────────────────────────────────────
+client.on('messageCreate', async message => {
+  try { await handleFaqMessage(message); } catch (e) { console.error('[ERRO] FAQ:', e); }
+  try { await handleBanCheck(message);   } catch (e) { console.error('[ERRO] BanCheck:', e); }
 });
 
-// ── Interações ─────────────────────────────────────────────────────────────────
+// ── Interações ────────────────────────────────────────────────────────────────
 client.on('interactionCreate', async interaction => {
-  // ── Slash commands ──────────────────────────────────────────────────────
+
+  // ── Slash commands ──────────────────────────────────────────────────────────
   if (interaction.isChatInputCommand()) {
     const command = client.commands.get(interaction.commandName);
     if (!command) return;
-
     try {
       await command.execute(interaction);
     } catch (error) {
-      console.error(`[ERRO] Comando /${interaction.commandName}:`, error);
+      console.error(`[ERRO] /${interaction.commandName}:`, error);
       const reply = { content: '❌ Ocorreu um erro ao executar este comando.', ephemeral: true };
       if (interaction.deferred || interaction.replied) await interaction.editReply(reply);
       else await interaction.reply(reply);
@@ -84,16 +85,30 @@ client.on('interactionCreate', async interaction => {
     return;
   }
 
-  // ── Botões ──────────────────────────────────────────────────────────────
+  // ── Botões ──────────────────────────────────────────────────────────────────
   if (interaction.isButton()) {
     const handler = BUTTON_HANDLERS[interaction.customId];
     if (!handler) return;
-
     try {
       await handler(interaction);
     } catch (error) {
       console.error(`[ERRO] Botão ${interaction.customId}:`, error);
       const reply = { content: '❌ Ocorreu um erro ao processar este botão.', ephemeral: true };
+      if (interaction.deferred || interaction.replied) await interaction.editReply(reply);
+      else await interaction.reply(reply);
+    }
+    return;
+  }
+
+  // ── Modais ──────────────────────────────────────────────────────────────────
+  if (interaction.isModalSubmit()) {
+    const handler = MODAL_HANDLERS[interaction.customId];
+    if (!handler) return;
+    try {
+      await handler(interaction);
+    } catch (error) {
+      console.error(`[ERRO] Modal ${interaction.customId}:`, error);
+      const reply = { content: '❌ Ocorreu um erro ao processar o formulário.', ephemeral: true };
       if (interaction.deferred || interaction.replied) await interaction.editReply(reply);
       else await interaction.reply(reply);
     }
