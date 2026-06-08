@@ -16,7 +16,8 @@ const {
 } = require('discord.js');
 
 const { findLogChannel, notifyBanDetected } = require('../utils/staffAlert');
-const { checkPlayer }                       = require('../utils/banDB');
+const banDB  = require('../utils/banDB');
+const fichaDB = require('../utils/fichaDB');
 
 const CATEGORY_NAME = 'League Tickets';
 const STAFF_ROLE    = 'STAFF';
@@ -60,7 +61,7 @@ function buildWelcomeContainer(user, staffMention) {
     .addSeparatorComponents(sep())
     .addTextDisplayComponents(txt(
       `👤  **Solicitante:** <@${user.id}>\n` +
-      `🕐  **Aberto em:** <t:${agora}:F>`
+      `🕐  **Aberto em:** <t:${Math.floor(Date.now() / 1000)}:F>`
     ))
     .addSeparatorComponents(sep())
     .addTextDisplayComponents(txt(
@@ -195,7 +196,7 @@ async function handleTicketOpen(interaction) {
   });
 }
 
-// ── 2. Botão "Preencher Ficha" → Modal único ──────────────────────────────────
+// ── 2. Botão "Preencher Ficha" → Modal ────────────────────────────────────────
 async function handleFormOpen(interaction) {
   const modal = new ModalBuilder()
     .setCustomId('form_inscricao')
@@ -250,17 +251,17 @@ async function handleFormOpen(interaction) {
   await interaction.showModal(modal);
 }
 
-// ── 3. Modal submit → processa ficha e verifica bans ─────────────────────────
+// ── 3. Modal submit → processa ficha, salva no DB ─────────────────────────────
 async function handleFormInscricao(interaction) {
   await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   // ── Parse clã ────────────────────────────────────────────────────────────
-  const claTagRaw = interaction.fields.getTextInputValue('cla_tag');
-  const claTagParts = claTagRaw.split('|').map(s => s.trim());
-  const cla = claTagParts[0] || '—';
-  const tag = claTagParts[1] || '—';
+  const claTagRaw      = interaction.fields.getTextInputValue('cla_tag');
+  const claTagParts    = claTagRaw.split('|').map(s => s.trim());
+  const cla            = claTagParts[0] || '—';
+  const tag            = claTagParts[1] || '—';
 
-  const lineManagerRaw = interaction.fields.getTextInputValue('line_manager');
+  const lineManagerRaw   = interaction.fields.getTextInputValue('line_manager');
   const lineManagerParts = lineManagerRaw.split('|').map(s => s.trim());
   const line    = lineManagerParts[0] || '—';
   const manager = lineManagerParts[1] || '—';
@@ -273,8 +274,8 @@ async function handleFormInscricao(interaction) {
     const nome     = parts[0] || '—';
     const uidMatch = raw.match(/\d{6,20}/);
     const uid      = uidMatch ? uidMatch[0] : (parts[1] || '—');
-    const tiktok   = parts[2] || '—';
-    return { nome, uid, tiktok };
+    const tk       = parts[2] || '—';
+    return { nome, uid, tiktok: tk };
   }
 
   const p1raw   = interaction.fields.getTextInputValue('p1');
@@ -299,7 +300,7 @@ async function handleFormInscricao(interaction) {
   const registroId = `OBL-${datePart}-${randPart}`;
 
   // ── Blocos de jogadores ───────────────────────────────────────────────────
-  const tipoLabel = ['Titular', 'Titular', 'Titular', 'Titular', 'Reserva'];
+  const tipoLabel  = ['Titular', 'Titular', 'Titular', 'Reserva', 'Reserva'];
   const playerBlock = players.map((p, i) => {
     const tipo = tipoLabel[i] ?? 'Titular';
     return (
@@ -312,55 +313,79 @@ async function handleFormInscricao(interaction) {
 
   const totalLabel = `${players.length} jogador${players.length !== 1 ? 'es' : ''}`;
 
-  // ── Posta a ficha no canal ────────────────────────────────────────────────
+  // ── Salvar no banco de dados ──────────────────────────────────────────────
+  await fichaDB.saveInscricao({
+    registroId,
+    guildId:       interaction.guild.id,
+    solicitanteId: interaction.user.id,
+    cla, tag, line, manager, tiktok,
+    jogadores:     players,
+    ticketChannelId: interaction.channel.id,
+  }).catch(e => console.error('[FORM] Erro ao salvar ficha no DB:', e.message));
+
+  // ── Posta a ficha + botões de aprovação no canal ──────────────────────────
   const channel = interaction.channel;
 
-  const fichaContainers = [
-
-    new ContainerBuilder()
-      .setAccentColor(0xFFAA00)
-      .addTextDisplayComponents(txt(
-        `## 🏆  OBLIVION LEAGUE\n` +
-        `### 📋  Ficha de Inscrição\n\n` +
-        `> 🆔  **ID de Registro:** \`${registroId}\`\n` +
-        `> 📅  **Recebido em:** <t:${agora}:F>\n` +
-        `> 👤  **Solicitante:** <@${interaction.user.id}>`
-      )),
-
-    new ContainerBuilder()
-      .setAccentColor(0x5865F2)
-      .addTextDisplayComponents(txt(
-        `### 🛡️  Dados do Clã\n\n` +
-        `> 🏷️  **Clã** · ${cla}\n` +
-        `> 🔖  **TAG** · \`${tag}\`\n` +
-        `> ⚔️  **Line** · ${line}\n` +
-        `> 👤  **Manager** · ${manager}\n` +
-        `> 🎵  **TikTok** · ${tiktok}`
-      )),
-
-    new ContainerBuilder()
-      .setAccentColor(0x00C851)
-      .addTextDisplayComponents(txt(`### 👥  Lineup · ${totalLabel}`))
-      .addSeparatorComponents(sep())
-      .addTextDisplayComponents(txt(playerBlock))
-      .addSeparatorComponents(sep())
-      .addTextDisplayComponents(txt(
-        `> ⏳  **Status:** \`PENDENTE DE ANÁLISE\`\n` +
-        `-# 🤖 Registro automático · ${registroId} · Sistema OBL`
-      )),
-
-  ];
-
   await channel.send({
-    components: fichaContainers,
+    components: [
+      new ContainerBuilder()
+        .setAccentColor(0xFFAA00)
+        .addTextDisplayComponents(txt(
+          `## 🏆  OBLIVION LEAGUE\n` +
+          `### 📋  Ficha de Inscrição\n\n` +
+          `> 🆔  **ID de Registro:** \`${registroId}\`\n` +
+          `> 📅  **Recebido em:** <t:${agora}:F>\n` +
+          `> 👤  **Solicitante:** <@${interaction.user.id}>`
+        )),
+
+      new ContainerBuilder()
+        .setAccentColor(0x5865F2)
+        .addTextDisplayComponents(txt(
+          `### 🛡️  Dados do Clã\n\n` +
+          `> 🏷️  **Clã** · ${cla}\n` +
+          `> 🔖  **TAG** · \`${tag}\`\n` +
+          `> ⚔️  **Line** · ${line}\n` +
+          `> 👤  **Manager** · ${manager}\n` +
+          `> 🎵  **TikTok** · ${tiktok}`
+        )),
+
+      new ContainerBuilder()
+        .setAccentColor(0x00C851)
+        .addTextDisplayComponents(txt(`### 👥  Lineup · ${totalLabel}`))
+        .addSeparatorComponents(sep())
+        .addTextDisplayComponents(txt(playerBlock))
+        .addSeparatorComponents(sep())
+        .addTextDisplayComponents(txt(
+          `> ⏳  **Status:** \`PENDENTE DE ANÁLISE\`\n` +
+          `-# 🤖 Registro automático · ${registroId} · Sistema OBL`
+        )),
+
+      new ContainerBuilder()
+        .setAccentColor(0x9B59B6)
+        .addTextDisplayComponents(txt(`### ⚖️  Decisão da Staff`))
+        .addSeparatorComponents(gap())
+        .addActionRowComponents(
+          new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+              .setCustomId(`ficha_aprovar:${registroId}`)
+              .setLabel('✅ Aprovar Ficha')
+              .setStyle(ButtonStyle.Success),
+            new ButtonBuilder()
+              .setCustomId(`ficha_rejeitar:${registroId}`)
+              .setLabel('❌ Rejeitar')
+              .setStyle(ButtonStyle.Danger),
+          )
+        ),
+    ],
     flags: MessageFlags.IsComponentsV2,
   }).catch(e => console.error('[FORM] Erro ao postar ficha:', e.message));
 
   // ── Verificação de bans ───────────────────────────────────────────────────
-  const uids   = players.map(p => p.uid).filter(u => /^\d{6,20}$/.test(u));
-  const banidos = uids
-    .map(uid => ({ uid, result: checkPlayer(uid) }))
-    .filter(({ result }) => result.status === 'BANIDO');
+  const uids = players.map(p => p.uid).filter(u => /^\d{6,20}$/.test(u));
+  const banResults = await Promise.all(
+    uids.map(async uid => ({ uid, result: await banDB.checkPlayer(uid) }))
+  );
+  const banidos = banResults.filter(({ result }) => result.status === 'BANIDO');
 
   console.log(`[FORM] ${interaction.user.tag} | UIDs: [${uids.join(', ')}] | Banidos: [${banidos.map(b => b.uid).join(', ') || 'nenhum'}]`);
 
@@ -380,7 +405,7 @@ async function handleFormInscricao(interaction) {
         .setAccentColor(0x00C851)
         .addTextDisplayComponents(txt(
           `### ✅ Ficha enviada!\n` +
-          `Sua inscrição foi registrada.\n` +
+          `Sua inscrição foi registrada com ID \`${registroId}\`.\n` +
           `-# Aguarde o retorno da staff.`
         )),
     ],

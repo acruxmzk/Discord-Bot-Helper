@@ -10,13 +10,37 @@ const {
   handleTicketCloseConfirm,
   handleTicketCloseCancel,
 } = require('./handlers/ticketHandler');
+
+const {
+  handleAprovarFicha,
+  handleRejeitarFicha,
+  handleFichaRejeicaoSubmit,
+  handleFichaEditarSubmit,
+} = require('./handlers/fichaHandler');
+
 const { handleFaqMessage } = require('./handlers/faqHandler');
 const { handleBanCheck }   = require('./handlers/banCheckHandler');
+
+const banDB   = require('./utils/banDB');
+const fichaDB = require('./utils/fichaDB');
 
 const token = process.env.TOKEN;
 if (!token) {
   console.error('[ERRO] TOKEN não definido.');
   process.exit(1);
+}
+
+// ── Inicializar tabelas do banco ──────────────────────────────────────────────
+async function initDB() {
+  try {
+    await banDB.init();
+    console.log('[DB] Tabela banned_players pronta.');
+    await fichaDB.init();
+    console.log('[DB] Tabela inscricoes pronta.');
+  } catch (err) {
+    console.error('[DB] Erro ao inicializar tabelas:', err.message);
+    process.exit(1);
+  }
 }
 
 const client = new Client({
@@ -56,6 +80,21 @@ const MODAL_HANDLERS = {
   form_inscricao: handleFormInscricao,
 };
 
+// Handlers por prefixo (customId contém ':')
+function resolveButtonHandler(customId) {
+  if (BUTTON_HANDLERS[customId]) return BUTTON_HANDLERS[customId];
+  if (customId.startsWith('ficha_aprovar:'))  return handleAprovarFicha;
+  if (customId.startsWith('ficha_rejeitar:')) return handleRejeitarFicha;
+  return null;
+}
+
+function resolveModalHandler(customId) {
+  if (MODAL_HANDLERS[customId]) return MODAL_HANDLERS[customId];
+  if (customId.startsWith('ficha_rejeicao_submit:')) return handleFichaRejeicaoSubmit;
+  if (customId.startsWith('ficha_editar_submit:'))   return handleFichaEditarSubmit;
+  return null;
+}
+
 // ── Mensagens ─────────────────────────────────────────────────────────────────
 client.on('messageCreate', async message => {
   try { await handleFaqMessage(message); } catch (e) { console.error('[ERRO] FAQ:', e); }
@@ -80,7 +119,7 @@ client.on('interactionCreate', async interaction => {
   }
 
   if (interaction.isButton()) {
-    const handler = BUTTON_HANDLERS[interaction.customId];
+    const handler = resolveButtonHandler(interaction.customId);
     if (!handler) return;
     try {
       await handler(interaction);
@@ -94,7 +133,7 @@ client.on('interactionCreate', async interaction => {
   }
 
   if (interaction.isModalSubmit()) {
-    const handler = MODAL_HANDLERS[interaction.customId];
+    const handler = resolveModalHandler(interaction.customId);
     if (!handler) return;
     try {
       await handler(interaction);
@@ -108,4 +147,5 @@ client.on('interactionCreate', async interaction => {
   }
 });
 
-client.login(token);
+// ── Iniciar ───────────────────────────────────────────────────────────────────
+initDB().then(() => client.login(token));

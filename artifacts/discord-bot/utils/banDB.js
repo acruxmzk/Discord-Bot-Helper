@@ -1,63 +1,66 @@
-const Database = require('better-sqlite3');
-const path     = require('path');
+const pool = require('./pgPool');
 
-const db = new Database(path.join(__dirname, '..', 'data', 'oblivion.db'));
-
-// ── Criar tabela se não existir ───────────────────────────────────────────────
-db.exec(`
-  CREATE TABLE IF NOT EXISTS banned_players (
-    id        INTEGER PRIMARY KEY AUTOINCREMENT,
-    uid       TEXT    UNIQUE NOT NULL,
-    reason    TEXT    NOT NULL,
-    banned_at TEXT    NOT NULL DEFAULT (datetime('now', 'localtime')),
-    banned_by TEXT    NOT NULL DEFAULT 'STAFF'
-  );
-`);
-
-// ── Banir (insert ou update) ───────────────────────────────────────────────────
-function banPlayer(uid, reason, bannedBy = 'STAFF') {
-  const stmt = db.prepare(`
-    INSERT INTO banned_players (uid, reason, banned_at, banned_by)
-    VALUES (?, ?, datetime('now', 'localtime'), ?)
-    ON CONFLICT(uid) DO UPDATE SET
-      reason    = excluded.reason,
-      banned_at = excluded.banned_at,
-      banned_by = excluded.banned_by
+async function init() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS banned_players (
+      id        SERIAL      PRIMARY KEY,
+      uid       VARCHAR(25) UNIQUE NOT NULL,
+      reason    TEXT        NOT NULL,
+      banned_by VARCHAR(60) NOT NULL DEFAULT 'STAFF',
+      banned_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
   `);
-  stmt.run(uid.trim(), reason.trim(), bannedBy);
 }
 
-// ── Desbanir ──────────────────────────────────────────────────────────────────
-function unbanPlayer(uid) {
-  const stmt = db.prepare(`DELETE FROM banned_players WHERE uid = ?`);
-  const info = stmt.run(uid.trim());
-  return info.changes > 0;
+async function banPlayer(uid, reason, bannedBy = 'STAFF') {
+  await pool.query(
+    `INSERT INTO banned_players (uid, reason, banned_by)
+     VALUES ($1, $2, $3)
+     ON CONFLICT (uid) DO UPDATE SET
+       reason    = EXCLUDED.reason,
+       banned_by = EXCLUDED.banned_by,
+       banned_at = NOW()`,
+    [uid.trim(), reason.trim(), bannedBy]
+  );
 }
 
-// ── Verificar ─────────────────────────────────────────────────────────────────
-function checkPlayer(uid) {
-  const row = db.prepare(`SELECT * FROM banned_players WHERE uid = ?`).get(uid.trim());
-  if (!row) return { status: 'LIMPO' };
+async function unbanPlayer(uid) {
+  const res = await pool.query(
+    `DELETE FROM banned_players WHERE uid = $1`,
+    [uid.trim()]
+  );
+  return res.rowCount > 0;
+}
+
+async function checkPlayer(uid) {
+  const res = await pool.query(
+    `SELECT * FROM banned_players WHERE uid = $1`,
+    [uid.trim()]
+  );
+  if (res.rows.length === 0) return { status: 'LIMPO' };
+  const row = res.rows[0];
   return {
     status:   'BANIDO',
     reason:   row.reason,
-    bannedAt: row.banned_at,
+    bannedAt: row.banned_at?.toISOString?.() ?? row.banned_at,
     bannedBy: row.banned_by,
   };
 }
 
-// ── Listar todos ──────────────────────────────────────────────────────────────
-function listBans(limit = 25) {
-  return db.prepare(`
-    SELECT * FROM banned_players ORDER BY banned_at DESC LIMIT ?
-  `).all(limit);
+async function listBans(limit = 25) {
+  const res = await pool.query(
+    `SELECT * FROM banned_players ORDER BY banned_at DESC LIMIT $1`,
+    [limit]
+  );
+  return res.rows;
 }
 
-// ── Buscar por UID parcial ────────────────────────────────────────────────────
-function searchBans(query) {
-  return db.prepare(`
-    SELECT * FROM banned_players WHERE uid LIKE ? ORDER BY banned_at DESC LIMIT 10
-  `).all(`%${query.trim()}%`);
+async function searchBans(query) {
+  const res = await pool.query(
+    `SELECT * FROM banned_players WHERE uid LIKE $1 ORDER BY banned_at DESC LIMIT 10`,
+    [`%${query.trim()}%`]
+  );
+  return res.rows;
 }
 
-module.exports = { banPlayer, unbanPlayer, checkPlayer, listBans, searchBans };
+module.exports = { init, banPlayer, unbanPlayer, checkPlayer, listBans, searchBans };
