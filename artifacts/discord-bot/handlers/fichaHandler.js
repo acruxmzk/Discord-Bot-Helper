@@ -372,6 +372,7 @@ async function handleFichaEditarSubmit(interaction) {
 
 module.exports = {
   buildFichaContainers,
+  findOrCreateFichasChannel,
   handleAprovarFicha,
   handleRejeitarFicha,
   handleFichaRejeicaoSubmit,

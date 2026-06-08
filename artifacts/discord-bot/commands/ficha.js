@@ -334,23 +334,19 @@ module.exports = {
         });
       }
 
-      // Importa o fichaHandler para reusar findOrCreateFichasChannel
-      const { buildFichaContainers } = require('../handlers/fichaHandler');
-      const { ChannelType } = require('discord.js');
+      // Reutiliza o handler para encontrar ou criar o canal automaticamente
+      const { buildFichaContainers, findOrCreateFichasChannel } = require('../handlers/fichaHandler');
 
-      await interaction.guild.channels.fetch().catch(() => {});
-      let fichasCh = interaction.guild.channels.cache.find(
-        c => c.type === ChannelType.GuildText &&
-             c.name.toLowerCase().replace(/[^a-z0-9-]/g, '').includes('fichas')
-      );
+      const fichasCh = await findOrCreateFichasChannel(interaction.guild);
 
       if (!fichasCh) {
         return interaction.editReply({
           components: [
             new ContainerBuilder()
-              .setAccentColor(0xFF6B35)
+              .setAccentColor(0xFF4444)
               .addTextDisplayComponents(txt(
-                `### ⚠️ Canal não encontrado\nCrie um canal chamado \`fichas-aprovadas\` primeiro.`
+                `### ❌ Sem permissão\nNão consegui criar o canal \`#fichas-aprovadas\`.\n` +
+                `-# Verifique se o bot tem permissão para gerenciar canais.`
               )),
           ],
           flags: MessageFlags.IsComponentsV2,
