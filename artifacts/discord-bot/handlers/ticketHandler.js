@@ -50,18 +50,25 @@ async function findOrCreateCategory(guild) {
 
 // ── Container de boas-vindas do ticket ────────────────────────────────────────
 function buildWelcomeContainer(user, staffMention) {
+  const agora = Math.floor(Date.now() / 1000);
   return new ContainerBuilder()
     .setAccentColor(0xFFA500)
     .addTextDisplayComponents(txt(
       `### 🎟️  Ticket de Inscrição\n` +
-      `**Solicitante:** <@${user.id}>\n` +
-      `**Aberto em:** <t:${Math.floor(Date.now() / 1000)}:F>\n\n` +
-      `-# ${staffMention} — nova inscrição recebida.`
+      `-# ${staffMention} — nova inscrição recebida`
     ))
     .addSeparatorComponents(sep())
     .addTextDisplayComponents(txt(
-      '📋 Clique em **Preencher Ficha** para enviar sua inscrição.\n' +
-      '-# Preencha os dados do clã e os UIDs de todos os jogadores.'
+      `👤  **Solicitante:** <@${user.id}>\n` +
+      `🕐  **Aberto em:** <t:${agora}:F>`
+    ))
+    .addSeparatorComponents(sep())
+    .addTextDisplayComponents(txt(
+      '### 📋  Instruções\n\n' +
+      '**1.** Clique em **📝 Preencher Ficha** abaixo\n' +
+      '**2.** Preencha o formulário com os dados do clã e UIDs\n' +
+      '**3.** Envie e aguarde a análise da staff\n\n' +
+      '-# ⚠️ Preencha todos os campos corretamente ou sua inscrição pode ser invalidada.'
     ))
     .addSeparatorComponents(gap())
     .addActionRowComponents(
@@ -280,45 +287,52 @@ async function handleFormInscricao(interaction) {
     parsePlayer(p45lines[1] || null),
   ].filter(Boolean);
 
-  // ── Monta ficha formatada ─────────────────────────────────────────────────
-  const playerLines = players.map((p, i) =>
-    `𝗣${i + 1}: ${p.nome}\n𝗨𝗜𝗗: ${p.uid}`
+  // ── Monta blocos de jogadores ─────────────────────────────────────────────
+  const labels  = ['P1 — Titular', 'P2 — Titular', 'P3 — Titular', 'P4 — Titular', 'P5 — Reserva'];
+  const playerBlock = players.map((p, i) =>
+    `${labels[i] ?? `P${i + 1}`}\n> Nick: **${p.nome}**\n> UID:    \`${p.uid}\``
   ).join('\n\n');
-
-  const fichaTexto = [
-    '╭━━━〔 🏆 𝐎𝐁𝐋𝐈𝐕𝐈𝐎𝐍 𝐋𝐄𝐀𝐆𝐔𝐄 〕━━━╮',
-    '',
-    '📋 𝐅𝐎𝐑𝐌𝐔𝐋𝐀́𝐑𝐈𝐎 𝐃𝐄 𝐈𝐍𝐒𝐂𝐑𝐈𝐂̧𝐀̃𝐎',
-    '',
-    `• 𝑪𝒍𝒂̃: ${cla}`,
-    `• 𝑻𝒂𝒈: ${tag}`,
-    `• 𝑳𝒊𝒏𝒆: ${line}`,
-    `• 𝑴𝒂𝒏𝒂𝒈𝒆𝒓: ${manager}`,
-    '',
-    '━━━━━━━━━━━━━━━━━━',
-    '',
-    playerLines,
-    '',
-    '━━━━━━━━━━━━━━━━━━',
-    '',
-    '╰━━━〔 ⚔️ 𝐎𝐁𝐋𝐈𝐕𝐈𝐎𝐍 〕━━━╯',
-  ].join('\n');
 
   // ── Posta a ficha no canal ────────────────────────────────────────────────
   const channel = interaction.channel;
+  const agora   = Math.floor(Date.now() / 1000);
+
+  const fichaContainers = [
+    // Cabeçalho
+    new ContainerBuilder()
+      .setAccentColor(0xFFA500)
+      .addTextDisplayComponents(txt(
+        `### 🏆  FICHA DE INSCRIÇÃO\n` +
+        `-# Enviado por <@${interaction.user.id}> · <t:${agora}:F>`
+      )),
+
+    // Dados do clã
+    new ContainerBuilder()
+      .setAccentColor(0x5865F2)
+      .addTextDisplayComponents(txt('### 🛡️  Dados do Clã'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt(
+        `🏷️  **Clã:** ${cla}\n` +
+        `🔖  **TAG:** ${tag}\n` +
+        `⚔️  **Line:** ${line}\n` +
+        `👤  **Manager:** ${manager}`
+      )),
+
+    // Lineup
+    new ContainerBuilder()
+      .setAccentColor(0x00C851)
+      .addTextDisplayComponents(txt('### 👥  Lineup'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt(playerBlock))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt(
+        '⏳  **Status:** Aguardando análise da staff\n' +
+        `-# Verifique se todos os dados estão corretos antes de confirmar.`
+      )),
+  ];
+
   await channel.send({
-    components: [
-      new ContainerBuilder()
-        .setAccentColor(0xFFA500)
-        .addTextDisplayComponents(txt(
-          `### 📋  Ficha de Inscrição\n` +
-          `**Enviado por:** <@${interaction.user.id}>  ·  <t:${Math.floor(Date.now() / 1000)}:F>`
-        ))
-        .addSeparatorComponents(sep())
-        .addTextDisplayComponents(txt('```\n' + fichaTexto + '\n```'))
-        .addSeparatorComponents(gap())
-        .addTextDisplayComponents(txt('-# Aguarde a análise da staff. ✅')),
-    ],
+    components: fichaContainers,
     flags: MessageFlags.IsComponentsV2,
   }).catch(e => console.error('[FORM] Erro ao postar ficha:', e.message));
 
