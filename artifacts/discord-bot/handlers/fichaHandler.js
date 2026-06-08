@@ -19,15 +19,45 @@ const sep = () => new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).
 const gap = () => new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(false);
 const txt = (c) => new TextDisplayBuilder().setContent(c);
 
-// ── Encontra ou tenta criar o canal #fichas-aprovadas ──────────────────────────
-async function findFichasChannel(guild) {
+// ── Encontra ou cria o canal #fichas-aprovadas ────────────────────────────────
+async function findOrCreateFichasChannel(guild) {
   await guild.channels.fetch().catch(() => {});
-  return (
-    guild.channels.cache.find(
-      c => c.type === ChannelType.GuildText &&
-           c.name.toLowerCase().replace(/[^a-z0-9-]/g, '').includes('fichas')
-    ) ?? null
+
+  const existing = guild.channels.cache.find(
+    c => c.type === ChannelType.GuildText &&
+         c.name.toLowerCase().replace(/[^a-z0-9-]/g, '').includes('fichas')
   );
+  if (existing) return existing;
+
+  // Tenta criar o canal automaticamente
+  try {
+    const staffRole = guild.roles.cache.find(r => r.name.toLowerCase() === 'staff');
+    const adminRole = guild.roles.cache.find(r => r.name.toLowerCase() === 'administrator');
+
+    const overwrites = [
+      { id: guild.roles.everyone.id, deny: [PermissionFlagsBits.SendMessages] },
+    ];
+    if (staffRole) overwrites.push({
+      id: staffRole.id,
+      allow: [PermissionFlagsBits.SendMessages, PermissionFlagsBits.ManageMessages],
+    });
+    if (adminRole) overwrites.push({
+      id: adminRole.id,
+      allow: [PermissionFlagsBits.SendMessages, PermissionFlagsBits.ManageMessages],
+    });
+
+    const ch = await guild.channels.create({
+      name: 'fichas-aprovadas',
+      type: ChannelType.GuildText,
+      topic: '📋 Fichas de inscrição aprovadas pela staff da Oblivion League',
+      permissionOverwrites: overwrites,
+    });
+    console.log(`[FICHA] Canal #fichas-aprovadas criado automaticamente: ${ch.id}`);
+    return ch;
+  } catch (e) {
+    console.error('[FICHA] Não foi possível criar #fichas-aprovadas:', e.message);
+    return null;
+  }
 }
 
 // ── Monta containers da ficha para exibição (aprovação/edição) ─────────────────
@@ -123,7 +153,7 @@ async function handleAprovarFicha(interaction) {
   }
 
   // Postar no canal #fichas-aprovadas
-  const fichasCh = await findFichasChannel(interaction.guild);
+  const fichasCh = await findOrCreateFichasChannel(interaction.guild);
   let fichasMsgId = null;
   let fichasChId  = null;
 
