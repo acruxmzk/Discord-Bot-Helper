@@ -213,11 +213,11 @@ async function handleFormOpen(interaction) {
       new ActionRowBuilder().addComponents(
         new TextInputBuilder()
           .setCustomId('line_manager')
-          .setLabel('Line  e  Manager')
+          .setLabel('Line  ·  Manager  ·  TikTok')
           .setStyle(TextInputStyle.Short)
           .setRequired(true)
-          .setPlaceholder('Line 1 | NomeDoManager')
-          .setMaxLength(60)
+          .setPlaceholder('Line 1 | NomeManager | @tiktokcla')
+          .setMaxLength(100)
       ),
       new ActionRowBuilder().addComponents(
         new TextInputBuilder()
@@ -264,6 +264,7 @@ async function handleFormInscricao(interaction) {
   const lineManagerParts = lineManagerRaw.split('|').map(s => s.trim());
   const line    = lineManagerParts[0] || '—';
   const manager = lineManagerParts[1] || '—';
+  const tiktok  = lineManagerParts[2] || '—';
 
   // ── Parse jogadores ───────────────────────────────────────────────────────
   function parsePlayer(raw) {
@@ -331,7 +332,8 @@ async function handleFormInscricao(interaction) {
         `> 🏷️  **Clã** · ${cla}\n` +
         `> 🔖  **TAG** · \`${tag}\`\n` +
         `> ⚔️  **Line** · ${line}\n` +
-        `> 👤  **Manager** · ${manager}`
+        `> 👤  **Manager** · ${manager}\n` +
+        `> 🎵  **TikTok** · ${tiktok}`
       )),
 
     new ContainerBuilder()
