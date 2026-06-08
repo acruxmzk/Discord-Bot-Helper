@@ -222,29 +222,29 @@ async function handleFormOpen(interaction) {
       new ActionRowBuilder().addComponents(
         new TextInputBuilder()
           .setCustomId('p1')
-          .setLabel('Jogador 1 — Titular  (Nick | UID)')
+          .setLabel('Jogador 1 — Titular  (Nick | UID | @TikTok)')
           .setStyle(TextInputStyle.Short)
           .setRequired(true)
-          .setPlaceholder('NickIngame | 1234567890')
-          .setMaxLength(80)
+          .setPlaceholder('NickIngame | 1234567890 | @tiktoknick')
+          .setMaxLength(100)
       ),
       new ActionRowBuilder().addComponents(
         new TextInputBuilder()
           .setCustomId('p2_p3')
-          .setLabel('Jogadores 2 e 3 — Titulares  (Nick | UID)')
+          .setLabel('Jogadores 2 e 3 — Titulares  (Nick | UID | @TikTok)')
           .setStyle(TextInputStyle.Paragraph)
           .setRequired(true)
-          .setPlaceholder('NickP2 | 1234567890\nNickP3 | 1234567890')
-          .setMaxLength(200)
+          .setPlaceholder('NickP2 | 1234567890 | @tiktokp2\nNickP3 | 1234567890 | @tiktokp3')
+          .setMaxLength(300)
       ),
       new ActionRowBuilder().addComponents(
         new TextInputBuilder()
           .setCustomId('p4_p5')
-          .setLabel('Jogadores 4 e 5 — Reservas  (Nick | UID)')
+          .setLabel('Jogadores 4 e 5 — Reservas  (Nick | UID | @TikTok)')
           .setStyle(TextInputStyle.Paragraph)
           .setRequired(false)
-          .setPlaceholder('NickP4 | 1234567890\nNickP5 | 1234567890  (opcional)')
-          .setMaxLength(200)
+          .setPlaceholder('NickP4 | 1234567890 | @tiktokp4\nNickP5 | 1234567890 | @tiktokp5  (opcional)')
+          .setMaxLength(300)
       ),
     );
   await interaction.showModal(modal);
@@ -273,7 +273,8 @@ async function handleFormInscricao(interaction) {
     const nome     = parts[0] || '—';
     const uidMatch = raw.match(/\d{6,20}/);
     const uid      = uidMatch ? uidMatch[0] : (parts[1] || '—');
-    return { nome, uid };
+    const tiktok   = parts[2] || '—';
+    return { nome, uid, tiktok };
   }
 
   const p1raw   = interaction.fields.getTextInputValue('p1');
@@ -303,8 +304,9 @@ async function handleFormInscricao(interaction) {
     const tipo = tipoLabel[i] ?? 'Titular';
     return (
       `**P${i + 1}  ·  ${tipo}**\n` +
-      `> \`Nick\`  ${p.nome}\n` +
-      `> \`UID \`  ${p.uid}`
+      `> \`Nick  \`  ${p.nome}\n` +
+      `> \`UID   \`  ${p.uid}\n` +
+      `> \`TikTok\`  ${p.tiktok}`
     );
   }).join('\n\n');
 
