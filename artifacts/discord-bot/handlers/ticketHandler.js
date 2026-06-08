@@ -232,7 +232,7 @@ async function handleFormOpen(interaction) {
       new ActionRowBuilder().addComponents(
         new TextInputBuilder()
           .setCustomId('p2_p3')
-          .setLabel('Jogadores 2 e 3 — Titulares  (Nick | UID | @TikTok)')
+          .setLabel('Titulares 2 e 3  (Nick | UID | @TikTok)')
           .setStyle(TextInputStyle.Paragraph)
           .setRequired(true)
           .setPlaceholder('NickP2 | 1234567890 | @tiktokp2\nNickP3 | 1234567890 | @tiktokp3')
@@ -241,7 +241,7 @@ async function handleFormOpen(interaction) {
       new ActionRowBuilder().addComponents(
         new TextInputBuilder()
           .setCustomId('p4_p5')
-          .setLabel('Jogadores 4 e 5 — Reservas  (Nick | UID | @TikTok)')
+          .setLabel('Reservas 4 e 5  (Nick | UID | @TikTok)')
           .setStyle(TextInputStyle.Paragraph)
           .setRequired(false)
           .setPlaceholder('NickP4 | 1234567890 | @tiktokp4\nNickP5 | 1234567890 | @tiktokp5  (opcional)')
