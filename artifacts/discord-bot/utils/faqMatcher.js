@@ -1,11 +1,11 @@
-// ─── Normalização de texto ────────────────────────────────────────────────────
+// ─── Normalização ─────────────────────────────────────────────────────────────
 
 function normalize(text) {
   return text
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')   // remove acentos
-    .replace(/[^a-z0-9\s]/g, ' ')      // remove pontuação
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -15,45 +15,56 @@ function tokenize(text) {
     'a', 'as', 'o', 'os', 'e', 'eh', 'de', 'do', 'da', 'dos', 'das',
     'no', 'na', 'nos', 'nas', 'em', 'um', 'uma', 'uns', 'umas', 'para',
     'por', 'com', 'que', 'se', 'ja', 'me', 'te', 'eu', 'tu', 'ele',
-    'ela', 'nos', 'vo', 'foi', 'ser', 'tem', 'ter', 'vai', 'vou',
-    'sao', 'era', 'ate', 'ao', 'aos', 'ou', 'pra', 'isso',
+    'ela', 'foi', 'ser', 'tem', 'ter', 'vai', 'vou', 'sao', 'era',
+    'ate', 'ao', 'aos', 'ou', 'pra', 'isso', 'so', 'ta', 'né', 'ne',
+    'ai', 'la', 'ca', 'bo', 'ok', 'oi', 'ola', 'boa',
   ]);
   return normalize(text).split(' ').filter(t => t.length > 1 && !STOP.has(t));
 }
 
-// ─── Base de perguntas e respostas ────────────────────────────────────────────
+// ─── Resposta aleatória (suporta string simples ou array) ─────────────────────
+
+function getResponse(entry) {
+  if (Array.isArray(entry.responses) && entry.responses.length > 0) {
+    return entry.responses[Math.floor(Math.random() * entry.responses.length)];
+  }
+  return entry.response ?? '—';
+}
+
+// ─── Base de perguntas ────────────────────────────────────────────────────────
 
 const FAQ_DB = [
-  // ── Cronograma ──────────────────────────────────────────────────────────────
+
+  // ══════════════════════════════════════════════════════════
+  // CRONOGRAMA
+  // ══════════════════════════════════════════════════════════
   {
     id: 'class1',
-    keywords: ['primeira', '1', '1a', 'primeiro', 'classificatoria', 'quando', 'data', 'dia', 'horario'],
-    response:
-      '📅 A **1ª Classificatória** acontecerá em **08/07/2026** às **20h00**.',
+    keywords: ['primeira', '1a', 'primeiro', 'classificatoria', 'quando', 'data', 'dia', 'horario', 'inicio'],
+    response: '📅 A **1ª Classificatória** acontecerá em **08/07/2026** às **20h00**.',
   },
   {
     id: 'class2',
-    keywords: ['segunda', '2', '2a', 'segundo', 'classificatoria', 'quando', 'data', 'dia', 'horario'],
-    response:
-      '📅 A **2ª Classificatória** acontecerá em **09/07/2026** às **20h00**.',
+    keywords: ['segunda', '2a', 'segundo', 'classificatoria', 'quando', 'data', 'dia', 'horario'],
+    response: '📅 A **2ª Classificatória** acontecerá em **09/07/2026** às **20h00**.',
   },
   {
-    id: 'final',
+    id: 'final_data',
     keywords: ['final', 'grande', 'quando', 'dia', 'data', 'horario', 'hora'],
-    response:
-      '🏆 A **Grande Final** acontecerá em **11/07/2026** às **22h00**.',
+    response: '🏆 A **Grande Final** acontecerá em **11/07/2026** às **22h00**.',
   },
   {
     id: 'duracao',
-    keywords: ['dias', 'dura', 'quantos', 'campeonato', 'duracao', 'periodo'],
-    response:
-      '📅 O campeonato será realizado nos dias **08**, **09** e **11 de julho de 2026**.',
+    keywords: ['dias', 'dura', 'quantos', 'campeonato', 'duracao', 'periodo', 'total'],
+    response: '📅 O campeonato será realizado nos dias **08**, **09** e **11 de julho de 2026**.',
   },
 
-  // ── Premiação ───────────────────────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════════
+  // PREMIAÇÃO
+  // ══════════════════════════════════════════════════════════
   {
     id: 'premiacao_geral',
-    keywords: ['premiacao', 'premio', 'premios', 'quanto', 'ganha', 'valor', 'dinheiro', 'reais', 'pagar', 'receber'],
+    keywords: ['premiacao', 'premio', 'premios', 'quanto', 'ganha', 'valor', 'dinheiro', 'reais', 'pagar', 'receber', 'total'],
     response:
       '💰 **Premiação Total: R$ 2.000,00**\n\n' +
       '🥇 1º Lugar — R$ 1.000,00\n' +
@@ -64,53 +75,53 @@ const FAQ_DB = [
   },
   {
     id: 'premiacao_mvp',
-    keywords: ['mvp', 'melhor', 'jogador', 'individual', 'premiacao'],
-    response:
-      '🏅 Sim! O **MVP** receberá **R$ 50,00**.',
+    keywords: ['mvp', 'melhor', 'jogador', 'individual', 'premiacao', 'cinquenta'],
+    response: '🏅 Sim! O **MVP** receberá **R$ 50,00** — prêmio individual pela melhor performance.',
   },
 
-  // ── Formato ─────────────────────────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════════
+  // FORMATO
+  // ══════════════════════════════════════════════════════════
   {
     id: 'modo',
-    keywords: ['modo', 'squad', 'tipo', 'formato', 'jogadores', 'equipe', 'time'],
-    response:
-      '👥 O campeonato será disputado no modo **Squad**.',
+    keywords: ['modo', 'squad', 'tipo', 'formato', 'jogadores', 'equipe', 'time', 'duo', 'solo'],
+    response: '👥 O campeonato será disputado no modo **Squad** (4 jogadores por equipe).',
   },
   {
     id: 'quedas',
-    keywords: ['quedas', 'quantas', 'rodadas', 'partidas', 'games', 'rounds'],
+    keywords: ['quedas', 'quantas', 'rodadas', 'partidas', 'games', 'rounds', 'queda'],
     response:
-      '🎯 **Classificatórias:** 3 quedas por dia.\n🏆 **Grande Final:** 4 quedas.',
+      '🎯 **Classificatórias:** 3 quedas por dia.\n' +
+      '🏆 **Grande Final:** 4 quedas.',
   },
   {
     id: 'mapas',
-    keywords: ['mapas', 'mapa', 'qual', 'onde', 'isolated', 'blackout'],
-    response:
-      '🗺️ Os mapas utilizados serão **Isolated** e **Blackout**.',
+    keywords: ['mapa', 'mapas', 'qual', 'onde', 'isolated', 'blackout', 'cenario'],
+    response: '🗺️ Os mapas utilizados serão **Isolated** e **Blackout**.',
   },
   {
     id: 'habilidades_formato',
-    keywords: ['habilidade', 'habilidades', 'skill', 'skills', 'ativa', 'ativas', 'usar', 'vai', 'tem'],
+    keywords: ['habilidade', 'habilidades', 'skill', 'skills', 'ativa', 'ativas', 'usar', 'final'],
     response:
-      '⚡ Sim, haverá quedas com habilidades na Final.\n\n' +
-      '🏆 **Grande Final:**\n' +
-      '> 2 quedas com habilidades\n' +
-      '> 2 quedas sem habilidades',
+      '⚡ Na **Grande Final** haverá quedas com e sem habilidades:\n\n' +
+      '> 2 quedas **com** habilidades\n' +
+      '> 2 quedas **sem** habilidades',
   },
 
-  // ── Classificação ───────────────────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════════
+  // CLASSIFICAÇÃO
+  // ══════════════════════════════════════════════════════════
   {
     id: 'classificacao',
-    keywords: ['classificacao', 'ranking', 'funciona', 'sistema', 'pontuacao', 'criterio', 'xt'],
+    keywords: ['classificacao', 'ranking', 'funciona', 'sistema', 'pontuacao', 'criterio', 'xt', 'calcular'],
     response:
-      '🎯 **Sistema XT**\n\n' +
-      '📊 O ranking é definido pela **soma de:**\n' +
+      '🎯 **Sistema XT** — o ranking é definido pela **soma de:**\n\n' +
       '> • Pontos de colocação\n' +
       '> • Eliminações (kills)',
   },
   {
     id: 'passa_final',
-    keywords: ['passa', 'passam', 'classificar', 'avancar', 'ir', 'final', 'quantas', 'equipes', 'top', 'vagas'],
+    keywords: ['passa', 'passam', 'classificar', 'avancar', 'final', 'quantas', 'equipes', 'top', 'vagas', 'avanca'],
     response:
       '📈 **Classificação para a Final:**\n\n' +
       '📅 **1ª Classificatória (08/07)** → Top 12 avançam\n' +
@@ -119,145 +130,180 @@ const FAQ_DB = [
   },
   {
     id: 'equipes_final',
-    keywords: ['quantas', 'equipes', 'times', 'final', 'total', '24'],
+    keywords: ['quantas', 'equipes', 'times', 'final', 'total', '24', 'participar'],
     response:
       '👥 A **Grande Final** contará com **24 equipes** classificadas.\n\n' +
       '> 12 da 1ª Classificatória\n' +
       '> 12 da 2ª Classificatória',
   },
 
-  // ── Inscrição / UID ─────────────────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════════
+  // INSCRIÇÃO
+  // ══════════════════════════════════════════════════════════
+  {
+    id: 'inscricao_como',
+    keywords: ['inscrever', 'inscricao', 'participar', 'entrar', 'como', 'ticket', 'abrir', 'cadastrar'],
+    response:
+      '🎫 Para se inscrever, abra um **ticket** no canal de inscrições e preencha a ficha com:\n\n' +
+      '> Clã · TAG · Line · Manager\n' +
+      '> Nick, UID e TikTok de cada jogador (P1 a P5)',
+  },
+  {
+    id: 'inscricao_prazo',
+    keywords: ['prazo', 'inscricao', 'inscricoes', 'encerra', 'fechar', 'limite', 'quando'],
+    response:
+      '📅 O prazo de inscrições é divulgado nos canais oficiais da **Oblivion League**.\n' +
+      '🎫 Fique de olho nos anúncios e inscreva sua equipe com antecedência.',
+  },
+  {
+    id: 'inscricao_jogadores',
+    keywords: ['jogadores', 'quantos', 'squad', 'equipe', 'membros', 'integrantes', 'pessoas', 'composicao'],
+    response:
+      '👥 Cada equipe deve ter **3 titulares + reservas** (modo Squad, 4 jogam).\n\n' +
+      '-# ℹ️ A inscrição aceita até 5 membros (3 titulares + 2 reservas).',
+  },
+  {
+    id: 'lines_cla',
+    keywords: ['lines', 'line', 'cla', 'quantas', 'mesmo', 'permitido', 'clan'],
+    response: '⚔️ É permitido até **3 lines** por clã.',
+  },
+
+  // ══════════════════════════════════════════════════════════
+  // UID / JOGADORES
+  // ══════════════════════════════════════════════════════════
   {
     id: 'uid_prazo',
-    keywords: ['uid', 'alterar', 'mudar', 'trocar', 'quando', 'prazo', 'ate', 'limite'],
-    response:
-      '📅 Alterações de UID são permitidas até **10/07/2026 às 23h59**.\nApós esse prazo, nenhuma alteração será aceita.',
+    keywords: ['uid', 'alterar', 'mudar', 'trocar', 'prazo', 'ate', 'limite', 'data'],
+    response: '📅 Alterações de UID são permitidas até **10/07/2026 às 23h59**.\nApós esse prazo, nenhuma alteração será aceita.',
   },
   {
     id: 'uid_outro',
-    keywords: ['uid', 'outro', 'diferente', 'jogar', 'usar', 'pode'],
-    response:
-      '🚫 Não. O UID utilizado deve ser o **mesmo informado na inscrição**.',
+    keywords: ['uid', 'outro', 'diferente', 'jogar', 'usar', 'diferente'],
+    response: '🚫 Não. O UID utilizado deve ser o **mesmo informado na inscrição**.',
   },
   {
     id: 'trocar_jogador',
-    keywords: ['trocar', 'substituir', 'jogador', 'membro', 'reserva', 'sub'],
+    keywords: ['trocar', 'substituir', 'jogador', 'membro', 'reserva', 'sub', 'substituto'],
+    response: '🎫 Entre em contato com a staff abrindo um **ticket** antes do prazo de alterações.',
+  },
+  {
+    id: 'jogador_nao_cadastrado',
+    keywords: ['nao', 'cadastrado', 'inscrito', 'fora', 'participar', 'jogar', 'substituto', 'diferente'],
     response:
-      '🎫 Entre em contato com a staff abrindo um **ticket**.',
+      '🚫 Jogadores **não inscritos** não podem participar.\n' +
+      '⚠️ Equipes com jogadores não cadastrados podem ser **desclassificadas**.\n' +
+      '🎫 Para substituições, abra um **ticket** antes do prazo.',
   },
 
-  // ── TAG ─────────────────────────────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════════
+  // TAG
+  // ══════════════════════════════════════════════════════════
   {
     id: 'tag',
-    keywords: ['tag', 'nome', 'apelido', 'nick', 'usar', 'obrigatorio', 'pode', 'jogar', 'sem'],
-    response:
-      '🏷️ **Sim, é obrigatório.**\nTodos os jogadores devem utilizar a **TAG da equipe** durante a competição.',
+    keywords: ['tag', 'nome', 'apelido', 'nick', 'usar', 'obrigatorio', 'jogar', 'sem'],
+    response: '🏷️ **Sim, é obrigatório.**\nTodos os jogadores devem utilizar a **TAG da equipe** durante a competição.',
   },
   {
     id: 'tag_diferente',
-    keywords: ['tag', 'diferente', 'outra', 'outro', 'membro', 'igual'],
-    response:
-      '🚫 Não. **Toda a equipe** deve utilizar a **mesma TAG**.',
+    keywords: ['tag', 'diferente', 'outra', 'outro', 'membro', 'igual', 'mesma'],
+    response: '🚫 Não. **Toda a equipe** deve utilizar a **mesma TAG**.',
   },
 
-  // ── Verificação ─────────────────────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════════
+  // VERIFICAÇÃO / VÍDEOS
+  // ══════════════════════════════════════════════════════════
   {
     id: 'gravar',
-    keywords: ['gravar', 'gravacao', 'video', 'videos', 'precisa', 'obrigatorio', 'devo'],
-    response:
-      '🎥 **Sim, é obrigatório.**\nTodos os jogadores devem enviar vídeos de verificação de todas as quedas.',
+    keywords: ['gravar', 'gravacao', 'video', 'videos', 'precisa', 'obrigatorio', 'devo', 'filmagem'],
+    response: '🎥 **Sim, é obrigatório.**\nTodos os jogadores devem gravar e enviar vídeos de verificação de **todas as quedas**.',
   },
   {
     id: 'qtd_videos',
-    keywords: ['quantos', 'videos', 'enviar', 'mandar', 'quantidade', 'total'],
+    keywords: ['quantos', 'videos', 'enviar', 'mandar', 'quantidade', 'total', 'numero'],
     response:
-      '🎞️ **4 vídeos** por jogador\n🎞️ **16 vídeos** por equipe (total)',
+      '🎞️ **4 vídeos** por jogador\n' +
+      '🎞️ **16 vídeos** por equipe (total)',
   },
   {
     id: 'prazo_videos',
-    keywords: ['prazo', 'ate', 'quando', 'enviar', 'videos', 'limite', 'horas', 'madrugada'],
-    response:
-      '⏰ Até às **02h00 da manhã** após o encerramento do campeonato.',
+    keywords: ['prazo', 'quando', 'enviar', 'videos', 'limite', 'horas', 'madrugada', 'envio'],
+    response: '⏰ Vídeos devem ser enviados até às **02h00 da manhã** após o encerramento do campeonato.',
   },
   {
     id: 'requisitos_video',
-    keywords: ['aparece', 'mostrar', 'requisitos', 'video', 'precisa', 'hud', 'notificacao', 'horario'],
+    keywords: ['aparece', 'mostrar', 'requisitos', 'video', 'precisa', 'hud', 'notificacao', 'horario', 'mostrar'],
     response:
       '📋 O vídeo deve mostrar:\n' +
       '> Barra de notificações\n' +
-      '> Horário\n' +
+      '> Horário visível\n' +
       '> Aplicativos abertos\n' +
-      '> HUD',
+      '> HUD do jogo',
   },
   {
     id: 'abrir_tela',
-    keywords: ['abrir', 'tela', 'screen', 'chamado', 'solicitado', 'staff', 'pode', 'pedir'],
-    response:
-      '🖥️ Sim. A staff pode solicitar **abertura de tela** antes, durante ou após o campeonato.',
+    keywords: ['abrir', 'tela', 'screen', 'chamado', 'solicitado', 'staff', 'compartilhar'],
+    response: '🖥️ Sim. A staff pode solicitar **abertura de tela** antes, durante ou após o campeonato.',
   },
   {
     id: 'recusar_verificacao',
-    keywords: ['recusar', 'recusa', 'negar', 'obrigado', 'obrigatorio', 'verificacao', 'consequencia'],
-    response:
-      '⚠️ **Sim, é obrigatório.**\nA recusa pode resultar em **desclassificação e banimento**.',
+    keywords: ['recusar', 'recusa', 'negar', 'obrigatorio', 'verificacao', 'consequencia', 'nao', 'quiser'],
+    response: '⚠️ **Sim, é obrigatório.**\nA recusa pode resultar em **desclassificação e banimento**.',
   },
 
-  // ── Discord ─────────────────────────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════════
+  // DISCORD
+  // ══════════════════════════════════════════════════════════
   {
     id: 'discord_obrigatorio',
     keywords: ['discord', 'entrar', 'obrigatorio', 'precisa', 'deve', 'estar', 'presente'],
-    response:
-      '✅ **Sim.**\nTodos os jogadores devem estar presentes no Discord **antes do início das partidas**.',
+    response: '✅ **Sim.**\nTodos os jogadores devem estar no Discord **antes do início das partidas** para conferência de lineup.',
   },
   {
     id: 'discord_call',
     keywords: ['call', 'voz', 'canal', 'discord', 'entrar', 'jogar', 'sem'],
-    response:
-      '⚠️ Não é recomendado.\nA staff pode usar o Discord para **verificações e conferência de lineup**.',
+    response: '⚠️ A staff usa o Discord para **verificações e conferência de lineup**.\nEstar no servidor é obrigatório.',
   },
 
-  // ── Proibições ───────────────────────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════════
+  // PROIBIÇÕES
+  // ══════════════════════════════════════════════════════════
   {
     id: 'emulador',
-    keywords: ['emulador', 'emuladores', 'pc', 'computador', 'pode'],
-    response:
-      '🚫 **Não.** Emuladores são **proibidos**.',
+    keywords: ['emulador', 'emuladores', 'pc', 'computador', 'bluestacks', 'ldplayer'],
+    response: '🚫 **Não.** Emuladores são **proibidos**. Apenas dispositivos móveis.',
   },
   {
     id: 'mobilador',
-    keywords: ['mobilador', 'mobiladores', 'mobile', 'controle', 'pode'],
-    response:
-      '🚫 **Não.** Mobiladores são **proibidos**.',
+    keywords: ['mobilador', 'mobiladores', 'controle', 'joystick', 'gamepad'],
+    response: '🚫 **Não.** Mobiladores são **proibidos**.',
   },
   {
     id: 'vpn',
-    keywords: ['vpn', 'rede', 'ping', 'pode', 'usar'],
-    response:
-      '🚫 **Não.** VPN é **proibido** e resulta em **expulsão imediata**.',
+    keywords: ['vpn', 'rede', 'ping', 'usar', 'tunel'],
+    response: '🚫 **Não.** VPN é **proibido** e resulta em **expulsão imediata**.',
   },
   {
     id: 'call_todos',
-    keywords: ['call', 'todos', 'geral', 'campeonato', 'pode'],
-    response:
-      '🚫 **Não.** Call para todos é **proibido** — resulta em **queda zerada**.',
+    keywords: ['call', 'todos', 'geral', 'campeonato', 'aberta', 'publica'],
+    response: '🚫 **Não.** Call aberta para todos é **proibida** — resulta em **queda zerada**.',
   },
   {
     id: 'atropelar',
-    keywords: ['atropelar', 'carro', 'veiculo', 'matar', 'pode'],
-    response:
-      '🚫 **Não.** Atropelar é **proibido** — resulta em **queda zerada**.',
+    keywords: ['atropelar', 'carro', 'veiculo', 'matar', 'bater'],
+    response: '🚫 **Não.** Atropelar é **proibido** — resulta em **queda zerada**.',
   },
   {
     id: 'hack_trapaça',
-    keywords: ['hack', 'hacker', 'trapaca', 'cheat', 'bug', 'exploit', 'aimbot', 'wallhack'],
-    response:
-      '⛔ **Não.** Qualquer programa de trapaça resulta em **banimento permanente**.',
+    keywords: ['hack', 'hacker', 'trapaca', 'cheat', 'bug', 'exploit', 'aimbot', 'wallhack', 'macro'],
+    response: '⛔ **Não.** Qualquer programa de trapaça resulta em **banimento permanente**.',
   },
 
-  // ── Armas ────────────────────────────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════════
+  // ARMAS
+  // ══════════════════════════════════════════════════════════
   {
     id: 'armas_proibidas',
-    keywords: ['armas', 'arma', 'proibidas', 'proibida', 'quais', 'usar', 'permitida', 'bazuca', 'sniper', 'thumper'],
+    keywords: ['armas', 'arma', 'proibidas', 'proibida', 'quais', 'permitida', 'bazuca', 'sniper', 'thumper', 'banidas'],
     response:
       '🔫 **Armas Proibidas:**\n\n' +
       '🚫 Munições especiais de sniper\n' +
@@ -270,10 +316,12 @@ const FAQ_DB = [
       '-# ℹ️ FHJ permitido apenas contra veículos.',
   },
 
-  // ── Habilidades ──────────────────────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════════
+  // HABILIDADES
+  // ══════════════════════════════════════════════════════════
   {
     id: 'habilidades_proibidas',
-    keywords: ['habilidades', 'habilidade', 'skills', 'skill', 'proibidas', 'proibida', 'quais', 'usar', 'ativas'],
+    keywords: ['habilidades', 'habilidade', 'skills', 'skill', 'proibidas', 'proibida', 'quais', 'banidas', 'lista'],
     response:
       '🚫 **Habilidades Proibidas:**\n\n' +
       '❌ Desperado\n' +
@@ -284,11 +332,20 @@ const FAQ_DB = [
       '❌ Todas as torretas\n' +
       '❌ Ataque de Dispersão',
   },
+  {
+    id: 'fhj',
+    keywords: ['fhj', 'lançador', 'lanca', 'rocket', 'missil', 'contra', 'veiculo'],
+    response:
+      '✅ O **FHJ** é **permitido**, mas **apenas contra veículos**.\n' +
+      '-# 🚫 Usar contra jogadores é proibido.',
+  },
 
-  // ── Veículos ─────────────────────────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════════
+  // VEÍCULOS
+  // ══════════════════════════════════════════════════════════
   {
     id: 'veiculos_proibidos',
-    keywords: ['veiculos', 'veiculo', 'carro', 'tanque', 'jato', 'moto', 'bike', 'proibidos', 'proibido', 'quais'],
+    keywords: ['veiculos', 'veiculo', 'carro', 'tanque', 'jato', 'moto', 'bike', 'proibidos', 'quais', 'voadora'],
     response:
       '🚗 **Veículos Proibidos:**\n\n' +
       '🚫 Caminhão\n' +
@@ -297,189 +354,289 @@ const FAQ_DB = [
       '🚫 Bike Voadora',
   },
 
-  // ── Penalidades ───────────────────────────────────────────────────────────────
-  {
-    id: 'pena_vpn',
-    keywords: ['pena', 'punicao', 'vpn', 'banido', 'expulso', 'consequencia'],
-    response:
-      '🌐 Uso de VPN → **Expulsão imediata**.',
-  },
-  {
-    id: 'pena_hack',
-    keywords: ['pena', 'punicao', 'hack', 'trapaca', 'banimento', 'consequencia'],
-    response:
-      '⛔ Uso de trapaças → **Banimento permanente**.',
-  },
-  {
-    id: 'pena_armas',
-    keywords: ['pena', 'punicao', 'armas', 'proibidas', 'consequencia', 'pontos', 'perder'],
-    response:
-      '➖ Uso de armas proibidas → **−50 pontos**.',
-  },
-  {
-    id: 'pena_habilidades',
-    keywords: ['pena', 'punicao', 'habilidades', 'proibidas', 'consequencia', 'pontos'],
-    response:
-      '➖ Uso de habilidades proibidas → **−50 pontos**.',
-  },
-  {
-    id: 'pena_atropelar',
-    keywords: ['pena', 'punicao', 'atropelar', 'carro', 'consequencia'],
-    response:
-      '❌ Atropelar → **Queda zerada**.',
-  },
-  {
-    id: 'pena_call',
-    keywords: ['pena', 'punicao', 'call', 'todos', 'geral', 'consequencia'],
-    response:
-      '❌ Call para todos → **Queda zerada**.',
-  },
-
-  // ── Pontuação ─────────────────────────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════════
+  // PONTUAÇÃO
+  // ══════════════════════════════════════════════════════════
   {
     id: 'pts_kill',
-    keywords: ['kill', 'kills', 'eliminacao', 'eliminacoes', 'vale', 'ponto', 'pontos', 'abate'],
+    keywords: ['kill', 'kills', 'eliminacao', 'eliminacoes', 'vale', 'ponto', 'pontos', 'abate', 'matar'],
     response:
       '🩸 **Valor da Kill:**\n\n' +
       '🎯 Sem habilidades → **+1 ponto**\n' +
       '⚡ Com habilidades → **+2 pontos**',
   },
   {
-    id: 'pts_1lugar',
-    keywords: ['primeiro', '1', '1o', 'lugar', 'vale', 'ponto', 'pontos', 'campeao'],
+    id: 'pts_colocacao',
+    keywords: ['colocacao', 'lugar', 'posicao', 'primeiro', 'segundo', 'terceiro', 'campeao', 'pontos', 'tabela'],
     response:
-      '🥇 **1º Lugar** = **15 pontos**.',
-  },
-  {
-    id: 'pts_2lugar',
-    keywords: ['segundo', '2', '2o', 'lugar', 'vale', 'ponto', 'pontos'],
-    response:
-      '🥈 **2º Lugar** = **13 pontos**.',
-  },
-  {
-    id: 'pts_3lugar',
-    keywords: ['terceiro', '3', '3o', 'lugar', 'vale', 'ponto', 'pontos'],
-    response:
-      '🥉 **3º Lugar** = **11 pontos**.',
+      '🏅 **Pontuação por Colocação:**\n\n' +
+      '🥇 1º — **15 pts**\n' +
+      '🥈 2º — **13 pts**\n' +
+      '🥉 3º — **11 pts**\n' +
+      '4º — 9 pts · 5º — 7 pts · 6º — 5 pts\n' +
+      '7º/8º — 3 pts · 9º–12º — 1 pt',
   },
 
-  // ── Inscrição ─────────────────────────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════════
+  // PENALIDADES
+  // ══════════════════════════════════════════════════════════
   {
-    id: 'inscricao_como',
-    keywords: ['inscrever', 'inscricao', 'participar', 'entrar', 'como', 'ticket', 'abrir'],
+    id: 'penalidades_geral',
+    keywords: ['pena', 'punicao', 'penalidade', 'consequencia', 'multa', 'desconto', 'punido'],
     response:
-      '🎫 Para se inscrever, abra um **ticket** no canal de inscrições.\n\n' +
-      'Preencha a ficha com:\n' +
-      '> Clã · TAG · Line · Manager\n' +
-      '> Nome e UID de cada jogador (P1 a P5)',
+      '⚖️ **Tabela de Penalidades:**\n\n' +
+      '🌐 VPN → Expulsão imediata\n' +
+      '⛔ Trapaça → Banimento permanente\n' +
+      '❌ Atropelar / Call geral → Queda zerada\n' +
+      '➖ Armas ou habilidades proibidas → **−50 pontos**\n' +
+      '⚠️ Briga no chat → Advertência / −50 pts',
   },
-  {
-    id: 'inscricao_prazo',
-    keywords: ['prazo', 'inscricao', 'inscricoes', 'encerra', 'fechar', 'limite', 'ate'],
-    response:
-      '📅 O prazo de inscrições é divulgado nos canais oficiais da **Oblivion League**.\n' +
-      '🎫 Fique de olho nos anúncios e inscreva sua equipe com antecedência.',
-  },
-  {
-    id: 'inscricao_jogadores',
-    keywords: ['jogadores', 'quantos', 'squad', 'equipe', 'membros', 'integrantes', 'pessoas'],
-    response:
-      '👥 Cada equipe é composta por **4 jogadores** (modo Squad).\n\n' +
-      '-# ℹ️ A inscrição deve conter o nome e UID de todos os membros.',
-  },
-
-  // ── Lines / Clã ───────────────────────────────────────────────────────────────
-  {
-    id: 'lines_cla',
-    keywords: ['lines', 'line', 'cla', 'quantas', 'equipes', 'mesmo', 'permitido'],
-    response:
-      '⚔️ É permitido até **3 lines** por clã.',
-  },
-  {
-    id: 'manager',
-    keywords: ['manager', 'lider', 'responsavel', 'quem', 'representa', 'capiao', 'capitao'],
-    response:
-      '👤 O **Manager** é o responsável pela equipe.\n' +
-      'Ele representa o clã e é o contato oficial com a staff durante o campeonato.',
-  },
-
-  // ── Configurações ─────────────────────────────────────────────────────────────
-  {
-    id: 'reanimacao',
-    keywords: ['reanimacao', 'reanimar', 'reviver', 'ressuscitar', 'automatica'],
-    response:
-      '❤️ **Sim.** O campeonato utiliza **Reanimação Automática**.',
-  },
-  {
-    id: 'municao',
-    keywords: ['municao', 'bala', 'infinita', 'acaba', 'falta'],
-    response:
-      '♾️ **Sim.** A configuração é **Munição Infinita**.',
-  },
-  {
-    id: 'fhj',
-    keywords: ['fhj', 'lançador', 'lanca', 'rocket', 'launcher', 'missil', 'contra', 'veiculo'],
-    response:
-      '✅ O **FHJ** é **permitido**, mas **apenas contra veículos**.\n' +
-      '-# 🚫 Usar contra jogadores é proibido.',
-  },
-
-  // ── Denúncias ─────────────────────────────────────────────────────────────────
-  {
-    id: 'denuncia',
-    keywords: ['denuncia', 'denunciar', 'reportar', 'trapaça', 'trapaca', 'hack', 'prova', 'reclamar'],
-    response:
-      '📸 Denúncias são aceitas **apenas mediante provas** (vídeo ou print).\n' +
-      '🎫 Abra um **ticket** e envie as evidências para a staff analisar.',
-  },
-
-  // ── Comportamento ─────────────────────────────────────────────────────────────
   {
     id: 'antidesportivo',
-    keywords: ['antidesportivo', 'comportamento', 'tóxico', 'toxico', 'xingar', 'ofender', 'briga'],
+    keywords: ['antidesportivo', 'comportamento', 'toxico', 'xingar', 'ofender', 'briga', 'chat', 'grosseria'],
     response:
-      '😡 Comportamento antidesportivo resulta em **expulsão do campeonato**.\n' +
+      '😡 Comportamento antidesportivo pode resultar em **expulsão**.\n\n' +
       '💬 Brigas no chat:\n' +
       '> 1ª ocorrência → ⚠️ Advertência\n' +
       '> 2ª ocorrência → ➖ **−50 pontos**',
   },
 
-  // ── Lineup ────────────────────────────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════════
+  // CONFIGURAÇÕES
+  // ══════════════════════════════════════════════════════════
+  {
+    id: 'reanimacao',
+    keywords: ['reanimacao', 'reanimar', 'reviver', 'ressuscitar', 'automatica'],
+    response: '❤️ **Sim.** O campeonato utiliza **Reanimação Automática**.',
+  },
+  {
+    id: 'municao',
+    keywords: ['municao', 'bala', 'infinita', 'acaba', 'falta', 'munição'],
+    response: '♾️ **Sim.** A configuração é **Munição Infinita**.',
+  },
+
+  // ══════════════════════════════════════════════════════════
+  // LINEUP / MANAGER
+  // ══════════════════════════════════════════════════════════
   {
     id: 'lineup',
     keywords: ['lineup', 'conferencia', 'conferir', 'checar', 'verificar', 'antes', 'inicio'],
     response:
       '🔍 A staff realizará a **conferência de lineup** antes do início das partidas.\n' +
-      '📲 Todos os jogadores devem estar presentes no Discord no momento da verificação.',
+      '📲 Todos os jogadores devem estar no Discord no momento da verificação.',
   },
   {
-    id: 'jogador_nao_cadastrado',
-    keywords: ['nao', 'cadastrado', 'inscrito', 'fora', 'participar', 'jogar', 'substituto'],
+    id: 'manager',
+    keywords: ['manager', 'lider', 'responsavel', 'quem', 'representa', 'capitao', 'contato'],
     response:
-      '🚫 Jogadores **não inscritos** não podem participar.\n' +
-      '⚠️ Equipes com jogadores não cadastrados podem ser **desclassificadas**.\n' +
-      '🎫 Para substituições, abra um **ticket** antes do prazo.',
+      '👤 O **Manager** é o responsável oficial pela equipe.\n' +
+      'Ele representa o clã e é o contato principal com a staff durante o campeonato.',
   },
 
-  // ── Ticket ────────────────────────────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════════
+  // DENÚNCIAS
+  // ══════════════════════════════════════════════════════════
+  {
+    id: 'denuncia',
+    keywords: ['denuncia', 'denunciar', 'reportar', 'trapaca', 'hack', 'prova', 'reclamar', 'acusar'],
+    response:
+      '📸 Denúncias são aceitas **apenas mediante provas** (vídeo ou print).\n' +
+      '🎫 Abra um **ticket** e envie as evidências para a staff analisar.',
+  },
+
+  // ══════════════════════════════════════════════════════════
+  // TICKET
+  // ══════════════════════════════════════════════════════════
   {
     id: 'ticket_duvida',
-    keywords: ['ticket', 'abrir', 'contato', 'staff', 'falar', 'ajuda', 'problema'],
+    keywords: ['ticket', 'abrir', 'contato', 'staff', 'falar', 'ajuda', 'problema', 'suporte'],
     response:
       '🎫 Para falar com a staff, abra um **ticket** no canal de inscrições.\n' +
       'Nossa equipe responderá o mais rápido possível.',
   },
+
+  // ══════════════════════════════════════════════════════════
+  // 😂 PERGUNTAS ENGRAÇADAS — RESPOSTAS ALEATÓRIAS
+  // ══════════════════════════════════════════════════════════
+  {
+    id: 'funny_ganhar',
+    funny: true,
+    keywords: ['vamos', 'vou', 'equipe', 'ganhar', 'campeao', 'trofeu', 'primeiro', 'ganh'],
+    responses: [
+      '🔮 A bola de cristal diz: **talvez**. Ou não. Depende se a internet aguenta.',
+      '📊 Probabilidade calculada: **muito baixa**. Mas coragem!',
+      '🙏 Depende de quantas velas sua avó acendeu hoje.',
+      '🎯 Sim! *(é o que todos os outros times também acham de si mesmos)*',
+      '💪 Claro! Agora vai treinar em vez de perguntar pro bot.',
+    ],
+  },
+  {
+    id: 'funny_trapacar',
+    funny: true,
+    keywords: ['trapacear', 'trapacar', 'wallhack', 'fraquinho', 'pouquinho', 'aimbot', 'cheat', 'pequeno'],
+    responses: [
+      '⛔ NÃO. Nem 1 pixel de wallhack.',
+      '🚫 "Fraquinho"... o banimento vai ser bem fortão, pode deixar.',
+      '🔍 A staff agradece por se entregar antes mesmo de trapacear.',
+      '😐 Interessante pergunta. A resposta é **BANIMENTO PERMANENTE**.',
+    ],
+  },
+  {
+    id: 'funny_net',
+    funny: true,
+    keywords: ['net', 'internet', 'cai', 'caiu', 'lag', 'ping', 'conexao', 'wifi', 'trava', 'lento'],
+    responses: [
+      '📡 Net caiu = problema seu. Recomenda-se usar cabo antes do campeonato.',
+      '🛜 "A net caiu" — o clássico álibi desde 2009.',
+      '😬 Infelizmente o campeonato não aceita desculpas em formato **.wifi**',
+      '💀 Skill issue de infra. Paga a conta de internet antes de entrar.',
+    ],
+  },
+  {
+    id: 'funny_crash',
+    funny: true,
+    keywords: ['jogo', 'caiu', 'crashou', 'bugou', 'travou', 'fechou', 'sozinho', 'crash'],
+    responses: [
+      '📱 Limpa o cache e volta logo. O campeonato não pausa.',
+      '😅 Que coincidência acontecer justamente na hora decisiva.',
+      '🔧 Tenta reinstalar o jogo. Ou o celular. Ou a vida.',
+      '🫠 O jogo sentiu o peso da responsabilidade e desmaiou igual ao time.',
+    ],
+  },
+  {
+    id: 'funny_arbitro',
+    funny: true,
+    keywords: ['arbitro', 'corrupto', 'injusto', 'roubado', 'parcial', 'favorito', 'combinado', 'injustico'],
+    responses: [
+      '😇 A staff é completamente imparcial. *(a staff aprovou essa mensagem)*',
+      '⚖️ Se perdeu, foi skill issue. O regulamento é claro.',
+      '🤐 Sem comentários. Se tiver provas, abre um ticket.',
+      '👀 Muito corajoso perguntar isso aqui com todo mundo lendo.',
+    ],
+  },
+  {
+    id: 'funny_segredo',
+    funny: true,
+    keywords: ['segredo', 'dica', 'macete', 'truque', 'melhorar', 'como', 'vencer', 'formula'],
+    responses: [
+      '🏆 Segredo: **treinar**. Mas como você está aqui perguntando pro bot...',
+      '🎯 1. Não use armas proibidas. 2. Não use VPN. 3. Reze. 4. Treine. 5. Repita.',
+      '💡 A melhor dica é parar de pedir dica pro bot e ir praticar.',
+      '🧠 Inteligência, comunicação e internet boa. Boa sorte com o último.',
+    ],
+  },
+  {
+    id: 'funny_pix',
+    funny: true,
+    keywords: ['pix', 'grana', 'dinheiro', 'rico', 'pagamento', 'cobrar', 'pagar', 'deposito'],
+    responses: [
+      '💸 O pix da OBL vai pro vencedor do campeonato. Vai lá ganhar.',
+      '🤑 Boa iniciativa. Tem R$2.000 em jogo — bora jogar.',
+      '🏦 Bot não tem conta bancária. Admiro o espírito empreendedor.',
+      '😂 A chave pix é: **vai.ganhar.o.campeonato**',
+    ],
+  },
+  {
+    id: 'funny_banheiro',
+    funny: true,
+    keywords: ['banheiro', 'pausa', 'pausar', 'parar', 'intervalo', 'xixi', 'necessidade'],
+    responses: [
+      '🚽 O campeonato não pausa. Se planeje com antecedência.',
+      '⏸️ Pausa não existe. Resolve antes das 20h ou aguenta.',
+      '🧻 Conselho: resolva isso antes do início. Depois é guerra.',
+      '😅 Questão filosófica importante. Resposta prática: não pode. Vai antes!',
+    ],
+  },
+  {
+    id: 'funny_acordo',
+    funny: true,
+    keywords: ['acordo', 'combinar', 'dividir', 'acertar', 'combinado', 'metade', 'dividir'],
+    responses: [
+      '😶 Não faço parte de acordos. A staff também não aprova.',
+      '🤝 Resultado combinado = desclassificação. Mas sinta-se à vontade.',
+      '👀 Aqui? Nesse canal? Com todo mundo lendo? **Muito corajoso.**',
+      '🚫 Isso é manipulação de resultado. Próxima dúvida.',
+    ],
+  },
+  {
+    id: 'funny_melhor_player',
+    funny: true,
+    keywords: ['melhor', 'player', 'pro', 'profissional', 'top', 'rank', 'quem', 'numero'],
+    responses: [
+      '🏆 O melhor jogador é aquele que não pergunta pro bot quem é o melhor.',
+      '🎮 Depende de quem for pegar o MVP no final.',
+      '😌 Com certeza não é quem está aqui no FAQ em vez de treinar.',
+      '👑 Boa pergunta. A resposta estará no ranking após o campeonato.',
+    ],
+  },
+  {
+    id: 'funny_bot',
+    funny: true,
+    keywords: ['bot', 'burro', 'inteligente', 'voce', 'robot', 'ia', 'artificial', 'funciona', 'otimo'],
+    responses: [
+      '🤖 Sou o bot mais inteligente desse servidor. Concorrência baixa.',
+      '💡 Funciono perfeitamente. Essa pergunta é que foi difícil.',
+      '😤 Burro? Eu soube responder essa pergunta. E você, soube fazer?',
+      '🧠 Processo linguagem natural, banco de dados e crise existencial ao mesmo tempo.',
+      '🤷 Me pergunta algo sobre o regulamento que eu brilho mais.',
+    ],
+  },
+  {
+    id: 'funny_rival',
+    funny: true,
+    keywords: ['rival', 'adversario', 'ruins', 'fracos', 'facil', 'fraco', 'lixo', 'faceis'],
+    responses: [
+      '😶 Com certeza. *É o que todos pensam antes de perder.*',
+      '📊 Pelo menos metade dos times vai perder. Inclusive o seu.',
+      '🎯 Se são ruins, vai ser fácil. Então para de perguntar e vai jogar.',
+      '😅 Toda derrota tem uma boa história de "eram bot mesmo".',
+    ],
+  },
+  {
+    id: 'funny_sorte',
+    funny: true,
+    keywords: ['sorte', 'azar', 'destino', 'rng', 'aleatorio', 'chance', 'deus', 'orar', 'reza'],
+    responses: [
+      '🍀 Sorte? No Battle Royale é tudo RNG. Menos as kills. Essas são skill.',
+      '🎲 O RNG vai estar ao seu lado... ou não. Trata bem o universo.',
+      '🙏 Recomendamos: rezar, pagar promessa e não usar VPN.',
+      '🌌 O cosmos é indiferente ao seu lobby de classificatória.',
+    ],
+  },
+  {
+    id: 'funny_bebado',
+    funny: true,
+    keywords: ['bebado', 'bebedo', 'alcool', 'cerveja', 'bebendo', 'beber', 'chapado', 'bebida'],
+    responses: [
+      '🍺 Não é proibido pelo regulamento. Resultado: problema seu.',
+      '😶 Alguns jogam melhor assim. Outros mandam a lineup pro time errado.',
+      '🎯 Boa sorte. Vai precisar de bastante.',
+      '🫡 O regulamento é silencioso sobre isso. O desempenho, não.',
+    ],
+  },
+  {
+    id: 'funny_perder',
+    funny: true,
+    keywords: ['perder', 'perdemos', 'perdeu', 'eliminado', 'caimos', 'eliminacao', 'caiu', 'morreu'],
+    responses: [
+      '😔 Acontece. Até os melhores times perdem... só que menos vezes.',
+      '💪 O que não mata fortalece. Até a próxima classificatória!',
+      '📈 Derrota hoje = aprendizado para o próximo. Vai treinar!',
+      '🎯 Faz parte. O importante é analisar o que errou e voltar mais forte.',
+      '🤝 Pelo menos vocês não usaram VPN. Isso já é alguma coisa.',
+    ],
+  },
 ];
 
-// ─── Função de matching ───────────────────────────────────────────────────────
+// ─── Matching ─────────────────────────────────────────────────────────────────
 
-const THRESHOLD = 0.30;
+const THRESHOLD = 0.28;
 
 function match(question) {
   const tokens = tokenize(question);
   if (tokens.length === 0) return null;
 
-  let best = null;
+  let best      = null;
   let bestScore = 0;
 
   for (const entry of FAQ_DB) {
@@ -493,7 +650,7 @@ function match(question) {
     const score = hits / Math.max(tokens.length, 1);
     if (score > bestScore) {
       bestScore = score;
-      best = entry;
+      best      = entry;
     }
   }
 
@@ -503,4 +660,4 @@ function match(question) {
   return null;
 }
 
-module.exports = { match, FAQ_DB, normalize };
+module.exports = { match, getResponse, FAQ_DB, normalize };
