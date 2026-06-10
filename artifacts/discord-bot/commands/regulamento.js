@@ -86,10 +86,9 @@ function buildRegulamentoContainers(cfg = {}) {
       .addTextDisplayComponents(txt('### 🏆  CLASSIFICATÓRIAS'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
-        '🥇  12 equipes avançam pela **1ª Classificatória**.\n\n' +
-        '🥈  12 equipes avançam pela **2ª Classificatória**.\n\n' +
-        '👥  **Total de classificados:**\n' +
-        '24 equipes.\n\n' +
+        '📋  **1ª Classificatória** — as 12 melhores equipes avançam para a Grande Final.\n\n' +
+        '📋  **2ª Classificatória** — as 12 melhores equipes avançam para a Grande Final.\n\n' +
+        '👥  **Total de classificados:** 24 equipes.\n\n' +
         '📖  As Classificatórias seguirão o modelo e regulamento oficial dos torneios XT.'
       ))
       .addSeparatorComponents(gap())
@@ -158,11 +157,11 @@ function buildRegulamentoContainers(cfg = {}) {
       .addTextDisplayComponents(txt('### 📜  REGRAS GERAIS'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
-        '🏷️  A TAG oficial da equipe é obrigatória, sendo tolerada a ausência em até **2 jogadores** por squad.\n' +
-        '📸  Denúncias aceitas apenas mediante provas\n' +
-        '👤  Jogadores não cadastrados não poderão participar\n' +
-        '🚫  Equipes com jogadores não inscritos podem ser desclassificadas\n' +
-        '⚔️  Permitido até **3 lines** por clã'
+        '🏷️  Todos os jogadores devem utilizar a TAG oficial da equipe. São permitidos até **2 jogadores sem TAG** por squad.\n' +
+        '📸  Denúncias serão analisadas somente mediante apresentação de provas\n' +
+        '👤  Somente jogadores devidamente inscritos estão autorizados a competir\n' +
+        '🚫  A escalação de jogadores não inscritos sujeita a equipe à desclassificação imediata\n' +
+        '⚔️  Cada clã poderá inscrever até **3 lines** no campeonato'
       ))
   );
 
@@ -241,14 +240,14 @@ function buildRegulamentoContainers(cfg = {}) {
       ))
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt(
-        '⚠️  Nenhum jogador ou equipe estará isento de verificação\n' +
-        '🖥️  A staff pode solicitar abertura de tela a qualquer momento\n' +
-        '-# 🚫  Recusa = desclassificação e possível banimento.'
+        '⚠️  A verificação é obrigatória para todos os jogadores e equipes, sem exceção.\n' +
+        '🖥️  A staff poderá solicitar compartilhamento de tela a qualquer momento.\n' +
+        '-# 🚫  A recusa implica desclassificação imediata e possível banimento.'
       ))
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt(
-        '📹  A organização poderá solicitar handcam e demais procedimentos de verificação a qualquer jogador, em qualquer fase do campeonato, sempre que julgar necessário para preservar a integridade competitiva da competição.\n\n' +
-        '⚠️  O não cumprimento das solicitações da organização poderá acarretar penalidades, desclassificação ou banimento da competição.'
+        '📹  A organização poderá solicitar handcam ou outros procedimentos de verificação a qualquer jogador, em qualquer fase do campeonato.\n\n' +
+        '⚠️  O descumprimento das solicitações da organização resultará em penalidades, desclassificação ou banimento da competição.'
       ))
   );
 
@@ -272,22 +271,22 @@ function buildRegulamentoContainers(cfg = {}) {
       .addTextDisplayComponents(txt('### ❗  PENALIDADES'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
-        '🔫  Armas ou habilidades proibidas\n' +
+        '🔫  Uso de arma ou habilidade proibida\n' +
         '> ➖  **−50 pontos**'
       ))
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt(
         '😡  Comportamento antidesportivo\n' +
-        '> 🚫  **Expulsão do campeonato**'
+        '> 🚫  **Expulsão do campeonato** (após análise da staff)'
       ))
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt(
         '🌐  Uso de VPN\n' +
-        '> 🚫  **Expulsão imediata**'
+        '> 🚫  **Expulsão imediata** (sem análise prévia)'
       ))
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt(
-        '💻  Uso de trapaças\n' +
+        '💻  Uso de programas de trapaça\n' +
         '> ⛔  **Banimento permanente**'
       ))
       .addSeparatorComponents(sep())
@@ -298,7 +297,12 @@ function buildRegulamentoContainers(cfg = {}) {
       ))
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt(
-        '🚗  Atropelar ou Call para Todos\n' +
+        '🚗  Atropelar\n' +
+        '> ❌  **Queda zerada**'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt(
+        '📢  Call para Todos\n' +
         '> ❌  **Queda zerada**'
       ))
   );
