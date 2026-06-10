@@ -21,8 +21,11 @@ const {
 const { handleFaqMessage } = require('./handlers/faqHandler');
 const { handleBanCheck }   = require('./handlers/banCheckHandler');
 
-const banDB   = require('./utils/banDB');
-const fichaDB = require('./utils/fichaDB');
+const banDB          = require('./utils/banDB');
+const fichaDB        = require('./utils/fichaDB');
+const regulamentoDB  = require('./utils/regulamentoDB');
+
+const { handleEditarRegDatasSubmit } = require('./commands/editarRegulamento');
 
 const token = process.env.TOKEN;
 if (!token) {
@@ -37,6 +40,8 @@ async function initDB() {
     console.log('[DB] Tabela banned_players pronta.');
     await fichaDB.init();
     console.log('[DB] Tabela inscricoes pronta.');
+    await regulamentoDB.init();
+    console.log('[DB] Tabela regulamento_config pronta.');
   } catch (err) {
     console.error('[DB] Erro ao inicializar tabelas:', err.message);
     process.exit(1);
@@ -77,7 +82,8 @@ const BUTTON_HANDLERS = {
 };
 
 const MODAL_HANDLERS = {
-  form_inscricao: handleFormInscricao,
+  form_inscricao:   handleFormInscricao,
+  editar_reg_datas: handleEditarRegDatasSubmit,
 };
 
 // Handlers por prefixo (customId contém ':')

@@ -8,9 +8,17 @@ const {
   ChannelType,
 } = require('discord.js');
 
+const regulamentoDB = require('../utils/regulamentoDB');
+
 const sep = () => new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true);
 const gap = () => new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large).setDivider(false);
 const txt = (s) => new TextDisplayBuilder().setContent(s);
+
+const DEFAULTS = {
+  data_class1: '20/07/2026',
+  data_class2: '21/07/2026',
+  data_final:  '23/07/2026',
+};
 
 const COLOR = {
   brand:     0xFFA500,
@@ -25,7 +33,11 @@ const COLOR = {
   score2:    0x7289DA,
 };
 
-function buildRegulamentoContainers() {
+function buildRegulamentoContainers(cfg = {}) {
+  const c1    = cfg.data_class1 ?? DEFAULTS.data_class1;
+  const c2    = cfg.data_class2 ?? DEFAULTS.data_class2;
+  const final = cfg.data_final  ?? DEFAULTS.data_final;
+
   const containers = [];
 
   // ── 1. Header ─────────────────────────────────────────────────────────────
@@ -36,8 +48,8 @@ function buildRegulamentoContainers() {
       .addTextDisplayComponents(txt('-# Regulamento Oficial · Temporada 2026'))
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt(
-        '📅  Classificatórias: **20/07** e **21/07/2026**\n' +
-        '🏆  Grande Final: **23/07/2026**\n' +
+        `📅  Classificatórias: **${c1.replace('/2026', '')}** e **${c2}**\n` +
+        `🏆  Grande Final: **${final}**\n` +
         '💰  Premiação Total: **R$ 2.000,00**\n' +
         '👥  Modo: **Squad**'
       ))
@@ -50,17 +62,17 @@ function buildRegulamentoContainers() {
       .addTextDisplayComponents(txt('### 📅  CRONOGRAMA'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
-        '🗓️  **20/07/2026 — 1ª Classificatória**\n' +
+        `🗓️  **${c1} — 1ª Classificatória**\n` +
         '> 🕒 20h00  ·  3 quedas'
       ))
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt(
-        '🗓️  **21/07/2026 — 2ª Classificatória**\n' +
+        `🗓️  **${c2} — 2ª Classificatória**\n` +
         '> 🕒 20h00  ·  3 quedas'
       ))
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt(
-        '🏆  **23/07/2026 — Grande Final**\n' +
+        `🏆  **${final} — Grande Final**\n` +
         '> 🕒 22h00  ·  4 quedas\n' +
         '> 2 no Isolated  ·  2 no Blackout\n' +
         '> 2 com habilidades  ·  2 sem habilidades'
@@ -88,7 +100,7 @@ function buildRegulamentoContainers() {
   containers.push(
     new ContainerBuilder()
       .setAccentColor(COLOR.brand)
-      .addTextDisplayComponents(txt('### 🏆  GRANDE FINAL — 23/07/2026 às 22h00'))
+      .addTextDisplayComponents(txt(`### 🏆  GRANDE FINAL — ${final} às 22h00`))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt('👥  **24 equipes classificadas**'))
       .addSeparatorComponents(sep())
@@ -360,7 +372,11 @@ module.exports = {
     await interaction.deferReply({ ephemeral: true });
 
     const targetChannel = interaction.options.getChannel('canal') ?? interaction.channel;
-    const containers = buildRegulamentoContainers();
+
+    const allRows = await regulamentoDB.getAll();
+    const cfg = Object.fromEntries(Object.entries(allRows).map(([k, row]) => [k, row.valor]));
+
+    const containers = buildRegulamentoContainers(cfg);
 
     for (const container of containers) {
       await targetChannel.send({
