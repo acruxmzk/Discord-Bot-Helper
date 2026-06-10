@@ -76,17 +76,11 @@ const MODAL_HANDLERS = {
 
 // Handlers por prefixo (customId contém ':')
 function resolveButtonHandler(customId) {
-  if (BUTTON_HANDLERS[customId]) return BUTTON_HANDLERS[customId];
-  if (customId.startsWith('ficha_aprovar:'))  return handleAprovarFicha;
-  if (customId.startsWith('ficha_rejeitar:')) return handleRejeitarFicha;
-  return null;
+  return BUTTON_HANDLERS[customId] ?? null;
 }
 
 function resolveModalHandler(customId) {
-  if (MODAL_HANDLERS[customId]) return MODAL_HANDLERS[customId];
-  if (customId.startsWith('ficha_rejeicao_submit:')) return handleFichaRejeicaoSubmit;
-  if (customId.startsWith('ficha_editar_submit:'))   return handleFichaEditarSubmit;
-  return null;
+  return MODAL_HANDLERS[customId] ?? null;
 }
 
 // ── Autocomplete ──────────────────────────────────────────────────────────────
