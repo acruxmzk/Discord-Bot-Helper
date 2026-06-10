@@ -158,8 +158,7 @@ function buildRegulamentoContainers(cfg = {}) {
       .addTextDisplayComponents(txt('### 📜  REGRAS GERAIS'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
-        '🏷️  Todos os jogadores deverão utilizar a mesma **TAG** da equipe\n' +
-        '🏷️  Será permitido até **2 jogadores sem TAG** por equipe\n' +
+        '🏷️  As equipes deverão utilizar a mesma TAG oficial. Será permitida a participação de até **2 jogadores sem TAG** por squad.\n' +
         '📸  Denúncias aceitas apenas mediante provas\n' +
         '👤  Jogadores não cadastrados não poderão participar\n' +
         '🚫  Equipes com jogadores não inscritos podem ser desclassificadas\n' +
@@ -260,9 +259,9 @@ function buildRegulamentoContainers(cfg = {}) {
       .addTextDisplayComponents(txt('### 🎙️  DISCORD'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
-        '👥  Todos os jogadores devem estar presentes no Discord antes do início\n' +
-        '🔍  Presença usada para conferência de lineup e verificações\n' +
-        '⚠️  Equipes ausentes podem sofrer punições ou desclassificação'
+        '👥  Todos os jogadores deverão permanecer no Discord oficial da competição durante toda a realização do campeonato.\n\n' +
+        '🔍  A organização poderá realizar conferências de lineup, verificações e procedimentos administrativos a qualquer momento.\n\n' +
+        '⚠️  A ausência de jogadores no Discord oficial poderá resultar em advertências, penalidades ou desclassificação da equipe.'
       ))
   );
 
