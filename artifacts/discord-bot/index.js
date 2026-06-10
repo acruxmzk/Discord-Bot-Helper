@@ -3,20 +3,10 @@ const fs   = require('fs');
 const path = require('path');
 
 const {
-  handleTicketOpen,
-  handleFormOpen,
-  handleFormInscricao,
   handleTicketClose,
   handleTicketCloseConfirm,
   handleTicketCloseCancel,
 } = require('./handlers/ticketHandler');
-
-const {
-  handleAprovarFicha,
-  handleRejeitarFicha,
-  handleFichaRejeicaoSubmit,
-  handleFichaEditarSubmit,
-} = require('./handlers/fichaHandler');
 
 const { handleFaqMessage } = require('./handlers/faqHandler');
 const { handleBanCheck }   = require('./handlers/banCheckHandler');
@@ -25,7 +15,7 @@ const banDB          = require('./utils/banDB');
 const fichaDB        = require('./utils/fichaDB');
 const regulamentoDB  = require('./utils/regulamentoDB');
 
-const { handleEditarRegDatasSubmit } = require('./commands/editarRegulamento');
+const { handleEditarRegDatasSubmit, handleEditarRegLinkSubmit } = require('./commands/editarRegulamento');
 
 const token = process.env.TOKEN;
 if (!token) {
@@ -74,16 +64,14 @@ client.once('ready', () => {
 
 // ── Roteadores ────────────────────────────────────────────────────────────────
 const BUTTON_HANDLERS = {
-  ticket_open:          handleTicketOpen,
-  form_open:            handleFormOpen,
   ticket_close:         handleTicketClose,
   ticket_close_confirm: handleTicketCloseConfirm,
   ticket_close_cancel:  handleTicketCloseCancel,
 };
 
 const MODAL_HANDLERS = {
-  form_inscricao:   handleFormInscricao,
   editar_reg_datas: handleEditarRegDatasSubmit,
+  editar_reg_link:  handleEditarRegLinkSubmit,
 };
 
 // Handlers por prefixo (customId contém ':')

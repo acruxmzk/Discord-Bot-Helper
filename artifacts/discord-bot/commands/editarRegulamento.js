@@ -13,6 +13,7 @@ const DEFAULTS = {
   data_class1: '20/07/2026',
   data_class2: '21/07/2026',
   data_final:  '23/07/2026',
+  link_forms:  '',
 };
 
 module.exports = {
@@ -24,6 +25,11 @@ module.exports = {
       sub
         .setName('datas')
         .setDescription('Atualiza as datas do campeonato via formulário')
+    )
+    .addSubcommand(sub =>
+      sub
+        .setName('link')
+        .setDescription('Define ou atualiza o link do Google Forms de inscrição')
     )
     .addSubcommand(sub =>
       sub
@@ -64,6 +70,31 @@ module.exports = {
       return;
     }
 
+    if (sub === 'link') {
+      const all = await regulamentoDB.getAll();
+      const current = all['link_forms']?.valor ?? '';
+
+      const modal = new ModalBuilder()
+        .setCustomId('editar_reg_link')
+        .setTitle('🔗 Link do Formulário de Inscrição');
+
+      modal.addComponents(
+        new ActionRowBuilder().addComponents(
+          new TextInputBuilder()
+            .setCustomId('link_forms')
+            .setLabel('URL do Google Forms')
+            .setStyle(TextInputStyle.Short)
+            .setValue(current)
+            .setPlaceholder('https://docs.google.com/forms/...')
+            .setRequired(true)
+            .setMaxLength(500)
+        )
+      );
+
+      await interaction.showModal(modal);
+      return;
+    }
+
     if (sub === 'ver') {
       const all = await regulamentoDB.getAll();
       const entries = Object.entries(all);
@@ -91,6 +122,21 @@ module.exports = {
   },
 };
 
+async function handleEditarRegLinkSubmit(interaction) {
+  const url   = interaction.fields.getTextInputValue('link_forms').trim();
+  const autor = interaction.user.tag;
+
+  await regulamentoDB.set('link_forms', url, autor);
+
+  await interaction.reply({
+    content:
+      `✅ **Link do formulário atualizado!**\n\n` +
+      `🔗 ${url}\n\n` +
+      `-# Use \`/regulamento\` para postar o regulamento com o botão de inscrição.`,
+    ephemeral: true,
+  });
+}
+
 async function handleEditarRegDatasSubmit(interaction) {
   const class1 = interaction.fields.getTextInputValue('data_class1').trim();
   const class2 = interaction.fields.getTextInputValue('data_class2').trim();
@@ -113,3 +159,4 @@ async function handleEditarRegDatasSubmit(interaction) {
 }
 
 module.exports.handleEditarRegDatasSubmit = handleEditarRegDatasSubmit;
+module.exports.handleEditarRegLinkSubmit  = handleEditarRegLinkSubmit;

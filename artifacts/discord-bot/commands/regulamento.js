@@ -4,6 +4,9 @@ const {
   SeparatorBuilder,
   TextDisplayBuilder,
   SeparatorSpacingSize,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
   MessageFlags,
   ChannelType,
 } = require('discord.js');
@@ -18,6 +21,7 @@ const DEFAULTS = {
   data_class1: '20/07/2026',
   data_class2: '21/07/2026',
   data_final:  '23/07/2026',
+  link_forms:  '',
 };
 
 const COLOR = {
@@ -34,9 +38,10 @@ const COLOR = {
 };
 
 function buildRegulamentoContainers(cfg = {}) {
-  const c1    = cfg.data_class1 ?? DEFAULTS.data_class1;
-  const c2    = cfg.data_class2 ?? DEFAULTS.data_class2;
-  const final = cfg.data_final  ?? DEFAULTS.data_final;
+  const c1        = cfg.data_class1 ?? DEFAULTS.data_class1;
+  const c2        = cfg.data_class2 ?? DEFAULTS.data_class2;
+  const final     = cfg.data_final  ?? DEFAULTS.data_final;
+  const linkForms = cfg.link_forms  ?? DEFAULTS.link_forms;
 
   const containers = [];
 
@@ -55,7 +60,50 @@ function buildRegulamentoContainers(cfg = {}) {
       ))
   );
 
-  // ── 2. Cronograma ─────────────────────────────────────────────────────────
+  // ── 2. Inscrições ─────────────────────────────────────────────────────────
+  const inscricaoContainer = new ContainerBuilder()
+    .setAccentColor(COLOR.rules)
+    .addTextDisplayComponents(txt('### 📝  INSCRIÇÕES'))
+    .addSeparatorComponents(gap())
+    .addTextDisplayComponents(txt(
+      '🏆  As inscrições da Oblivion League serão realizadas exclusivamente através do formulário oficial.\n\n' +
+      '📋  Antes de se inscrever, certifique-se de que todas as informações da equipe estejam corretas.\n\n' +
+      '⚠️  Informações incorretas poderão resultar em recusa da inscrição ou penalidades durante a competição.'
+    ))
+    .addSeparatorComponents(sep());
+
+  if (linkForms) {
+    inscricaoContainer.addActionRowComponents(
+      new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setLabel('📋  Acessar Formulário Oficial')
+          .setStyle(ButtonStyle.Link)
+          .setURL(linkForms)
+      )
+    );
+  } else {
+    inscricaoContainer.addTextDisplayComponents(txt(
+      '🔗  *Link do formulário será disponibilizado em breve. Acompanhe os canais oficiais.*'
+    ));
+  }
+
+  inscricaoContainer
+    .addSeparatorComponents(sep())
+    .addTextDisplayComponents(txt('### 📢  REQUISITOS OBRIGATÓRIOS'))
+    .addSeparatorComponents(gap())
+    .addTextDisplayComponents(txt(
+      '📸  Seguir o Instagram oficial da organização.\n' +
+      '🎥  Seguir o TikTok oficial do Will.fps.\n\n' +
+      '⚠️  O descumprimento dos requisitos poderá resultar no cancelamento da inscrição.'
+    ))
+    .addSeparatorComponents(sep())
+    .addTextDisplayComponents(txt(
+      '✅  Após preencher o formulário, aguarde o contato da organização e acompanhe os canais oficiais para atualizações.'
+    ));
+
+  containers.push(inscricaoContainer);
+
+  // ── 3. Cronograma ─────────────────────────────────────────────────────────
   containers.push(
     new ContainerBuilder()
       .setAccentColor(COLOR.schedule)

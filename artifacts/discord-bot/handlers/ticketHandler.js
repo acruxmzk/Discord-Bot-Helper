@@ -476,9 +476,6 @@ async function handleTicketCloseCancel(interaction) {
 }
 
 module.exports = {
-  handleTicketOpen,
-  handleFormOpen,
-  handleFormInscricao,
   handleTicketClose,
   handleTicketCloseConfirm,
   handleTicketCloseCancel,
