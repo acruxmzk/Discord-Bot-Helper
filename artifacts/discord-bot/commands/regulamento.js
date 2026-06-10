@@ -36,8 +36,8 @@ function buildRegulamentoContainers() {
       .addTextDisplayComponents(txt('-# Regulamento Oficial · Temporada 2026'))
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt(
-        '📅  Classificatórias: **08/07** e **09/07/2026**\n' +
-        '🏆  Grande Final: **11/07/2026**\n' +
+        '📅  Classificatórias: **20/07** e **21/07/2026**\n' +
+        '🏆  Grande Final: **23/07/2026**\n' +
         '💰  Premiação Total: **R$ 2.000,00**\n' +
         '👥  Modo: **Squad**'
       ))
@@ -50,17 +50,17 @@ function buildRegulamentoContainers() {
       .addTextDisplayComponents(txt('### 📅  CRONOGRAMA'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
-        '🗓️  **08/07/2026 — 1ª Classificatória**\n' +
+        '🗓️  **20/07/2026 — 1ª Classificatória**\n' +
         '> 🕒 20h00  ·  3 quedas'
       ))
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt(
-        '🗓️  **09/07/2026 — 2ª Classificatória**\n' +
+        '🗓️  **21/07/2026 — 2ª Classificatória**\n' +
         '> 🕒 20h00  ·  3 quedas'
       ))
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt(
-        '🏆  **11/07/2026 — Grande Final**\n' +
+        '🏆  **23/07/2026 — Grande Final**\n' +
         '> 🕒 22h00  ·  4 quedas\n' +
         '> 2 no Isolated  ·  2 no Blackout\n' +
         '> 2 com habilidades  ·  2 sem habilidades'
@@ -88,7 +88,7 @@ function buildRegulamentoContainers() {
   containers.push(
     new ContainerBuilder()
       .setAccentColor(COLOR.brand)
-      .addTextDisplayComponents(txt('### 🏆  GRANDE FINAL — 11/07/2026 às 22h00'))
+      .addTextDisplayComponents(txt('### 🏆  GRANDE FINAL — 23/07/2026 às 22h00'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt('👥  **24 equipes classificadas**'))
       .addSeparatorComponents(sep())
@@ -147,19 +147,11 @@ function buildRegulamentoContainers() {
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
         '🏷️  Todos os jogadores deverão utilizar a mesma **TAG** da equipe\n' +
+        '🏷️  Será permitido até **2 jogadores sem TAG** por equipe\n' +
         '📸  Denúncias aceitas apenas mediante provas\n' +
         '👤  Jogadores não cadastrados não poderão participar\n' +
         '🚫  Equipes com jogadores não inscritos podem ser desclassificadas\n' +
         '⚔️  Permitido até **3 lines** por clã'
-      ))
-      .addSeparatorComponents(sep())
-      .addTextDisplayComponents(txt('### 📌  REGRAS COMPLEMENTARES'))
-      .addSeparatorComponents(gap())
-      .addTextDisplayComponents(txt(
-        '🆔  Alterações de UID permitidas até **1 dia antes** da Grande Final\n' +
-        '📅  Prazo final: **10/07/2026 às 23h59**\n' +
-        '🚫  Após esse prazo nenhuma alteração será aceita\n' +
-        '📨  Solicitações via canais oficiais da organização'
       ))
   );
 
@@ -241,6 +233,11 @@ function buildRegulamentoContainers() {
         '⚠️  Nenhum jogador ou equipe estará isento de verificação\n' +
         '🖥️  A staff pode solicitar abertura de tela a qualquer momento\n' +
         '-# 🚫  Recusa = desclassificação e possível banimento.'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt(
+        '📹  A organização poderá solicitar handcam e demais procedimentos de verificação a qualquer jogador, em qualquer fase do campeonato, sempre que julgar necessário para preservar a integridade competitiva da competição.\n\n' +
+        '⚠️  O não cumprimento das solicitações da organização poderá acarretar penalidades, desclassificação ou banimento da competição.'
       ))
   );
 
