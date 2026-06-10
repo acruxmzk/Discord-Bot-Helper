@@ -158,7 +158,7 @@ function buildRegulamentoContainers(cfg = {}) {
       .addTextDisplayComponents(txt('### 📜  REGRAS GERAIS'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
-        '🏷️  As equipes deverão utilizar a mesma TAG oficial. Será permitida a participação de até **2 jogadores sem TAG** por squad.\n' +
+        '🏷️  A TAG oficial da equipe é obrigatória, sendo tolerada a ausência em até **2 jogadores** por squad.\n' +
         '📸  Denúncias aceitas apenas mediante provas\n' +
         '👤  Jogadores não cadastrados não poderão participar\n' +
         '🚫  Equipes com jogadores não inscritos podem ser desclassificadas\n' +
