@@ -1,0 +1,108 @@
+Crie a estrutura completa de um servidor Discord para uma organização competitiva de FPS chamada OBLIVION.
+
+A identidade da organização é inspirada em megacorporações cyberpunk japonesas, com uma estética séria, minimalista, militar e tecnológica. O servidor deve parecer um quartel-general corporativo de elite, evitando canais desnecessários ou aparência de comunidade casual.
+
+Estilo Visual
+
+Utilize exatamente este padrão para as categorias:
+
+◢◤ ＯＢＬＩＶＩＯＮ ◥◣
+◢◤ ＡＲＡＳＡＫＡ ◥◣
+◢◤ ＫＵＲＯＳＡＫＡ ◥◣
+
+Utilize caracteres Unicode elegantes, espaços invisíveis quando necessário e uma identidade visual limpa e premium.
+
+Evite:
+
+* excesso de emojis
+* estética infantil
+* canais desnecessários
+* poluição visual
+
+A sensação deve ser de:
+
+* sigilo
+* elite
+* organização militar
+* corporação cyberpunk japonesa
+* alto desempenho competitivo
+
+Estrutura do Servidor
+
+◢◤ ＯＢＬＩＶＩＯＮ ◥◣
+
+Canal:
+
+* 🔊・reunião
+
+Permissões:
+
+* Categoria visível para todos os membros.
+* O cargo @everyone deve conseguir visualizar esta categoria.
+* Explique detalhadamente quais permissões devem ser ativadas ou desativadas.
+
+◢◤ ＡＲＡＳＡＫＡ ◥◣
+
+Line principal da organização.
+
+Canais:
+
+* 🧠・estratégia
+* 🎥・clips
+* 📊・tabela-arasaka
+* 🔊・arasaka
+
+Permissões:
+
+* Apenas Arasaka Player e Manager podem visualizar e acessar.
+* Kurosaka Player não pode visualizar esta categoria.
+* @everyone não pode visualizar esta categoria.
+
+◢◤ ＫＵＲＯＳＡＫＡ ◥◣
+
+Segunda line oficial da organização.
+
+Canais:
+
+* 🧠・estratégia
+* 🎥・clips
+* 📊・tabela-kurosaka
+* 🔊・kurosaka
+
+Permissões:
+
+* Apenas Kurosaka Player e Manager podem visualizar e acessar.
+* Arasaka Player não pode visualizar esta categoria.
+* @everyone não pode visualizar esta categoria.
+
+Cargos
+
+👑 Owner
+
+* Controle total do servidor.
+
+🎖 Manager
+
+* Acesso completo ao HQ, Arasaka e Kurosaka.
+
+🔴 Arasaka Player
+
+* Acesso ao HQ e à categoria Arasaka.
+
+⚫ Kurosaka Player
+
+* Acesso ao HQ e à categoria Kurosaka.
+
+Entrega Esperada
+
+Explique passo a passo:
+
+1. Como criar cada cargo.
+2. Como configurar cada categoria.
+3. Como configurar as permissões corretamente.
+4. Como impedir que Arasaka veja Kurosaka.
+5. Como impedir que Kurosaka veja Arasaka.
+6. Como permitir que Manager veja ambas.
+7. Como deixar o servidor limpo, profissional e fácil de administrar.
+
+O resultado final deve parecer um sistema operacional interno da OBLIVION e não um servidor comum de Discord.
