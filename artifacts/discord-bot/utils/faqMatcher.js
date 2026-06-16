@@ -530,6 +530,33 @@ const FAQ_DB = [
   },
 
   // ══════════════════════════════════════════════════════════
+  // OBSERVAÇÕES COMPLEMENTARES
+  // ══════════════════════════════════════════════════════════
+  {
+    id: 'obs_prints_perfis',
+    keywords: ['print', 'prints', 'perfil', 'perfis', 'seguindo', 'seguir', 'obrigatorio', 'enviar', 'mandar', 'provar', 'comprovante'],
+    response:
+      '📸 **Não é obrigatório** enviar prints durante o campeonato.\n\n' +
+      '🔎 A verificação dos perfis será feita **ao término da competição**.\n' +
+      '⚠️ Se nenhum integrante da equipe estiver seguindo os perfis obrigatórios, **a premiação será retida**.',
+  },
+  {
+    id: 'obs_nick_discord',
+    keywords: ['nick', 'nome', 'discord', 'jogo', 'igual', 'mesmo', 'identico', 'diferente', 'mudar', 'trocar'],
+    response:
+      '🏷️ **Sim, é obrigatório.**\n\n' +
+      'O nick no Discord deve ser **idêntico** ao nick utilizado no jogo.\n' +
+      '-# 👤 A manager é responsável por garantir isso em toda a equipe.',
+  },
+  {
+    id: 'obs_discord_manager',
+    keywords: ['manager', 'capita', 'responsavel', 'discord', 'entrar', 'organizar', 'squad', 'equipe', 'servidor', 'permanencia'],
+    response:
+      '👤 A **manager** é responsável pela entrada, organização e permanência de toda a equipe no Discord oficial da Oblivion League.\n\n' +
+      '⚠️ Todos os integrantes do squad devem estar presentes no servidor durante o campeonato.',
+  },
+
+  // ══════════════════════════════════════════════════════════
   // TICKET
   // ══════════════════════════════════════════════════════════
   {
