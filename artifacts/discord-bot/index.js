@@ -8,6 +8,8 @@ const {
   handleTicketCloseCancel,
 } = require('./handlers/ticketHandler');
 
+const { handleSupportOpen } = require('./handlers/supportHandler');
+
 const { handleFaqMessage } = require('./handlers/faqHandler');
 const { handleBanCheck }   = require('./handlers/banCheckHandler');
 
@@ -64,6 +66,7 @@ client.once('ready', () => {
 
 // ── Roteadores ────────────────────────────────────────────────────────────────
 const BUTTON_HANDLERS = {
+  support_open:         handleSupportOpen,
   ticket_close:         handleTicketClose,
   ticket_close_confirm: handleTicketCloseConfirm,
   ticket_close_cancel:  handleTicketCloseCancel,
