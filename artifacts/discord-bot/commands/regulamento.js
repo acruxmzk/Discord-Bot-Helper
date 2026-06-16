@@ -367,19 +367,13 @@ function buildRegulamentoContainers(cfg = {}) {
       .addTextDisplayComponents(txt('### 📌  OBSERVAÇÕES COMPLEMENTARES'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
-        '**1.**  Não será exigido envio de prints comprovando que os jogadores estão seguindo perfis obrigatórios durante o campeonato. A verificação será realizada ao final da competição e, caso nenhum player da line esteja seguindo os perfis obrigatórios, a premiação será retida.'
+        '**1.**  O envio de prints durante o campeonato não será exigido. A verificação do seguimento dos perfis obrigatórios ocorrerá ao término da competição. Se nenhum integrante da equipe estiver em conformidade, a premiação será retida.\n\n' +
+        '**2.**  Todos os integrantes do squad devem estar presentes no Discord oficial da Oblivion League. A capitã é responsável pela entrada, organização e permanência da equipe no servidor.\n\n' +
+        '**3.**  Todas as demais regras permanecem vigentes e devem ser cumpridas integralmente.'
       ))
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt(
-        '**2.**  É obrigatório que todo o squad esteja presente no Discord oficial da Oblivion League. A manager é responsável pela entrada, organização e permanência da equipe.'
-      ))
-      .addSeparatorComponents(sep())
-      .addTextDisplayComponents(txt(
-        '**3.**  Todas as demais regras já existentes permanecem válidas e devem ser cumpridas integralmente.'
-      ))
-      .addSeparatorComponents(sep())
-      .addTextDisplayComponents(txt(
-        '-# ⚠️  As regras relacionadas à permanência no Discord e ao controle de acesso têm como objetivo garantir a integridade da competição, evitando a entrada de jogadores banidos, irregulares ou não autorizados.'
+        '-# ⚠️  As regras de permanência no Discord e de controle de acesso visam garantir a integridade da competição, impedindo a participação de jogadores banidos, irregulares ou não autorizados.'
       ))
   );
 
