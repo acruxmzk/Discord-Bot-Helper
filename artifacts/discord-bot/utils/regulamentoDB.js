@@ -38,4 +38,14 @@ async function set(chave, valor, atualizadoPor = null) {
   );
 }
 
-module.exports = { init, get, getAll, set };
+async function saveMessageIds(channelId, messageIds) {
+  await set('mensagens_ids', JSON.stringify({ channelId, messageIds }));
+}
+
+async function getMessageIds() {
+  const raw = await get('mensagens_ids');
+  if (!raw) return null;
+  try { return JSON.parse(raw); } catch { return null; }
+}
+
+module.exports = { init, get, getAll, set, saveMessageIds, getMessageIds };

@@ -390,26 +390,54 @@ module.exports = {
         .setDescription('Canal onde postar (padrão: aqui)')
         .addChannelTypes(ChannelType.GuildText)
         .setRequired(false)
+    )
+    .addBooleanOption(option =>
+      option
+        .setName('atualizar')
+        .setDescription('Apaga o regulamento anterior e posta o atualizado')
+        .setRequired(false)
     ),
 
   async execute(interaction) {
     await interaction.deferReply({ ephemeral: true });
 
     const targetChannel = interaction.options.getChannel('canal') ?? interaction.channel;
+    const atualizar     = interaction.options.getBoolean('atualizar') ?? false;
 
+    // ── Apagar mensagens anteriores ───────────────────────────────────────────
+    if (atualizar) {
+      const saved = await regulamentoDB.getMessageIds();
+      if (saved?.messageIds?.length) {
+        const ch = interaction.guild.channels.cache.get(saved.channelId) ?? targetChannel;
+        for (const msgId of saved.messageIds) {
+          try {
+            const msg = await ch.messages.fetch(msgId);
+            await msg.delete();
+          } catch {
+            // mensagem já apagada ou inacessível — ignorar
+          }
+        }
+      }
+    }
+
+    // ── Postar regulamento atualizado ─────────────────────────────────────────
     const allRows = await regulamentoDB.getAll();
-    const cfg = Object.fromEntries(Object.entries(allRows).map(([k, row]) => [k, row.valor]));
-
+    const cfg     = Object.fromEntries(Object.entries(allRows).map(([k, row]) => [k, row.valor]));
     const containers = buildRegulamentoContainers(cfg);
 
+    const newIds = [];
     for (const container of containers) {
-      await targetChannel.send({
+      const msg = await targetChannel.send({
         components: [container],
         flags: MessageFlags.IsComponentsV2,
       });
+      newIds.push(msg.id);
     }
 
-    const where = targetChannel.id === interaction.channelId ? 'neste canal' : `em ${targetChannel}`;
-    await interaction.editReply({ content: `✅ Regulamento postado ${where}.` });
+    await regulamentoDB.saveMessageIds(targetChannel.id, newIds);
+
+    const where  = targetChannel.id === interaction.channelId ? 'neste canal' : `em ${targetChannel}`;
+    const status = atualizar ? '🔄 Regulamento atualizado' : '✅ Regulamento postado';
+    await interaction.editReply({ content: `${status} ${where}.` });
   },
 };
