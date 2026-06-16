@@ -360,6 +360,28 @@ function buildRegulamentoContainers(cfg = {}) {
       .addTextDisplayComponents(txt('-# 🌐  Oblivion League · Regulamento Oficial · 2026'))
   );
 
+  // ── 14. Observações Complementares ────────────────────────────────────────
+  containers.push(
+    new ContainerBuilder()
+      .setAccentColor(COLOR.penalty)
+      .addTextDisplayComponents(txt('### 📌  OBSERVAÇÕES COMPLEMENTARES'))
+      .addSeparatorComponents(gap())
+      .addTextDisplayComponents(txt(
+        '**1.**  Não será exigido envio de prints comprovando que os jogadores estão seguindo perfis obrigatórios durante o campeonato. A verificação será realizada ao final da competição e, caso nenhum player esteja em conformidade, a premiação poderá ser retida.'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt(
+        '**2.**  É obrigatório que todo o squad esteja presente no Discord oficial da Oblivion League. A manager é responsável pela entrada, organização e permanência da equipe.'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt(
+        '**3.**  Todas as demais regras já existentes permanecem válidas e devem ser cumpridas integralmente.'
+      ))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt(
+        '-# ⚠️  As regras relacionadas à permanência no Discord e ao controle de acesso têm como objetivo garantir a integridade da competição, evitando a entrada de jogadores banidos, irregulares ou não autorizados.'
+      ))
+  );
 
   return containers;
 }
