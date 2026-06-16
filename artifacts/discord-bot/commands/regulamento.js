@@ -407,8 +407,10 @@ module.exports = {
     // ── Apagar mensagens anteriores ───────────────────────────────────────────
     if (atualizar) {
       const saved = await regulamentoDB.getMessageIds();
+      const ch    = (saved?.channelId && interaction.guild.channels.cache.get(saved.channelId)) ?? targetChannel;
+
       if (saved?.messageIds?.length) {
-        const ch = interaction.guild.channels.cache.get(saved.channelId) ?? targetChannel;
+        // IDs rastreados — apaga cada um diretamente
         for (const msgId of saved.messageIds) {
           try {
             const msg = await ch.messages.fetch(msgId);
@@ -416,6 +418,17 @@ module.exports = {
           } catch {
             // mensagem já apagada ou inacessível — ignorar
           }
+        }
+      } else {
+        // Fallback: varrer o canal e apagar todas as mensagens do bot
+        try {
+          const fetched = await targetChannel.messages.fetch({ limit: 100 });
+          const botMsgs = fetched.filter(m => m.author.id === interaction.client.user.id);
+          for (const msg of botMsgs.values()) {
+            try { await msg.delete(); } catch { /* ignorar */ }
+          }
+        } catch {
+          // sem permissão ou canal inacessível
         }
       }
     }
