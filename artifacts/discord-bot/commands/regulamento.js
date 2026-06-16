@@ -367,7 +367,7 @@ function buildRegulamentoContainers(cfg = {}) {
       .addTextDisplayComponents(txt('### 📌  OBSERVAÇÕES COMPLEMENTARES'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
-        '**1.**  Não será exigido envio de prints comprovando que os jogadores estão seguindo perfis obrigatórios durante o campeonato. A verificação será realizada ao final da competição e, caso nenhum player esteja em conformidade, a premiação poderá ser retida.'
+        '**1.**  Não será exigido envio de prints comprovando que os jogadores estão seguindo perfis obrigatórios durante o campeonato. A verificação será realizada ao final da competição e, caso nenhum player da line esteja seguindo os perfis obrigatórios, a premiação será retida.'
       ))
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt(
