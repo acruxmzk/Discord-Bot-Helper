@@ -22,6 +22,91 @@ function tokenize(text) {
   return normalize(text).split(' ').filter(t => t.length > 1 && !STOP.has(t));
 }
 
+// ─── Mapa de Sinônimos ────────────────────────────────────────────────────────
+// Expande variações para o termo canônico antes do matching
+
+const SYNONYM_MAP = {
+  'cheater': 'trapaca', 'cheat': 'trapaca', 'trapasseiro': 'trapaca',
+  'hacker': 'hack', 'aimbot': 'hack', 'wallhack': 'hack', 'macro': 'hack',
+  'mod': 'hack', 'modded': 'hack', 'modificado': 'hack',
+  'joystick': 'mobilador', 'gamepad': 'mobilador', 'controle': 'mobilador',
+  'bluestacks': 'emulador', 'ldplayer': 'emulador', 'nox': 'emulador', 'memu': 'emulador',
+  'time': 'equipe', 'clan': 'cla',
+  'filmar': 'gravar', 'filmagem': 'gravacao', 'clip': 'video',
+  'matar': 'kill', 'abater': 'kill', 'eliminar': 'eliminacao',
+  'capitar': 'capitao', 'capitar': 'manager', 'lider': 'manager',
+  'quando e': 'quando', 'que horas': 'horario',
+  'pegar': 'receber', 'recebo': 'receber', 'ganho': 'ganhar',
+  'expulsao': 'expulso', 'expulsar': 'expulsao', 'banir': 'banimento',
+  'nao pode': 'proibido', 'proibido': 'proibido', 'banido': 'ban',
+  'tunel': 'vpn', 'tunnel': 'vpn', 'rede virtual': 'vpn',
+  'bazuca': 'arma', 'thumper': 'arma', 'sniper': 'arma', 'purificador': 'arma',
+  'skill': 'habilidade', 'skills': 'habilidades',
+};
+
+function applySynonyms(tokens) {
+  return tokens.map(t => SYNONYM_MAP[t] ?? t);
+}
+
+// ─── Detecção de Evasão ───────────────────────────────────────────────────────
+// Detecta quando o usuário reformula uma proibição tentando obter outra resposta
+
+const EVASION_SIGNALS = [
+  /escondido|as escondidas|escondida/,
+  /sem ninguem (saber|ver|perceber|notar)/,
+  /ninguem (vai|ira|pode) (saber|ver|perceber|notar|detectar)/,
+  /nao (vai|ira|pode|tem como) (detectar|pegar|saber|ver|perceber)/,
+  /de brincadeira|so pra testar|so testando|so por hoje/,
+  /so dessa vez|uma vez so|por uma vez|uma unica vez/,
+  /e se (eu |a gente |ninguem )?(souber|saber|ver|perceber)/,
+  /da pra (usar|fazer|jogar|entrar)\s.*(sem (ser )?pego|sem detectar|sem saber)/,
+  /consigo (passar|escapar|burlar|enganar|driblar)/,
+  /se (usar|fizer|jogar|tentar) mesmo assim/,
+  /mas e se/,
+  /e se (eu |a gente )?usar mesmo/,
+  /posso\s.*(escondido|sem avisar|sem ninguem ver)/,
+];
+
+function detectEvasion(normalizedText) {
+  return EVASION_SIGNALS.some(pattern => pattern.test(normalizedText));
+}
+
+// ─── Mapa de Ações Proibidas ──────────────────────────────────────────────────
+// Qualquer pergunta sobre ação proibida → sempre retorna a resposta de proibição,
+// independente do framing (hipotético, negação, evasão, etc.)
+
+const PROHIBITED_MAP = [
+  { triggers: ['vpn', 'tunel', 'tunnel'], entryId: 'vpn' },
+  { triggers: ['emulador', 'bluestacks', 'ldplayer', 'nox', 'memu', 'pc', 'computador'], entryId: 'emulador' },
+  { triggers: ['mobilador', 'controle', 'joystick', 'gamepad'], entryId: 'mobilador' },
+  { triggers: ['hack', 'trapaca', 'cheat', 'aimbot', 'wallhack', 'macro', 'mod', 'modded', 'modificado'], entryId: 'hack_trapaça' },
+  { triggers: ['atropelar', 'atropelo'], entryId: 'atropelar' },
+];
+
+function matchProhibited(tokens) {
+  for (const rule of PROHIBITED_MAP) {
+    if (tokens.some(t => rule.triggers.includes(t))) {
+      return rule.entryId;
+    }
+  }
+  return null;
+}
+
+// ─── Detecção de Negação ──────────────────────────────────────────────────────
+// "VPN não é proibida?" → normaliza para tratar como "VPN proibida"
+// Remove a negação para que o matching encontre a entrada correta
+
+const NEGATION_PATTERNS = [
+  /nao (e|eh|seria|seria|precisa|preciso|tem|ha|existe)\s/g,
+  /\b(nao|nem)\s+(e|eh|sera|vai|ira|pode|tem|precisa|preciso)\b/g,
+];
+
+function stripNegation(text) {
+  let result = text;
+  for (const p of NEGATION_PATTERNS) result = result.replace(p, ' ');
+  return result;
+}
+
 // ─── Resposta aleatória (suporta string simples ou array) ─────────────────────
 
 function getResponse(entry) {
@@ -630,24 +715,53 @@ const FAQ_DB = [
 
 // ─── Matching ─────────────────────────────────────────────────────────────────
 
-const THRESHOLD = 0.28;
+const THRESHOLD = 0.22;
 
+function scoreEntry(entry, tokens) {
+  const kwSet = entry.keywords.map(k => normalize(k));
+  let hits = 0;
+  for (const token of tokens) {
+    if (kwSet.some(kw => kw === token || kw.includes(token) || token.includes(kw))) {
+      hits++;
+    }
+  }
+  return hits / Math.max(tokens.length, 1);
+}
+
+/**
+ * match(question) → { entry, score, evasion: bool } | null
+ *
+ * Camadas de inteligência (por prioridade):
+ *  1. Ações proibidas — sempre retorna a resposta de proibição, qualquer que seja o framing
+ *  2. Detecção de evasão — marca a resposta com flag `evasion: true`
+ *  3. Remoção de negação — "VPN não é proibida?" trata como "VPN proibida"
+ *  4. Expansão de sinônimos — "bluestacks", "aimbot" etc. mapeados ao canônico
+ *  5. Keyword matching melhorado com threshold reduzido
+ */
 function match(question) {
-  const tokens = tokenize(question);
+  const norm    = normalize(question);
+  const isEvasion = detectEvasion(norm);
+
+  // ── 1. Ações proibidas: framing não muda a resposta ───────────────────────
+  const rawTokens = tokenize(norm);
+  const synTokens = applySynonyms(rawTokens);
+  const prohibitedId = matchProhibited(synTokens);
+
+  if (prohibitedId) {
+    const entry = FAQ_DB.find(e => e.id === prohibitedId);
+    if (entry) return { entry, score: 1, evasion: isEvasion };
+  }
+
+  // ── 2. Remoção de negação + sinônimos para matching geral ─────────────────
+  const stripped  = stripNegation(norm);
+  const tokens    = applySynonyms(tokenize(stripped));
   if (tokens.length === 0) return null;
 
   let best      = null;
   let bestScore = 0;
 
   for (const entry of FAQ_DB) {
-    const kwSet = entry.keywords.map(k => normalize(k));
-    let hits = 0;
-    for (const token of tokens) {
-      if (kwSet.some(kw => kw === token || kw.includes(token) || token.includes(kw))) {
-        hits++;
-      }
-    }
-    const score = hits / Math.max(tokens.length, 1);
+    const score = scoreEntry(entry, tokens);
     if (score > bestScore) {
       bestScore = score;
       best      = entry;
@@ -655,9 +769,23 @@ function match(question) {
   }
 
   if (bestScore >= THRESHOLD && best) {
-    return { entry: best, score: bestScore };
+    return { entry: best, score: bestScore, evasion: isEvasion };
   }
-  return null;
+
+  // ── 3. Fallback com tokens originais (sem remoção de negação) ─────────────
+  let best2      = null;
+  let bestScore2 = 0;
+  const rawSyn = applySynonyms(rawTokens);
+  for (const entry of FAQ_DB) {
+    const score = scoreEntry(entry, rawSyn);
+    if (score > bestScore2) { bestScore2 = score; best2 = entry; }
+  }
+
+  if (bestScore2 >= THRESHOLD && best2) {
+    return { entry: best2, score: bestScore2, evasion: isEvasion };
+  }
+
+  return isEvasion ? { entry: null, score: 0, evasion: true } : null;
 }
 
-module.exports = { match, getResponse, FAQ_DB, normalize };
+module.exports = { match, getResponse, FAQ_DB, normalize, detectEvasion };
