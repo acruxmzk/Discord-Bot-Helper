@@ -367,13 +367,14 @@ function buildRegulamentoContainers(cfg = {}) {
       .addTextDisplayComponents(txt('### 📌  OBSERVAÇÕES COMPLEMENTARES'))
       .addSeparatorComponents(gap())
       .addTextDisplayComponents(txt(
-        '**1.**  O envio de prints dos perfis obrigatórios durante o campeonato não será exigido. A confirmação será feita ao término da competição. Caso nenhum integrante da equipe esteja seguindo os perfis obrigatórios, a premiação será retida.\n\n' +
-        '**2.**  Todos os integrantes do squad devem estar presentes no Discord oficial da Oblivion League. A manager é responsável pela entrada, comportamento e permanência da equipe no servidor.\n\n' +
-        '**3.**  Todas as demais regras permanecem vigentes e devem ser cumpridas integralmente.'
+        '**1.**  O envio de prints dos perfis obrigatórios durante o campeonato não será exigido. A confirmação será feita ao término da competição. Caso algum player da line não esteja seguindo os perfis obrigatórios, a premiação será retida.\n\n' +
+        '**2.**  Todos os integrantes do squad devem estar presentes no Discord oficial da Oblivion League. A capitã é responsável pela entrada, organização e permanência da equipe no servidor.\n\n' +
+        '**3.**  O nick utilizado no servidor do Discord deve ser o mesmo nick no jogo. A manager é responsável por garantir isso.\n\n' +
+        '**4.**  Todas as demais regras permanecem vigentes e devem ser cumpridas integralmente.'
       ))
       .addSeparatorComponents(sep())
       .addTextDisplayComponents(txt(
-        '-# ⚠️  As regras de permanência no Discord e de controle de acesso visam garantir a integridade da competição, impedindo a participação de jogadores banidos, irregulares ou não autorizados.'
+        '-# ⚠️  Em caso de suspeita de irregularidade, a Oblivion League se reserva o direito de convocar a equipe para verificação. As regras de permanência no Discord e de controle de acesso visam garantir a integridade da competição, impedindo a participação de jogadores banidos, irregulares ou não autorizados.'
       ))
   );
 
