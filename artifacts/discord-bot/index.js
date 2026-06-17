@@ -18,6 +18,7 @@ const { handleTallyWebhook }  = require('./handlers/tallyWebhook');
 const banDB          = require('./utils/banDB');
 const fichaDB        = require('./utils/fichaDB');
 const regulamentoDB  = require('./utils/regulamentoDB');
+const tallyDB        = require('./utils/tallyDB');
 
 const { handleEditarRegDatasSubmit, handleEditarRegLinkSubmit } = require('./commands/editarRegulamento');
 
@@ -36,6 +37,8 @@ async function initDB() {
     console.log('[DB] Tabela inscricoes pronta.');
     await regulamentoDB.init();
     console.log('[DB] Tabela regulamento_config pronta.');
+    await tallyDB.init();
+    console.log('[DB] Tabela tally_submissions pronta.');
   } catch (err) {
     console.error('[DB] Erro ao inicializar tabelas:', err.message);
     process.exit(1);
