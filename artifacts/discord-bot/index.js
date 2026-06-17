@@ -61,9 +61,70 @@ for (const file of commandFiles) {
   }
 }
 
-client.once('ready', () => {
+// ── Canais de log (nomes aceitos, por prioridade) ─────────────────────────────
+const LOG_CHANNEL_NAMES = [
+  'bot-logs', 'bot-log', 'logs-bot', 'logs',
+  'staff-logs', 'staff-log', 'admin-logs',
+  'sistema', 'system', 'notificacoes', 'notificações',
+];
+
+function normCh(str) {
+  return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function findLogChannel() {
+  for (const guild of client.guilds.cache.values()) {
+    for (const name of LOG_CHANNEL_NAMES) {
+      const ch = guild.channels.cache.find(
+        c => c.isTextBased?.() && normCh(c.name).includes(name)
+      );
+      if (ch) return ch;
+    }
+  }
+  return null;
+}
+
+client.once('ready', async () => {
   console.log(`[BOT] Online como ${client.user.tag}`);
   console.log(`[BOT] Servidores: ${client.guilds.cache.size}`);
+
+  // ── Notificação de (re)início ──────────────────────────────────────────────
+  try {
+    const ch = findLogChannel();
+    if (ch) {
+      const domain   = process.env.REPLIT_DEV_DOMAIN ?? '';
+      const uptime   = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+      const healthUrl = domain ? `https://${domain}:3001/health` : '—';
+
+      const { ContainerBuilder, SeparatorBuilder, TextDisplayBuilder,
+              SeparatorSpacingSize, MessageFlags } = require('discord.js');
+      const sep = () => new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true);
+      const gap = () => new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large).setDivider(false);
+      const txt = s  => new TextDisplayBuilder().setContent(s);
+
+      const container = new ContainerBuilder()
+        .setAccentColor(0x57F287)
+        .addTextDisplayComponents(txt('✅ **Bot reiniciado e online**'))
+        .addSeparatorComponents(sep())
+        .addTextDisplayComponents(txt(
+          `🤖 **${client.user.tag}**\n` +
+          `📅 ${uptime}\n` +
+          `🌐 Servidores ativos: **${client.guilds.cache.size}**`
+        ))
+        .addSeparatorComponents(sep())
+        .addTextDisplayComponents(txt(
+          `💓 Health: \`${healthUrl}\`\n` +
+          `-# Use /webhook-url para ver todas as URLs`
+        ))
+        .addSeparatorComponents(gap())
+        .addTextDisplayComponents(txt('-# 🌐 Oblivion League · Monitor de Sistema'));
+
+      await ch.send({ components: [container], flags: MessageFlags.IsComponentsV2 });
+      console.log(`[BOT] Notificação de início enviada para #${ch.name}`);
+    }
+  } catch (err) {
+    console.warn('[BOT] Notificação de início falhou:', err.message);
+  }
 });
 
 // ── Roteadores ────────────────────────────────────────────────────────────────
@@ -182,6 +243,30 @@ function startWebhookServer() {
     console.log(`[WEBHOOK] Servidor ativo na porta ${port}`);
     console.log(`[WEBHOOK] Tally  → POST ${webhookUrl}`);
     console.log(`[WEBHOOK] Health → GET  ${healthUrl}`);
+
+    // ── Auto-ping: mantém o processo vivo a cada 4 minutos ──────────────────
+    // Complementa serviços externos (UptimeRobot, cron-job.org) como camada
+    // extra de keep-alive — sem depender de nada externo.
+    if (domain && domain !== 'localhost') {
+      const selfUrl = `https://${domain}:3001/health`;
+      setInterval(async () => {
+        try {
+          const https = require('https');
+          await new Promise((resolve, reject) => {
+            const req = https.get(selfUrl, res => {
+              res.resume();
+              resolve(res.statusCode);
+            });
+            req.on('error', reject);
+            req.setTimeout(8000, () => { req.destroy(); reject(new Error('timeout')); });
+          });
+          console.log(`[KEEPALIVE] ping ok — uptime ${Math.floor(process.uptime() / 60)}min`);
+        } catch (err) {
+          console.warn(`[KEEPALIVE] ping falhou: ${err.message}`);
+        }
+      }, 4 * 60 * 1000); // 4 minutos
+      console.log('[KEEPALIVE] Auto-ping ativado (a cada 4 min)');
+    }
   });
 }
 
