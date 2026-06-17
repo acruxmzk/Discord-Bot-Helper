@@ -160,8 +160,15 @@ function startWebhookServer() {
 
   app.use(express.json());
 
-  // Health check
-  app.get('/health', (_req, res) => res.json({ ok: true, bot: client.user?.tag ?? 'iniciando' }));
+  // Health check / keep-alive (usado pelo UptimeRobot)
+  app.get('/health', (_req, res) => {
+    res.json({
+      ok:     true,
+      bot:    client.user?.tag ?? 'iniciando',
+      uptime: Math.floor(process.uptime()),
+      ts:     new Date().toISOString(),
+    });
+  });
 
   // Webhook do Tally
   app.post('/webhook/tally', (req, res) => {
@@ -169,7 +176,12 @@ function startWebhookServer() {
   });
 
   app.listen(port, () => {
-    console.log(`[WEBHOOK] Servidor ouvindo na porta ${port} — endpoint: POST /webhook/tally`);
+    const domain     = process.env.REPLIT_DEV_DOMAIN ?? 'localhost';
+    const webhookUrl = `https://${domain}:3001/webhook/tally`;
+    const healthUrl  = `https://${domain}:3001/health`;
+    console.log(`[WEBHOOK] Servidor ativo na porta ${port}`);
+    console.log(`[WEBHOOK] Tally  → POST ${webhookUrl}`);
+    console.log(`[WEBHOOK] Health → GET  ${healthUrl}`);
   });
 }
 
