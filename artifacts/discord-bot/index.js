@@ -1,6 +1,7 @@
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
-const fs   = require('fs');
-const path = require('path');
+const fs      = require('fs');
+const path    = require('path');
+const express = require('express');
 
 const {
   handleTicketClose,
@@ -10,8 +11,9 @@ const {
 
 const { handleSupportOpen } = require('./handlers/supportHandler');
 
-const { handleFaqMessage } = require('./handlers/faqHandler');
-const { handleBanCheck }   = require('./handlers/banCheckHandler');
+const { handleFaqMessage }    = require('./handlers/faqHandler');
+const { handleBanCheck }      = require('./handlers/banCheckHandler');
+const { handleTallyWebhook }  = require('./handlers/tallyWebhook');
 
 const banDB          = require('./utils/banDB');
 const fichaDB        = require('./utils/fichaDB');
@@ -150,5 +152,29 @@ client.on('interactionCreate', async interaction => {
   }
 });
 
+// ── Servidor webhook (Tally) ──────────────────────────────────────────────────
+
+function startWebhookServer() {
+  const app  = express();
+  const port = process.env.WEBHOOK_PORT ?? 3000;
+
+  app.use(express.json());
+
+  // Health check
+  app.get('/health', (_req, res) => res.json({ ok: true, bot: client.user?.tag ?? 'iniciando' }));
+
+  // Webhook do Tally
+  app.post('/webhook/tally', (req, res) => {
+    handleTallyWebhook(req, res, client);
+  });
+
+  app.listen(port, () => {
+    console.log(`[WEBHOOK] Servidor ouvindo na porta ${port} — endpoint: POST /webhook/tally`);
+  });
+}
+
 // ── Iniciar ───────────────────────────────────────────────────────────────────
-initDB().then(() => client.login(token));
+initDB().then(() => {
+  startWebhookServer();
+  client.login(token);
+});
