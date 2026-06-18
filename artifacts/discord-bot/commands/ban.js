@@ -29,10 +29,10 @@ module.exports = {
     .setDescription('Banir um jogador permanentemente pelo UID')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(o =>
-      o.setName('uid').setDescription('UID do jogador no Free Fire').setRequired(true).setMaxLength(30)
+      o.setName('uid').setDescription('UID do jogador no COD').setRequired(true).setMaxLength(30)
     )
     .addStringOption(o =>
-      o.setName('nick').setDescription('Nick do jogador no Free Fire').setRequired(true).setMaxLength(60)
+      o.setName('nick').setDescription('Nick do jogador no COD').setRequired(true).setMaxLength(60)
     )
     .addStringOption(o =>
       o.setName('motivo').setDescription('Motivo do banimento').setRequired(true).setMaxLength(200)
