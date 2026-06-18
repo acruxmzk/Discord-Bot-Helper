@@ -32,17 +32,21 @@ module.exports = {
       o.setName('uid').setDescription('UID do jogador no Free Fire').setRequired(true).setMaxLength(30)
     )
     .addStringOption(o =>
+      o.setName('nick').setDescription('Nick do jogador no Free Fire').setRequired(true).setMaxLength(60)
+    )
+    .addStringOption(o =>
       o.setName('motivo').setDescription('Motivo do banimento').setRequired(true).setMaxLength(200)
     ),
 
   async execute(interaction) {
     const uid    = interaction.options.getString('uid').trim();
+    const nick   = interaction.options.getString('nick').trim();
     const reason = interaction.options.getString('motivo').trim();
 
-    const anterior = checkPlayer(uid);
+    const anterior = await checkPlayer(uid);
     const update   = anterior.status === 'BANIDO';
 
-    banPlayer(uid, reason, interaction.user.tag);
+    await banPlayer(uid, nick, reason, interaction.user.tag);
 
     const agora = Math.floor(Date.now() / 1000);
 
@@ -61,11 +65,12 @@ module.exports = {
           new ContainerBuilder()
             .setAccentColor(0xFF4444)
             .addTextDisplayComponents(txt(
-              `### 🚨  PLAYER BANIDO DETECTADO\n` +
+              `### 🚨 ${update ? 'BAN ATUALIZADO' : 'PLAYER BANIDO'}\n` +
               `**UID:** \`${uid}\`\n` +
+              `**Nick:** ${nick}\n` +
               `**Motivo:** ${reason}\n` +
-              `**Data:** ${new Date().toLocaleString('pt-BR')}\n` +
-              `**Responsável:** <@${interaction.user.id}>`
+              `**Responsável:** <@${interaction.user.id}>\n` +
+              `**Data:** <t:${agora}:F>`
             )),
         ],
         flags: MessageFlags.IsComponentsV2,
@@ -83,6 +88,7 @@ module.exports = {
           .addSeparatorComponents(sep())
           .addTextDisplayComponents(txt(
             `**UID:** \`${uid}\`\n` +
+            `**Nick:** ${nick}\n` +
             `**Motivo:** ${reason}\n` +
             `**Registrado por:** ${interaction.user.displayName}\n` +
             `**Data:** <t:${agora}:F>`
@@ -91,7 +97,7 @@ module.exports = {
           .addTextDisplayComponents(txt(
             update
               ? `-# ♻️ Registro anterior atualizado.`
-              : `-# ✅ UID salvo no banco permanentemente.`
+              : `-# ✅ UID e nick salvos no banco permanentemente.`
           )),
       ],
       flags: MessageFlags.IsComponentsV2,

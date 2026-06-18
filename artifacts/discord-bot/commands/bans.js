@@ -17,22 +17,30 @@ function sep() { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.S
 function gap() { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(false); }
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 8;
 
 function buildPage(rows, page, busca) {
-  const total     = rows.length;
-  const totalPgs  = Math.ceil(total / PAGE_SIZE);
-  const slice     = rows.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+  const total    = rows.length;
+  const totalPgs = Math.ceil(total / PAGE_SIZE);
+  const slice    = rows.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
 
   const linhas = slice.map((r, i) => {
     const n    = page * PAGE_SIZE + i + 1;
     const data = new Date(r.banned_at).toLocaleDateString('pt-BR');
-    return `\`${String(n).padStart(2, '0')}\`  \`${r.uid}\`  ·  ${r.reason}  ·  ${r.banned_by}  ·  *${data}*`;
-  }).join('\n');
+    const nick = r.nick ? r.nick : '—';
+    return (
+      `**${String(n).padStart(2, '0')}.** \`${r.uid}\`  **·**  ${nick}\n` +
+      `> ${r.reason}  ·  *${data}*`
+    );
+  }).join('\n\n');
 
   const titulo = busca
     ? `### 🔍 Busca: \`${busca}\` — ${total} resultado(s)`
-    : `### 🚫 UIDs Banidos — ${total} registro(s)`;
+    : `### 🚫 Jogadores Banidos — ${total} registro(s)`;
+
+  const rodape = totalPgs > 1
+    ? `-# Página ${page + 1} de ${totalPgs}  ·  busca por UID ou nick com \`/bans busca:\``
+    : `-# busca por UID ou nick com \`/bans busca:\``;
 
   const container = new ContainerBuilder()
     .setAccentColor(0xFF4444)
@@ -40,11 +48,7 @@ function buildPage(rows, page, busca) {
     .addSeparatorComponents(sep())
     .addTextDisplayComponents(txt(linhas))
     .addSeparatorComponents(gap())
-    .addTextDisplayComponents(txt(
-      totalPgs > 1
-        ? `-# Página ${page + 1} de ${totalPgs} · Use \`/verificar [uid]\` para detalhes.`
-        : `-# Use \`/verificar [uid]\` para detalhes completos.`
-    ));
+    .addTextDisplayComponents(txt(rodape));
 
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
@@ -65,10 +69,13 @@ function buildPage(rows, page, busca) {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('bans')
-    .setDescription('Listar UIDs banidos da Oblivion League')
+    .setDescription('Listar jogadores banidos da Oblivion League')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(o =>
-      o.setName('busca').setDescription('Filtrar por UID (parcial)').setRequired(false).setMaxLength(30)
+      o.setName('busca')
+        .setDescription('Filtrar por UID ou nick (parcial)')
+        .setRequired(false)
+        .setMaxLength(40)
     ),
 
   async execute(interaction) {
@@ -83,7 +90,7 @@ module.exports = {
         components: [
           new ContainerBuilder()
             .setAccentColor(0x5865F2)
-            .addTextDisplayComponents(txt(`### 📋 UIDs Banidos\n\n-# ${msg}`)),
+            .addTextDisplayComponents(txt(`### 📋 Jogadores Banidos\n\n-# ${msg}`)),
         ],
         flags: MessageFlags.IsComponentsV2,
         ephemeral: true,
@@ -94,9 +101,7 @@ module.exports = {
     let page = 0;
     const { container, row, totalPgs } = buildPage(rows, page, busca);
 
-    const components = totalPgs > 1
-      ? [container, row]
-      : [container];
+    const components = totalPgs > 1 ? [container, row] : [container];
 
     const reply = await interaction.reply({
       components,
