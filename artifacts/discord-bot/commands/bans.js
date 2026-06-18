@@ -93,7 +93,6 @@ module.exports = {
             .addTextDisplayComponents(txt(`### 📋 Jogadores Banidos\n\n-# ${msg}`)),
         ],
         flags: MessageFlags.IsComponentsV2,
-        ephemeral: true,
       });
       return;
     }
@@ -106,7 +105,6 @@ module.exports = {
     const reply = await interaction.reply({
       components,
       flags: MessageFlags.IsComponentsV2,
-      ephemeral: true,
     });
 
     if (totalPgs <= 1) return;
