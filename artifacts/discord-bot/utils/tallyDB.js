@@ -133,14 +133,41 @@ async function flagAsRejected(submissionId) {
   );
 }
 
-// ─── Listar todas as submissões ───────────────────────────────────────────────
+// ─── Listar / filtrar submissões com paginação ────────────────────────────────
 
-async function listar(limit = 20) {
-  const res = await pool.query(
-    `SELECT * FROM tally_submissions ORDER BY received_at DESC LIMIT $1`,
-    [limit]
-  );
-  return res.rows;
+async function listar({ status = null, pagina = 1, porPagina = 5 } = {}) {
+  const offset = (pagina - 1) * porPagina;
+  const params = [];
+  let where = '';
+
+  if (status) {
+    params.push(status);
+    where = `WHERE status = $${params.length}`;
+  }
+
+  const [rowsRes, countRes] = await Promise.all([
+    pool.query(
+      `SELECT submission_id, form_name, squad_name, squad_tag, manager_name,
+              manager_discord, uids, status, received_at
+       FROM tally_submissions
+       ${where}
+       ORDER BY received_at DESC
+       LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+      [...params, porPagina, offset]
+    ),
+    pool.query(
+      `SELECT COUNT(*) AS total FROM tally_submissions ${where}`,
+      params
+    ),
+  ]);
+
+  return {
+    rows:  rowsRes.rows,
+    total: parseInt(countRes.rows[0].total, 10),
+    pagina,
+    porPagina,
+    totalPaginas: Math.max(1, Math.ceil(parseInt(countRes.rows[0].total, 10) / porPagina)),
+  };
 }
 
 // ─── Remover submissão ────────────────────────────────────────────────────────
@@ -153,4 +180,4 @@ async function remover(submissionId) {
   return res.rowCount > 0;
 }
 
-module.exports = { init, saveSubmission, findDuplicateUIDs, findDuplicateSquad, flagAsRejected, listar, remover, normText };
+module.exports = { init, saveSubmission, findDuplicateUIDs, findDuplicateSquad, flagAsRejected, listar, remover, normText, listarFiltrado: listar };
