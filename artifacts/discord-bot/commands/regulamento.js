@@ -166,7 +166,7 @@ function buildRegulamentoContainers(cfg = {}) {
         '📸  Denúncias serão analisadas somente mediante apresentação de provas\n' +
         '👤  Somente jogadores devidamente inscritos estão autorizados a competir\n' +
         '🚫  A escalação de jogadores não inscritos sujeita a equipe à desclassificação imediata\n' +
-        '⚔️  Cada clã poderá inscrever até **3 lines** no campeonato'
+        '⚔️  Cada clã poderá inscrever até **4 lines** no campeonato'
       ))
   );
 
