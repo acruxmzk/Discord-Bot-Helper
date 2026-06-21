@@ -14,8 +14,13 @@ async function init() {
       manager_name  VARCHAR(150),
       uids          TEXT[]        NOT NULL DEFAULT '{}',
       raw_extras    JSONB         NOT NULL DEFAULT '[]',
+      status        VARCHAR(20)   NOT NULL DEFAULT 'PENDENTE',
       received_at   TIMESTAMPTZ   NOT NULL DEFAULT NOW()
     )
+  `);
+  // migração: adiciona coluna status se não existir
+  await pool.query(`
+    ALTER TABLE tally_submissions ADD COLUMN IF NOT EXISTS status VARCHAR(20) NOT NULL DEFAULT 'PENDENTE'
   `);
   await pool.query(`
     CREATE INDEX IF NOT EXISTS idx_tally_uids ON tally_submissions USING GIN(uids);
@@ -112,6 +117,15 @@ async function findDuplicateSquad(squadName, currentSubmissionId) {
   }));
 }
 
+// ─── Marcar submissão como rejeitada ─────────────────────────────────────────
+
+async function flagAsRejected(submissionId) {
+  await pool.query(
+    `UPDATE tally_submissions SET status = 'REJEITADA' WHERE submission_id = $1`,
+    [submissionId]
+  );
+}
+
 // ─── Listar todas as submissões ───────────────────────────────────────────────
 
 async function listar(limit = 20) {
@@ -132,4 +146,4 @@ async function remover(submissionId) {
   return res.rowCount > 0;
 }
 
-module.exports = { init, saveSubmission, findDuplicateUIDs, findDuplicateSquad, listar, remover, normText };
+module.exports = { init, saveSubmission, findDuplicateUIDs, findDuplicateSquad, flagAsRejected, listar, remover, normText };

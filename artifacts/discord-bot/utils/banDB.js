@@ -72,4 +72,14 @@ async function searchBans(query) {
   return res.rows;
 }
 
-module.exports = { init, banPlayer, unbanPlayer, checkPlayer, listBans, searchBans };
+async function checkPlayerByNick(nick) {
+  const res = await pool.query(
+    `SELECT * FROM banned_players WHERE nick ILIKE $1 LIMIT 1`,
+    [nick.trim()]
+  );
+  if (res.rows.length === 0) return null;
+  const row = res.rows[0];
+  return { uid: row.uid, nick: row.nick, reason: row.reason, bannedBy: row.banned_by, bannedAt: row.banned_at };
+}
+
+module.exports = { init, banPlayer, unbanPlayer, checkPlayer, checkPlayerByNick, listBans, searchBans };
