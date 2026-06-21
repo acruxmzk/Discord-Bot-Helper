@@ -41,27 +41,34 @@ function normText(str) {
 
 // ─── Salvar submissão ─────────────────────────────────────────────────────────
 
-async function saveSubmission({ submissionId, formName, squadName, squadTag, managerName, uids, rawExtras }) {
+async function saveSubmission({ submissionId, formName, squadName, squadTag, managerName, managerDiscord, uids, rawExtras }) {
+  // migração: adiciona coluna manager_discord se não existir
+  await pool.query(`
+    ALTER TABLE tally_submissions ADD COLUMN IF NOT EXISTS manager_discord VARCHAR(100) DEFAULT NULL
+  `).catch(() => {});
+
   await pool.query(
     `INSERT INTO tally_submissions
-       (submission_id, form_name, squad_name, squad_name_norm, squad_tag, manager_name, uids, raw_extras)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       (submission_id, form_name, squad_name, squad_name_norm, squad_tag, manager_name, manager_discord, uids, raw_extras)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
      ON CONFLICT (submission_id) DO UPDATE SET
-       form_name      = EXCLUDED.form_name,
-       squad_name     = EXCLUDED.squad_name,
-       squad_name_norm= EXCLUDED.squad_name_norm,
-       squad_tag      = EXCLUDED.squad_tag,
-       manager_name   = EXCLUDED.manager_name,
-       uids           = EXCLUDED.uids,
-       raw_extras     = EXCLUDED.raw_extras,
-       received_at    = NOW()`,
+       form_name       = EXCLUDED.form_name,
+       squad_name      = EXCLUDED.squad_name,
+       squad_name_norm = EXCLUDED.squad_name_norm,
+       squad_tag       = EXCLUDED.squad_tag,
+       manager_name    = EXCLUDED.manager_name,
+       manager_discord = EXCLUDED.manager_discord,
+       uids            = EXCLUDED.uids,
+       raw_extras      = EXCLUDED.raw_extras,
+       received_at     = NOW()`,
     [
       submissionId,
-      formName   ?? null,
-      squadName  ?? null,
+      formName        ?? null,
+      squadName       ?? null,
       normText(squadName),
-      squadTag   ?? null,
-      managerName ?? null,
+      squadTag        ?? null,
+      managerName     ?? null,
+      managerDiscord  ?? null,
       uids,
       JSON.stringify(rawExtras ?? []),
     ]
