@@ -167,48 +167,15 @@ function findChannel(guild) {
 async function postar(channel) {
   console.log(`[ARASAKA] Postando em #${channel.name} (${channel.guild.name})`);
 
-  // 1. Cabeçalho
-  await channel.send({
-    components: [
-      new ContainerBuilder()
-        .setAccentColor(0xFFD700)
-        .addTextDisplayComponents(txt(
-          `## ⚔️ OBLIVION · LINE ARASAKA\n` +
-          `### 📋 Tabela Completa de Resultados — X-Treinos & Torneios\n` +
-          `-# ${TORNEIOS.length} torneios registrados · Kills totais: **${totalKills.toLocaleString('pt-BR')}** · Pontos totais: **${totalPontos.toLocaleString('pt-BR')}**`
-        )),
-    ],
-    flags: MessageFlags.IsComponentsV2,
-  });
-
-  // 2. Cada torneio: imagem + container
-  for (let i = 0; i < TORNEIOS.length; i++) {
-    const r        = TORNEIOS[i];
-    const medal    = medals[r.lugar - 1] ?? `**${r.lugar}º**`;
-    const dataStr  = r.data ?? '📌 Data não confirmada';
-    const killsStr = r.kills != null ? `${r.kills} kills` : r.obs ?? '—';
-    const ptsStr   = r.pontos != null ? `${r.pontos.toLocaleString('pt-BR')} pts` : '—';
-    const cor      = r.lugar === 1 ? 0x00C851 : r.lugar === 2 ? 0x5865F2 : 0xFF8C00;
-
-    const filePath = path.join(ASSETS, r.arquivo);
-    const attach   = new AttachmentBuilder(filePath, { name: `arasaka_${i + 1}.jpeg` });
-
-    const container = new ContainerBuilder()
-      .setAccentColor(cor)
-      .addTextDisplayComponents(txt(
-        `### ${medal} ${r.torneio}\n` +
-        `> 📅 **${dataStr}**\n` +
-        `> 💀 **Kills:** ${killsStr}  ·  🎯 **Pontuação:** ${ptsStr}`
-      ));
-
-    await channel.send({
-      files:      [attach],
-      components: [container],
-      flags:      MessageFlags.IsComponentsV2,
-    });
-
-    // Pequena pausa para não rate-limitar
-    await new Promise(r => setTimeout(r, 800));
+  // 1. Postar todas as fotos em grupos de 10 (limite do Discord)
+  const BATCH = 10;
+  for (let i = 0; i < TORNEIOS.length; i += BATCH) {
+    const grupo = TORNEIOS.slice(i, i + BATCH);
+    const files = grupo.map((r, j) =>
+      new AttachmentBuilder(path.join(ASSETS, r.arquivo), { name: `arasaka_${i + j + 1}.jpeg` })
+    );
+    await channel.send({ files });
+    await new Promise(res => setTimeout(res, 1000));
   }
 
   // 3. Resumo final
