@@ -151,31 +151,26 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 client.once('ready', async () => {
   console.log(`[ARASAKA] Logado como ${client.user.tag}`);
+  console.log(`[ARASAKA] Servidores no cache: ${[...client.guilds.cache.values()].map(g => g.name).join(', ')}`);
 
-  // Resolver o invite para pegar o channel ID
   let targetChannel = null;
-  try {
-    const invite = await client.fetchInvite(INVITE_CODE);
-    console.log(`[ARASAKA] Convite resolvido → Guild: "${invite.guild?.name}" | Canal: #${invite.channel?.name} (${invite.channelId})`);
 
-    // Tentar buscar o canal nos servidores que o bot já está
-    const guild = client.guilds.cache.get(invite.guildId);
-    if (guild) {
-      await guild.channels.fetch().catch(() => {});
-      targetChannel = guild.channels.cache.get(invite.channelId) ?? null;
-    } else {
-      console.warn(`[ARASAKA] ⚠️ Bot não está no servidor "${invite.guild?.name}". Adicione o bot primeiro.`);
-    }
+  // Canal resolvido via invite EcQ4bqWK7 → #📊・tabela-arasaka
+  const TARGET_CHANNEL_ID = '1514696441317032159';
+
+  try {
+    targetChannel = await client.channels.fetch(TARGET_CHANNEL_ID).catch(() => null);
   } catch (err) {
-    console.warn(`[ARASAKA] Não foi possível resolver o invite: ${err.message}`);
+    console.warn(`[ARASAKA] Erro ao buscar canal: ${err.message}`);
   }
 
   if (!targetChannel) {
-    console.error('[ARASAKA] ❌ Canal não encontrado. Verifique se o bot foi adicionado ao servidor do link.');
+    console.error('[ARASAKA] ❌ Canal não encontrado. Verifique se o bot tem acesso ao canal.');
     client.destroy();
     process.exit(1);
   }
 
+  console.log(`[ARASAKA] ✅ Canal encontrado: #${targetChannel.name} em "${targetChannel.guild?.name}"`);
   await postar(targetChannel);
   client.destroy();
   process.exit(0);
