@@ -127,6 +127,21 @@ function buildResumo() {
 async function postar(channel) {
   console.log(`[ARASAKA] Postando em #${channel.name} · ${channel.guild.name}`);
 
+  // Título
+  await channel.send({
+    components: [
+      new ContainerBuilder()
+        .setAccentColor(0xFFD700)
+        .addTextDisplayComponents(txt(
+          `## ⚔️ OBLIVION · LINE ARASAKA\n` +
+          `### 🏆 Histórico de Resultados — X-Treinos & Torneios\n` +
+          `-# ${TORNEIOS.length} torneios registrados · Organizado por data · 21/06/2026`
+        )),
+    ],
+    flags: MessageFlags.IsComponentsV2,
+  });
+  await new Promise(r => setTimeout(r, 800));
+
   const msgs = buildGalleryMessages();
 
   for (const { files, container } of msgs) {
