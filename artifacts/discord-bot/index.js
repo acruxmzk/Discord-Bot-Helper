@@ -22,6 +22,7 @@ const tallyDB        = require('./utils/tallyDB');
 const movieDB        = require('./utils/movieDB');
 
 const { handleEditarRegDatasSubmit, handleEditarRegLinkSubmit } = require('./commands/editarRegulamento');
+const { handleFilmesButton } = require('./handlers/filmesHandler');
 
 const token = process.env.TOKEN;
 if (!token) {
@@ -147,8 +148,14 @@ const MODAL_HANDLERS = {
 };
 
 // Handlers por prefixo (customId contém ':')
+const BUTTON_PREFIX_HANDLERS = {
+  filmes: handleFilmesButton,
+};
+
 function resolveButtonHandler(customId) {
-  return BUTTON_HANDLERS[customId] ?? null;
+  if (BUTTON_HANDLERS[customId]) return BUTTON_HANDLERS[customId];
+  const prefix = customId.split(':')[0];
+  return BUTTON_PREFIX_HANDLERS[prefix] ?? null;
 }
 
 function resolveModalHandler(customId) {
