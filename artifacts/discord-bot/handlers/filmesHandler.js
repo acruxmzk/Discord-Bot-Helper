@@ -11,33 +11,47 @@ const {
 const { getAll } = require('../utils/movieDB');
 const { buildPanelContainer } = require('../utils/buildPanelContainer');
 
-function sep() { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true); }
+function sep()  { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true); }
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
 
+function progressBar(percent, length = 16) {
+  const filled = Math.round((percent / 100) * length);
+  return '▓'.repeat(filled) + '░'.repeat(length - filled);
+}
+
 function formatMovie(m) {
-  const note = m.note !== null ? `  ·  ⭐ **${parseFloat(m.note)}**` : '';
+  const note = m.note !== null ? `  ⭐ **${parseFloat(m.note)}**` : '';
   return m.watched
     ? `✅  **${m.name}**${note}`
-    : `⬜  ${m.name}`;
+    : `○  ${m.name}`;
 }
 
 function buildFilmesContainer(movies, filter) {
   const all     = movies;
   const watched = movies.filter(m => m.watched);
   const pending = movies.filter(m => !m.watched);
+  const percent = all.length > 0 ? Math.round((watched.length / all.length) * 100) : 0;
 
   const list = filter === 'watched' ? watched
              : filter === 'pending' ? pending
              : all;
 
-  const headerText = filter === 'watched'
+  const accent = filter === 'watched' ? 0x57F287
+               : filter === 'pending' ? 0x6C5CE7
+               : 0x6C5CE7;
+
+  const header = filter === 'watched'
     ? `### ✅  Assistidos  —  ${watched.length} de ${all.length}`
     : filter === 'pending'
-    ? `### 🔲  Pendentes  —  ${pending.length} de ${all.length}`
-    : `### 🎬  Watchlist  —  ${watched.length} / ${all.length} assistidos`;
+    ? `### 🎞️  Pendentes  —  ${pending.length} de ${all.length}`
+    : `### ✨  Premiere  🌙`;
 
-  const container = new ContainerBuilder().setAccentColor(0x5865F2);
-  container.addTextDisplayComponents(txt(headerText));
+  const subtitle = filter === 'all'
+    ? `-# **${watched.length}** assistidos  ·  **${pending.length}** pendentes  ·  \`${'▓'.repeat(Math.round(percent / 100 * 10))}${'░'.repeat(10 - Math.round(percent / 100 * 10))}\`  **${percent}%**`
+    : null;
+
+  const container = new ContainerBuilder().setAccentColor(accent);
+  container.addTextDisplayComponents(txt(subtitle ? `${header}\n${subtitle}` : header));
   container.addSeparatorComponents(sep());
 
   if (list.length === 0) {
@@ -66,7 +80,7 @@ function buildFilmesContainer(movies, filter) {
       .setStyle(filter === 'watched' ? ButtonStyle.Success : ButtonStyle.Secondary),
     new ButtonBuilder()
       .setCustomId('filmes:pending')
-      .setLabel(`🔲  Pendentes  (${pending.length})`)
+      .setLabel(`🎞️  Pendentes  (${pending.length})`)
       .setStyle(filter === 'pending' ? ButtonStyle.Primary : ButtonStyle.Secondary),
   );
   container.addActionRowComponents(row);
