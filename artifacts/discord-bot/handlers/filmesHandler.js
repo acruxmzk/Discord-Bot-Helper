@@ -53,18 +53,15 @@ function buildFilmesContainer(movies, filter) {
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId('filmes:all')
-      .setLabel('Todos')
-      .setEmoji('🎬')
+      .setLabel('🎬 Todos')
       .setStyle(filter === 'all' ? ButtonStyle.Primary : ButtonStyle.Secondary),
     new ButtonBuilder()
       .setCustomId('filmes:watched')
-      .setLabel('Assistidos')
-      .setEmoji('☑')
+      .setLabel('✅ Assistidos')
       .setStyle(filter === 'watched' ? ButtonStyle.Primary : ButtonStyle.Secondary),
     new ButtonBuilder()
       .setCustomId('filmes:pending')
-      .setLabel('Pendentes')
-      .setEmoji('☐')
+      .setLabel('🔲 Pendentes')
       .setStyle(filter === 'pending' ? ButtonStyle.Primary : ButtonStyle.Secondary),
   );
   container.addActionRowComponents(row);
