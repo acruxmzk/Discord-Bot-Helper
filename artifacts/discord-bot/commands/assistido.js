@@ -6,7 +6,7 @@ const {
   SeparatorSpacingSize,
   MessageFlags,
 } = require('discord.js');
-const { search, markWatched } = require('../utils/movieDB');
+const { search, markWatched, setNote } = require('../utils/movieDB');
 
 function sep() { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true); }
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
@@ -14,12 +14,18 @@ function txt(c) { return new TextDisplayBuilder().setContent(c); }
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('assistido')
-    .setDescription('Marca um filme como assistido')
+    .setDescription('Marca um filme como assistido e opcionalmente registra a nota')
     .addStringOption(o =>
       o.setName('filme')
         .setDescription('Nome do filme')
         .setRequired(true)
         .setAutocomplete(true)
+    )
+    .addNumberOption(o =>
+      o.setName('nota')
+        .setDescription('Nota de 0 a 10 (opcional)')
+        .setMinValue(0)
+        .setMaxValue(10)
     ),
 
   async autocomplete(interaction) {
@@ -34,7 +40,9 @@ module.exports = {
     await interaction.deferReply({ ephemeral: true });
 
     const name = interaction.options.getString('filme');
-    const movie = await markWatched(name);
+    const nota = interaction.options.getNumber('nota');
+
+    let movie = await markWatched(name);
 
     if (!movie) {
       await interaction.editReply({
@@ -48,7 +56,12 @@ module.exports = {
       return;
     }
 
+    if (nota !== null) {
+      movie = await setNote(movie.name, nota) ?? movie;
+    }
+
     const dateStr = new Date(movie.watched_at).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+    const noteStr = movie.note !== null ? `\n⭐ **${parseFloat(movie.note)}/10**` : '';
 
     await interaction.editReply({
       components: [
@@ -58,10 +71,9 @@ module.exports = {
           .addSeparatorComponents(sep())
           .addTextDisplayComponents(txt(
             `🎬 **${movie.name}**\n` +
-            `📅 ${dateStr}`
-          ))
-          .addSeparatorComponents(sep())
-          .addTextDisplayComponents(txt(`-# Use /nota para avaliar o filme`)),
+            `📅 ${dateStr}` +
+            noteStr
+          )),
       ],
       flags: MessageFlags.IsComponentsV2,
     });
