@@ -133,6 +133,7 @@ async function handleFaqMessage(message) {
   if (message.author.bot) return;
 
   const inFaq = isFaqChannel(message.channel);
+  console.log(`[FAQ] Canal: "${message.channel.name}" | isFaq: ${inFaq} | content length: ${message.content.length}`);
   if (!inFaq) return;
 
   const question = message.content.trim();
