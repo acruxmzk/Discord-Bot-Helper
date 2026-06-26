@@ -19,6 +19,7 @@ const banDB          = require('./utils/banDB');
 const fichaDB        = require('./utils/fichaDB');
 const regulamentoDB  = require('./utils/regulamentoDB');
 const tallyDB        = require('./utils/tallyDB');
+const movieDB        = require('./utils/movieDB');
 
 const { handleEditarRegDatasSubmit, handleEditarRegLinkSubmit } = require('./commands/editarRegulamento');
 
@@ -39,6 +40,8 @@ async function initDB() {
     console.log('[DB] Tabela regulamento_config pronta.');
     await tallyDB.init();
     console.log('[DB] Tabela tally_submissions pronta.');
+    await movieDB.init();
+    console.log('[DB] Tabela movies pronta.');
   } catch (err) {
     console.error('[DB] Erro ao inicializar tabelas:', err.message);
     process.exit(1);
