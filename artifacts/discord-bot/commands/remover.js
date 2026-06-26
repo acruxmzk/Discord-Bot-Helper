@@ -7,6 +7,7 @@ const {
   MessageFlags,
 } = require('discord.js');
 const { search, removeMovie } = require('../utils/movieDB');
+const { refreshPanel } = require('../utils/refreshPanel');
 
 function sep() { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true); }
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
@@ -25,9 +26,7 @@ module.exports = {
   async autocomplete(interaction) {
     const query = interaction.options.getFocused();
     const results = await search(query || '');
-    await interaction.respond(
-      results.map(m => ({ name: m.name, value: m.name }))
-    );
+    await interaction.respond(results.map(m => ({ name: m.name, value: m.name })));
   },
 
   async execute(interaction) {
@@ -58,5 +57,7 @@ module.exports = {
       ],
       flags: MessageFlags.IsComponentsV2,
     });
+
+    refreshPanel(interaction.guildId).catch(() => {});
   },
 };

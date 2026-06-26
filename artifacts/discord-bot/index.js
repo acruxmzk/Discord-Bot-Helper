@@ -20,9 +20,11 @@ const fichaDB        = require('./utils/fichaDB');
 const regulamentoDB  = require('./utils/regulamentoDB');
 const tallyDB        = require('./utils/tallyDB');
 const movieDB        = require('./utils/movieDB');
+const panelStore     = require('./utils/panelStore');
+const clientRef      = require('./utils/clientRef');
 
 const { handleEditarRegDatasSubmit, handleEditarRegLinkSubmit } = require('./commands/editarRegulamento');
-const { handleFilmesButton } = require('./handlers/filmesHandler');
+const { handleFilmesButton, handlePainelButton } = require('./handlers/filmesHandler');
 
 const token = process.env.TOKEN;
 if (!token) {
@@ -43,6 +45,8 @@ async function initDB() {
     console.log('[DB] Tabela tally_submissions pronta.');
     await movieDB.init();
     console.log('[DB] Tabela movies pronta.');
+    await panelStore.init();
+    console.log('[DB] Tabela movie_panel pronta.');
   } catch (err) {
     console.error('[DB] Erro ao inicializar tabelas:', err.message);
     process.exit(1);
@@ -57,6 +61,8 @@ const client = new Client({
     GatewayIntentBits.MessageContent,
   ],
 });
+
+clientRef.set(client);
 
 client.commands = new Collection();
 const commandFiles = fs.readdirSync(path.join(__dirname, 'commands')).filter(f => f.endsWith('.js'));
@@ -150,6 +156,7 @@ const MODAL_HANDLERS = {
 // Handlers por prefixo (customId contém ':')
 const BUTTON_PREFIX_HANDLERS = {
   filmes: handleFilmesButton,
+  painel: handlePainelButton,
 };
 
 function resolveButtonHandler(customId) {

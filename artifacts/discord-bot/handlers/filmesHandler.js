@@ -9,14 +9,15 @@ const {
   MessageFlags,
 } = require('discord.js');
 const { getAll } = require('../utils/movieDB');
+const { buildPanelContainer } = require('../utils/buildPanelContainer');
 
 function sep() { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true); }
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
 
 function buildFilmesContainer(movies, filter) {
-  const all      = movies;
-  const watched  = movies.filter(m => m.watched);
-  const pending  = movies.filter(m => !m.watched);
+  const all     = movies;
+  const watched = movies.filter(m => m.watched);
+  const pending = movies.filter(m => !m.watched);
 
   const list = filter === 'watched' ? watched
              : filter === 'pending' ? pending
@@ -66,7 +67,6 @@ function buildFilmesContainer(movies, filter) {
       .setEmoji('☐')
       .setStyle(filter === 'pending' ? ButtonStyle.Primary : ButtonStyle.Secondary),
   );
-
   container.addActionRowComponents(row);
 
   return container;
@@ -76,11 +76,20 @@ async function handleFilmesButton(interaction) {
   const filter = interaction.customId.split(':')[1] ?? 'all';
   const movies = await getAll();
   const container = buildFilmesContainer(movies, filter);
-
   await interaction.update({
     components: [container],
     flags: MessageFlags.IsComponentsV2,
   });
 }
 
-module.exports = { handleFilmesButton, buildFilmesContainer };
+async function handlePainelButton(interaction) {
+  const filter = interaction.customId.split(':')[1] ?? 'all';
+  const movies = await getAll();
+  const container = buildPanelContainer(movies, filter);
+  await interaction.update({
+    components: [container],
+    flags: MessageFlags.IsComponentsV2,
+  });
+}
+
+module.exports = { handleFilmesButton, handlePainelButton, buildFilmesContainer };

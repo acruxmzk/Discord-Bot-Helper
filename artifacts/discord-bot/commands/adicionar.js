@@ -7,6 +7,7 @@ const {
   MessageFlags,
 } = require('discord.js');
 const { addMovie, markWatched, setNote } = require('../utils/movieDB');
+const { refreshPanel } = require('../utils/refreshPanel');
 
 function sep() { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true); }
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
@@ -35,9 +36,9 @@ module.exports = {
   async execute(interaction) {
     await interaction.deferReply({ ephemeral: true });
 
-    const name      = interaction.options.getString('filme').trim();
-    const watched   = interaction.options.getBoolean('assistido') ?? false;
-    const nota      = interaction.options.getNumber('nota');
+    const name    = interaction.options.getString('filme').trim();
+    const watched = interaction.options.getBoolean('assistido') ?? false;
+    const nota    = interaction.options.getNumber('nota');
 
     const added = await addMovie(name);
 
@@ -56,13 +57,8 @@ module.exports = {
     }
 
     let movie = added;
-
-    if (watched) {
-      movie = await markWatched(name) ?? movie;
-    }
-    if (nota !== null) {
-      movie = await setNote(name, nota) ?? movie;
-    }
+    if (watched) movie = await markWatched(name) ?? movie;
+    if (nota !== null) movie = await setNote(name, nota) ?? movie;
 
     const statusStr = movie.watched ? '☑ Assistido' : '☐ Não assistido';
     const noteStr   = movie.note !== null ? `\n⭐ **${parseFloat(movie.note)}/10**` : '';
@@ -81,5 +77,7 @@ module.exports = {
       ],
       flags: MessageFlags.IsComponentsV2,
     });
+
+    refreshPanel(interaction.guildId).catch(() => {});
   },
 };
