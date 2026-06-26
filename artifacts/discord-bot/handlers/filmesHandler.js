@@ -12,9 +12,10 @@ const { getAll } = require('../utils/movieDB');
 const { buildPanelContainer } = require('../utils/buildPanelContainer');
 
 function sep()  { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true); }
+function gap()  { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large).setDivider(false); }
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
 
-function progressBar(percent, length = 14) {
+function progressBar(percent, length = 16) {
   const filled = Math.round((percent / 100) * length);
   return '▓'.repeat(filled) + '░'.repeat(length - filled);
 }
@@ -22,16 +23,14 @@ function progressBar(percent, length = 14) {
 function fmtDate(raw) {
   if (!raw) return '';
   const d  = new Date(raw);
-  const dd = String(d.getDate()).padStart(2, '0');
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  return `${dd}/${mm}`;
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
 }
 
 function formatMovie(m) {
   const note = m.note !== null ? `  ⭐ **${parseFloat(m.note)}**` : '';
   const date = m.watched && m.watched_at ? `  ·  ${fmtDate(m.watched_at)}` : '';
   return m.watched
-    ? `✅  **${m.name}**${note}${date}`
+    ? `✅  ***${m.name}***${note}${date}`
     : `○  ${m.name}`;
 }
 
@@ -53,34 +52,63 @@ function buildFilmesContainer(movies, filter) {
                : filter === 'pending' ? 0xFEE75C
                : 0x6C5CE7;
 
-  let header = '';
-  let subtitle = '';
+  const container = new ContainerBuilder().setAccentColor(accent);
 
+  // ── Cabeçalho dinâmico por filtro ──────────────────────────────────────────
   if (filter === 'all') {
     const bar = progressBar(percent);
-    header   = `### ✨  Premiere  🌙`;
-    subtitle = `-# **${watched.length}** assistidos  ·  **${pending.length}** pendentes  ·  \`${bar}\`  **${percent}%**` +
-               (avgNote ? `  ·  ⭐ **${avgNote}**` : '');
+    container.addTextDisplayComponents(txt(
+      `### ✨  Premiere  🌙\n` +
+      `-# Sua sala de cinema particular`
+    ));
+    container.addSeparatorComponents(sep());
+    container.addTextDisplayComponents(txt(
+      `> **📊  ${watched.length} / ${all.length}  assistidos  —  ${percent}%**\n` +
+      `> \`${bar}\`` +
+      (avgNote ? `\n> **⭐  Nota média  ${avgNote} / 10**` : '')
+    ));
+
   } else if (filter === 'watched') {
-    header   = `### ✅  Assistidos  —  ${watched.length} de ${all.length}`;
-    subtitle = avgNote
-      ? `-# Nota média  **${avgNote}** / 10  ·  ${rated.length} avaliado${rated.length !== 1 ? 's' : ''}`
-      : `-# Nenhum avaliado ainda`;
+    container.addTextDisplayComponents(txt(
+      `### ✅  Assistidos\n` +
+      `-# ${watched.length} de ${all.length} filmes concluídos`
+    ));
+    container.addSeparatorComponents(sep());
+    if (avgNote) {
+      container.addTextDisplayComponents(txt(
+        `> **⭐  Nota média  ${avgNote} / 10**\n` +
+        `-# Baseado em ${rated.length} avaliação${rated.length !== 1 ? 'ões' : ''}`
+      ));
+    } else {
+      container.addTextDisplayComponents(txt(
+        `> *⭐  Nenhum avaliado ainda — use /nota*`
+      ));
+    }
+
   } else {
-    header   = `### 🎞️  Pendentes  —  ${pending.length} de ${all.length}`;
-    subtitle = `-# ${pending.length} filme${pending.length !== 1 ? 's' : ''} esperando na fila`;
+    container.addTextDisplayComponents(txt(
+      `### 🎞️  Pendentes\n` +
+      `-# ${pending.length} filme${pending.length !== 1 ? 's' : ''} esperando na fila`
+    ));
+    container.addSeparatorComponents(sep());
+    if (pending.length > 0) {
+      container.addTextDisplayComponents(txt(
+        `> **🎬  Próximo na fila**\n` +
+        `> ○  *${pending[0].name}*`
+      ));
+    }
   }
 
-  const container = new ContainerBuilder().setAccentColor(accent);
-  container.addTextDisplayComponents(txt(`${header}\n${subtitle}`));
   container.addSeparatorComponents(sep());
 
+  // ── Lista ────────────────────────────────────────────────────────────────────
   if (list.length === 0) {
-    container.addTextDisplayComponents(txt(`-# Nenhum filme nessa categoria ainda.`));
+    container.addSeparatorComponents(gap());
+    container.addTextDisplayComponents(txt(`*Nenhum filme nessa categoria ainda.*`));
+    container.addSeparatorComponents(gap());
   } else {
     const chunks = [];
     for (let i = 0; i < list.length; i += 10) chunks.push(list.slice(i, i + 10));
-
     for (let ci = 0; ci < chunks.length; ci++) {
       container.addTextDisplayComponents(txt(chunks[ci].map(formatMovie).join('\n')));
       if (ci < chunks.length - 1) container.addSeparatorComponents(sep());
@@ -89,6 +117,7 @@ function buildFilmesContainer(movies, filter) {
 
   container.addSeparatorComponents(sep());
 
+  // ── Botões ───────────────────────────────────────────────────────────────────
   container.addActionRowComponents(
     new ActionRowBuilder().addComponents(
       new ButtonBuilder()
@@ -102,7 +131,7 @@ function buildFilmesContainer(movies, filter) {
       new ButtonBuilder()
         .setCustomId('filmes:pending')
         .setLabel(`🎞️  Pendentes  (${pending.length})`)
-        .setStyle(filter === 'pending' ? ButtonStyle.Secondary : ButtonStyle.Secondary),
+        .setStyle(filter === 'pending' ? ButtonStyle.Primary : ButtonStyle.Secondary),
     )
   );
 
