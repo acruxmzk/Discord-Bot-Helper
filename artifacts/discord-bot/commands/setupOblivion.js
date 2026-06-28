@@ -11,9 +11,8 @@ const {
 const ROLES_DEF = [
   { name: '👑 Owner',          color: 0xFFD700, hoist: true, position: 4 },
   { name: '🎖 Manager',        color: 0xC0C0C0, hoist: true, position: 3 },
-  { name: '🔴 Arasaka Player',  color: 0xFF4444, hoist: true, position: 3 },
-  { name: '⚫ Kurosaka Player', color: 0x555555, hoist: true, position: 2 },
-  { name: '🟣 Ayasaka Player',  color: 0xAA44FF, hoist: true, position: 1 },
+  { name: '🔴 Arasaka Player',  color: 0xFF4444, hoist: true, position: 2 },
+  { name: '⚫ Kurosaka Player', color: 0x555555, hoist: true, position: 1 },
 ];
 
 const CATEGORIES_DEF = [
@@ -44,16 +43,6 @@ const CATEGORIES_DEF = [
       { name: '🔊・kurosaka',        type: ChannelType.GuildVoice },
     ],
   },
-  {
-    name: '◢◤ ＡＹＡＳＡＫＡ ◥◣',
-    access: 'ayasaka',
-    channels: [
-      { name: '🧠・estratégia',      type: ChannelType.GuildText  },
-      { name: '🎥・clips',           type: ChannelType.GuildText  },
-      { name: '📊・tabela-ayasaka',  type: ChannelType.GuildText  },
-      { name: '🔊・ayasaka',         type: ChannelType.GuildVoice },
-    ],
-  },
 ];
 
 // ── Helper: criar ou encontrar cargo ──────────────────────────────────────────
@@ -76,7 +65,6 @@ function buildOverwrites(guild, access, roles) {
   const managerId  = roles['🎖 Manager']?.id;
   const arasakaId  = roles['🔴 Arasaka Player']?.id;
   const kurosakaId = roles['⚫ Kurosaka Player']?.id;
-  const ayasakaId  = roles['🟣 Ayasaka Player']?.id;
 
   const BASE_ALLOW = [
     PermissionFlagsBits.ViewChannel,
@@ -101,9 +89,7 @@ function buildOverwrites(guild, access, roles) {
     ];
   }
 
-  const memberRoleId = access === 'arasaka' ? arasakaId
-                     : access === 'kurosaka' ? kurosakaId
-                     : ayasakaId;
+  const memberRoleId = access === 'arasaka' ? arasakaId : kurosakaId;
   const overwrites = [
     {
       id:   everyoneId,
@@ -190,10 +176,9 @@ module.exports = {
           {
             name:   '🔐 Isolamento',
             value:
-              '`🔴 Arasaka Player` vê só a Arasaka\n' +
-              '`⚫ Kurosaka Player` vê só a Kurosaka\n' +
-              '`🟣 Ayasaka Player` vê só a Ayasaka\n' +
-              '`🎖 Manager` vê todas',
+              '`🔴 Arasaka Player` **não vê** a categoria Kurosaka\n' +
+              '`⚫ Kurosaka Player` **não vê** a categoria Arasaka\n' +
+              '`🎖 Manager` **vê ambas**',
             inline: false,
           },
           {
