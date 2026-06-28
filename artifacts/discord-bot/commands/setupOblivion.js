@@ -11,7 +11,6 @@ const {
 const ROLES_DEF = [
   { name: '👑 Owner',          color: 0xFFD700, hoist: true, position: 4 },
   { name: '🎖 Manager',        color: 0xC0C0C0, hoist: true, position: 3 },
-  { name: '🔴 Arasaka Player',  color: 0xFF4444, hoist: true, position: 2 },
   { name: '⚫ Kurosaka Player', color: 0x555555, hoist: true, position: 1 },
 ];
 
@@ -21,16 +20,6 @@ const CATEGORIES_DEF = [
     access: 'everyone',
     channels: [
       { name: '🔊・reunião', type: ChannelType.GuildVoice },
-    ],
-  },
-  {
-    name: '◢◤ ＡＲＡＳＡＫＡ ◥◣',
-    access: 'arasaka',
-    channels: [
-      { name: '🧠・estratégia',    type: ChannelType.GuildText  },
-      { name: '🎥・clips',         type: ChannelType.GuildText  },
-      { name: '📊・tabela-arasaka', type: ChannelType.GuildText  },
-      { name: '🔊・arasaka',        type: ChannelType.GuildVoice },
     ],
   },
   {
@@ -63,7 +52,6 @@ async function upsertRole(guild, def) {
 function buildOverwrites(guild, access, roles) {
   const everyoneId = guild.roles.everyone.id;
   const managerId  = roles['🎖 Manager']?.id;
-  const arasakaId  = roles['🔴 Arasaka Player']?.id;
   const kurosakaId = roles['⚫ Kurosaka Player']?.id;
 
   const BASE_ALLOW = [
@@ -89,7 +77,7 @@ function buildOverwrites(guild, access, roles) {
     ];
   }
 
-  const memberRoleId = access === 'arasaka' ? arasakaId : kurosakaId;
+  const memberRoleId = kurosakaId;
   const overwrites = [
     {
       id:   everyoneId,
@@ -176,9 +164,8 @@ module.exports = {
           {
             name:   '🔐 Isolamento',
             value:
-              '`🔴 Arasaka Player` **não vê** a categoria Kurosaka\n' +
-              '`⚫ Kurosaka Player` **não vê** a categoria Arasaka\n' +
-              '`🎖 Manager` **vê ambas**',
+              '`⚫ Kurosaka Player` acessa a categoria Kurosaka\n' +
+              '`🎖 Manager` vê tudo',
             inline: false,
           },
           {
