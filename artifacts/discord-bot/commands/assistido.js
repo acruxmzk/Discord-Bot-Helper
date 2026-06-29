@@ -55,18 +55,45 @@ module.exports = {
       return;
     }
 
+    const alreadyWatched = movie.already_watched === true;
+
     if (nota !== null) {
       movie = await setNote(movie.name, nota) ?? movie;
+    } else if (alreadyWatched) {
+      // Já estava assistido e não veio nota nova — nada a fazer
+      const dateStr = new Date(movie.watched_at).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+      const noteStr = movie.note !== null ? `\n⭐ **${parseFloat(movie.note)}/10**` : '';
+      await interaction.editReply({
+        components: [
+          new ContainerBuilder()
+            .setAccentColor(0xFEE75C)
+            .addTextDisplayComponents(txt(`### ⚠️ Filme já estava marcado como assistido`))
+            .addSeparatorComponents(sep())
+            .addTextDisplayComponents(txt(
+              `🎬 **${movie.name}**\n` +
+              `📅 ${dateStr}` +
+              noteStr +
+              `\n\n*Use a opção \`nota\` para atualizar a nota sem mudar a data.*`
+            )),
+        ],
+        flags: MessageFlags.IsComponentsV2,
+      });
+      refreshPanel(interaction.guildId).catch(() => {});
+      return;
     }
 
     const dateStr = new Date(movie.watched_at).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
     const noteStr = movie.note !== null ? `\n⭐ **${parseFloat(movie.note)}/10**` : '';
 
+    const title = alreadyWatched
+      ? `### 📝 Nota atualizada`
+      : `### ✅ Filme marcado como assistido`;
+
     await interaction.editReply({
       components: [
         new ContainerBuilder()
           .setAccentColor(0x57F287)
-          .addTextDisplayComponents(txt(`### ✅ Filme marcado como assistido`))
+          .addTextDisplayComponents(txt(title))
           .addSeparatorComponents(sep())
           .addTextDisplayComponents(txt(
             `🎬 **${movie.name}**\n` +

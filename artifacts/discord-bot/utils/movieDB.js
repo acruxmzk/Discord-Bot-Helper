@@ -75,9 +75,14 @@ async function search(query) {
 
 async function markWatched(name) {
   const res = await pool.query(
-    `UPDATE movies SET watched = true, watched_at = CURRENT_DATE
+    `WITH before AS (
+       SELECT watched FROM movies WHERE LOWER(name) = LOWER($1)
+     )
+     UPDATE movies SET
+       watched    = true,
+       watched_at = CASE WHEN (SELECT watched FROM before) THEN watched_at ELSE CURRENT_DATE END
      WHERE LOWER(name) = LOWER($1)
-     RETURNING *`,
+     RETURNING *, (SELECT watched FROM before) AS already_watched`,
     [name]
   );
   return res.rows[0] ?? null;
