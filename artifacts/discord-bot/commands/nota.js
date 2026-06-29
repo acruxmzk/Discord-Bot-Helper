@@ -22,12 +22,10 @@ module.exports = {
         .setRequired(true)
         .setAutocomplete(true)
     )
-    .addNumberOption(o =>
+    .addStringOption(o =>
       o.setName('nota')
-        .setDescription('Nota de 0 a 10 (aceita decimais)')
+        .setDescription('Nota de 0 a 10, ex: 6.8 ou 6,8')
         .setRequired(true)
-        .setMinValue(0)
-        .setMaxValue(10)
     ),
 
   async autocomplete(interaction) {
@@ -39,8 +37,21 @@ module.exports = {
   async execute(interaction) {
     await interaction.deferReply({ ephemeral: true });
 
-    const name = interaction.options.getString('filme');
-    const nota = interaction.options.getNumber('nota');
+    const name    = interaction.options.getString('filme');
+    const notaRaw = interaction.options.getString('nota');
+    const nota    = parseFloat(notaRaw.replace(',', '.'));
+
+    if (isNaN(nota) || nota < 0 || nota > 10) {
+      await interaction.editReply({
+        components: [
+          new ContainerBuilder()
+            .setAccentColor(0xFF4444)
+            .addTextDisplayComponents(txt(`### ❌ Nota inválida\nDigite um número entre **0** e **10**, ex: \`6.8\` ou \`6,8\`.`)),
+        ],
+        flags: MessageFlags.IsComponentsV2,
+      });
+      return;
+    }
 
     const movie = await setNote(name, nota);
 
