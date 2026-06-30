@@ -26,7 +26,7 @@ async function refreshPanel(guildId) {
       flags: MessageFlags.IsComponentsV2,
     });
   } catch (err) {
-    console.warn('[PANEL] Falha ao atualizar:', err.message);
+    console.error('[PANEL] Falha ao atualizar:', err.message, err.stack);
   }
 }
 

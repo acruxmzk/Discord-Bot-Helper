@@ -22,7 +22,7 @@ module.exports = {
 
   async execute(interaction) {
     const uid    = interaction.options.getString('uid').trim();
-    const result = checkPlayer(uid);
+    const result = await checkPlayer(uid);
 
     if (result.status === 'BANIDO') {
       await interaction.reply({
