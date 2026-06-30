@@ -1,36 +1,43 @@
-# [Project name]
+# Oblivion League Discord Bot
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Bot de administração para o servidor Discord da **Oblivion League** — campeonato de Free Fire. Gerencia bans, squads, inscrições, tickets, FAQ com IA, filmes, e muito mais.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- **Workflow:** `Discord Bot` — `cd artifacts/discord-bot && node index.js`
+- **Deploy de comandos:** `cd artifacts/discord-bot && node deploy-commands.js` (rodar uma vez após adicionar/alterar slash commands)
+- **Health check:** `GET /health` na porta 3000 (exposta como 3001 externamente)
+- **Webhook Tally:** `POST /webhook/tally` na porta 3000
+
+## Required Secrets
+
+| Variável | Obrigatória | Descrição |
+|---|---|---|
+| `TOKEN` | ✅ Sim | Discord bot token |
+| `DATABASE_URL` | ✅ Sim | Gerenciada automaticamente pelo Replit PostgreSQL |
+| `GROQ_API_KEY` | ❌ Opcional | Classificador de FAQ com IA (Groq / Llama 3.1) |
 
 ## Stack
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- Node.js 20, CommonJS (sem TypeScript)
+- discord.js v14
+- PostgreSQL via `pg` (pool em `utils/pgPool.js`)
+- Express 5 (servidor webhook na porta 3000)
+- OpenAI SDK apontando para Groq (`api.groq.com`)
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/discord-bot/` — raiz do bot
+- `commands/` — slash commands (carregados automaticamente pelo index.js)
+- `handlers/` — handlers de eventos (ticket, FAQ, ban check, Tally webhook, filmes)
+- `utils/` — pool PG, DB helpers (banDB, fichaDB, regulamentoDB, tallyDB, movieDB, panelStore), Groq classifier
+- `config/config.js` — configurações estáticas (cor padrão, número de squads, prefixo)
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
-
-## Product
-
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Tabelas criadas via `CREATE TABLE IF NOT EXISTS` no `initDB()` na inicialização — sem ferramenta de migration separada.
+- Auto-ping a cada 4 min para manter o processo vivo no Replit (complementa UptimeRobot/cron-job.org).
+- Groq classifier retorna `null` silenciosamente se `GROQ_API_KEY` não estiver definida — FAQ cai para keyword matching.
 
 ## User preferences
 
@@ -38,8 +45,6 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
-
-## Pointers
-
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- O bot exige `TOKEN` no ambiente. Sem ele, o processo encerra imediatamente com erro.
+- Rodar `node deploy-commands.js` é necessário para registrar novos slash commands no Discord.
+- As tabelas são criadas na inicialização; se o banco mudar, pode ser necessário rodar `ALTER TABLE` manualmente.
