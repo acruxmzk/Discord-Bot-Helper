@@ -22,10 +22,12 @@ module.exports = {
         .setRequired(true)
         .setAutocomplete(true)
     )
-    .addStringOption(o =>
+    .addNumberOption(o =>
       o.setName('nota')
-        .setDescription('Nota de 0 a 10, ex: 6.8 ou 6,8')
+        .setDescription('Nota de 0 a 10, ex: 6.8')
         .setRequired(true)
+        .setMinValue(0)
+        .setMaxValue(10)
     ),
 
   async autocomplete(interaction) {
@@ -35,13 +37,12 @@ module.exports = {
   },
 
   async execute(interaction) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-    const name    = interaction.options.getString('filme');
-    const notaRaw = interaction.options.getString('nota');
-    const nota    = parseFloat(notaRaw.replace(',', '.'));
+    const name = interaction.options.getString('filme');
+    const nota = interaction.options.getNumber('nota');
 
-    if (isNaN(nota) || nota < 0 || nota > 10) {
+    if (nota === null || isNaN(nota) || nota < 0 || nota > 10) {
       await interaction.editReply({
         components: [
           new ContainerBuilder()
