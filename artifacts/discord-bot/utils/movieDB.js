@@ -31,6 +31,8 @@ const INITIAL_MOVIES = [
   'Homem-Formiga e a Vespa: Quantumania',
   'Guardiões da Galáxia Vol. 3',
   'Deadpool & Wolverine',
+  'Barbie:  A princesa da ilha',
+  'Para todos os garotos que já amei',
 ];
 
 async function init() {
