@@ -7,8 +7,7 @@ const {
 } = require('discord.js');
 
 // ── Identidade visual ─────────────────────────────────────────────────────────
-const CAT_MAIN  = '🌸 𝒜𝓎𝒶𝓈𝒶𝓀𝒶 𝒫𝓇𝑜𝓉𝑜𝒸𝑜𝓁';
-const CAT_TRIOS = '🎀 𝒯𝓇𝒾𝑜𝓈';
+const CAT_MAIN = '🌸 𝒜𝓎𝒶𝓈𝒶𝓀𝒶 𝒫𝓇𝑜𝓉𝑜𝒸𝑜𝓁';
 
 // ── Cargos ────────────────────────────────────────────────────────────────────
 const ROLES_DEF = [
@@ -16,7 +15,7 @@ const ROLES_DEF = [
   { name: '📋 Manager | Ayasaka', color: 0xB983FF, hoist: true },
 ];
 
-// ── Canais institucionais (categoria principal) ────────────────────────────────
+// ── Canais institucionais ──────────────────────────────────────────────────────
 const MAIN_CHANNELS = [
   '📜┃𝓡𝓮𝓰𝓻𝓪𝓼',
   '📢┃𝓐𝓷ú𝓷𝓬𝓲𝓸𝓼',
@@ -27,15 +26,12 @@ const MAIN_CHANNELS = [
   '📝┃𝓘𝓷𝓼𝓬𝓻𝓲çõ𝓮𝓼',
 ];
 
-// ── Trios: 25 pares intercalados [texto, voz] ─────────────────────────────────
-// texto acima → voz abaixo, exatamente como o Discord ordena por posição
-const TRIO_PAIRS = Array.from({ length: 25 }, (_, i) => {
+// ── 25 canais de voz dos trios (sem canal de texto individual) ─────────────────
+// Total: 7 institucionais + 1 separador + 25 voz = 33 canais (< limite de 50)
+const TRIO_VOICE = Array.from({ length: 25 }, (_, i) => {
   const n = String(i + 1).padStart(2, '0');
-  return [
-    { name: `💗┃𝓽𝓻𝓲𝓸-${n}`, type: ChannelType.GuildText  },
-    { name: `🔊┃𝓽𝓻𝓲𝓸-${n}`, type: ChannelType.GuildVoice, userLimit: 3 },
-  ];
-}).flat(); // 50 canais — exatamente no limite do Discord
+  return { name: `🔊┃𝓣𝓻𝓲𝓸-${n}`, type: ChannelType.GuildVoice, userLimit: 3 };
+});
 
 // ── Helper: criar ou reutilizar cargo ─────────────────────────────────────────
 async function upsertRole(guild, def) {
@@ -139,7 +135,7 @@ function buildOverwrites(guild, roles, type = 'player') {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('setup-ayasaka')
-    .setDescription('Cria a estrutura completa do 🌸 Ayasaka Protocol (duas categorias, Unicode, permissões)')
+    .setDescription('Cria a estrutura completa do 🌸 Ayasaka Protocol (categoria única, Unicode, permissões)')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
@@ -163,11 +159,12 @@ module.exports = {
           : `⏭️ Cargo já existe: **${def.name}**`);
       }
 
-      // ── 2. Categoria principal ─────────────────────────────────────────────
+      // ── 2. Categoria única ─────────────────────────────────────────────────
       log.push('\n**— 🌸 Ayasaka Protocol —**');
       const playerOverwrites = buildOverwrites(guild, roles, 'player');
       const catMain = await upsertCategory(guild, CAT_MAIN, playerOverwrites, log);
 
+      // Canais institucionais de texto
       for (const name of MAIN_CHANNELS) {
         await upsertChannel(guild, {
           name,
@@ -177,17 +174,36 @@ module.exports = {
         }, log);
       }
 
-      // ── 3. Categoria de trios ──────────────────────────────────────────────
-      log.push('\n**— 🎀 Trios —**');
-      const trioOverwrites = buildOverwrites(guild, roles, 'trio');
-      const catTrios = await upsertCategory(guild, CAT_TRIOS, trioOverwrites, log);
+      // Separador visual
+      await upsertChannel(guild, {
+        name:   '━━━━━━━━━━━━━━',
+        type:   ChannelType.GuildText,
+        parent: catMain.id,
+        permissionOverwrites: [
+          { id: guild.roles.everyone.id, type: OverwriteType.Role,
+            deny: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages] },
+          ...(roles['🌸 Player | Ayasaka']
+            ? [{ id: roles['🌸 Player | Ayasaka'].id, type: OverwriteType.Role,
+                allow: [PermissionFlagsBits.ViewChannel],
+                deny:  [PermissionFlagsBits.SendMessages] }]
+            : []),
+          ...(roles['📋 Manager | Ayasaka']
+            ? [{ id: roles['📋 Manager | Ayasaka'].id, type: OverwriteType.Role,
+                allow: [PermissionFlagsBits.ViewChannel],
+                deny:  [PermissionFlagsBits.SendMessages] }]
+            : []),
+        ],
+        reason: 'Setup Ayasaka Protocol',
+      }, log);
 
-      for (const ch of TRIO_PAIRS) {
+      // 25 canais de voz dos trios (sem canal de texto individual)
+      log.push('\n**— 🔊 Canais de Voz —**');
+      for (const ch of TRIO_VOICE) {
         await upsertChannel(guild, {
           name:      ch.name,
           type:      ch.type,
-          parent:    catTrios.id,
-          userLimit: ch.userLimit ?? 0,
+          parent:    catMain.id,
+          userLimit: ch.userLimit,
           reason:    'Setup Ayasaka Protocol',
         }, log);
       }
@@ -207,7 +223,7 @@ module.exports = {
           .setColor(0xFF69B4)
           .setDescription(chunk)
           .setFooter(i === chunks.length - 1
-            ? { text: 'Campeonato Feminino · COD Mobile 3x3 · Duas categorias criadas' }
+            ? { text: 'Campeonato Feminino · COD Mobile 3x3 · 33 canais · Categoria única' }
             : null)
           .setTimestamp(i === chunks.length - 1 ? new Date() : null)
       );
@@ -225,7 +241,7 @@ module.exports = {
           name:  '📌 Próximos passos',
           value:
             '1. Configure o **Carl-bot** com auto-role para `🌸 Player | Ayasaka` e `📋 Manager | Ayasaka`.\n' +
-            '2. A categoria `🎀 𝒯𝓇𝒾𝑜𝓈` tem 25 pares texto+voz — atribua acesso individual por equipe conforme necessário.',
+            '2. Os 25 canais de voz `🔊┃𝓣𝓻𝓲𝓸-XX` ficam na categoria principal — limite de 3 usuários cada.',
           inline: false,
         }
       );

@@ -6,7 +6,7 @@ const {
 } = require('discord.js');
 
 const ROLES_TO_DELETE = ['🌸 Player | Ayasaka', '📋 Manager | Ayasaka'];
-const CATS_TO_DELETE  = ['🌸 𝒜𝓎𝒶𝓈𝒶𝓀𝒶 𝒫𝓇𝑜𝓉𝑜𝒸𝑜𝓁', '🎀 𝒯𝓇𝒾𝑜𝓈'];
+const CATS_TO_DELETE  = ['🌸 𝒜𝓎𝒶𝓈𝒶𝓀𝒶 𝒫𝓇𝑜𝓉𝑜𝒸𝑜𝓁'];
 
 module.exports = {
   data: new SlashCommandBuilder()
