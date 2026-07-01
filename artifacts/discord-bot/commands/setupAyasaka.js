@@ -6,28 +6,36 @@ const {
   OverwriteType,
 } = require('discord.js');
 
-// ── Definições de cargos ───────────────────────────────────────────────────────
+// ── Identidade visual ─────────────────────────────────────────────────────────
+const CAT_MAIN  = '🌸 𝒜𝓎𝒶𝓈𝒶𝓀𝒶 𝒫𝓇𝑜𝓉𝑜𝒸𝑜𝓁';
+const CAT_TRIOS = '🎀 𝒯𝓇𝒾𝑜𝓈';
+
+// ── Cargos ────────────────────────────────────────────────────────────────────
 const ROLES_DEF = [
   { name: '🌸 Player | Ayasaka',  color: 0xFF69B4, hoist: true },
   { name: '📋 Manager | Ayasaka', color: 0xB983FF, hoist: true },
 ];
 
-// ── Canais de texto da categoria principal ─────────────────────────────────────
+// ── Canais institucionais (categoria principal) ────────────────────────────────
 const MAIN_CHANNELS = [
-  '📜┃regras',
-  '📢┃anúncios',
-  '👥┃lineups',
-  '🏆┃resultados',
-  '💬┃chat',
-  '🎫┃suporte',
-  '📝┃inscrição',
+  '📜┃𝓡𝓮𝓰𝓻𝓪𝓼',
+  '📢┃𝓐𝓷ú𝓷𝓬𝓲𝓸𝓼',
+  '👥┃𝓛𝓲𝓷𝓮𝓾𝓹𝓼',
+  '🏆┃𝓡𝓮𝓼𝓾𝓵𝓽𝓪𝓭𝓸𝓼',
+  '💬┃𝓒𝓱𝓪𝓽',
+  '🎫┃𝓢𝓾𝓹𝓸𝓻𝓽𝓮',
+  '📝┃𝓘𝓷𝓼𝓬𝓻𝓲çõ𝓮𝓼',
 ];
 
-// ── Canais privados de trio (texto) ────────────────────────────────────────────
-const TRIO_TEXT = Array.from({ length: 25 }, (_, i) => `💗┃trio-${String(i + 1).padStart(2, '0')}`);
-
-// ── Canais de voz ──────────────────────────────────────────────────────────────
-const TRIO_VOICE = Array.from({ length: 25 }, (_, i) => `🎀 Trio ${String(i + 1).padStart(2, '0')}`);
+// ── Trios: 25 pares intercalados [texto, voz] ─────────────────────────────────
+// texto acima → voz abaixo, exatamente como o Discord ordena por posição
+const TRIO_PAIRS = Array.from({ length: 25 }, (_, i) => {
+  const n = String(i + 1).padStart(2, '0');
+  return [
+    { name: `💗┃𝓽𝓻𝓲𝓸-${n}`, type: ChannelType.GuildText  },
+    { name: `🔊┃𝓽𝓻𝓲𝓸-${n}`, type: ChannelType.GuildVoice, userLimit: 3 },
+  ];
+}).flat(); // 50 canais — exatamente no limite do Discord
 
 // ── Helper: criar ou reutilizar cargo ─────────────────────────────────────────
 async function upsertRole(guild, def) {
@@ -43,21 +51,41 @@ async function upsertRole(guild, def) {
   return { role, created: true };
 }
 
+// ── Helper: criar ou reutilizar categoria ─────────────────────────────────────
+async function upsertCategory(guild, name, overwrites, log) {
+  const existing = guild.channels.cache.find(
+    c => c.type === ChannelType.GuildCategory && c.name === name
+  );
+  if (existing) {
+    await existing.permissionOverwrites.set(overwrites, 'Setup Ayasaka');
+    log.push(`⏭️ Categoria já existe (permissões atualizadas): **${name}**`);
+    return existing;
+  }
+  const cat = await guild.channels.create({
+    name,
+    type:                 ChannelType.GuildCategory,
+    permissionOverwrites: overwrites,
+    reason:               'Setup Ayasaka Protocol',
+  });
+  log.push(`✅ Categoria criada: **${name}**`);
+  return cat;
+}
+
 // ── Helper: criar ou reutilizar canal ─────────────────────────────────────────
 async function upsertChannel(guild, opts, log) {
   const existing = guild.channels.cache.find(
-    c => c.name === opts.name && c.parentId === (opts.parent ?? null)
+    c => c.name === opts.name && c.parentId === opts.parent
   );
   if (existing) {
-    log.push(`  ⏭️ Canal já existe: ${opts.name}`);
+    log.push(`  ⏭️ Já existe: ${opts.name}`);
     return existing;
   }
   const ch = await guild.channels.create(opts);
-  log.push(`  ✅ Canal criado: ${opts.name}`);
+  log.push(`  ✅ Criado: ${opts.name}`);
   return ch;
 }
 
-// ── Montar overwrites de permissão ────────────────────────────────────────────
+// ── Montar overwrites ─────────────────────────────────────────────────────────
 function buildOverwrites(guild, roles, type = 'player') {
   const everyoneId = guild.roles.everyone.id;
   const playerId   = roles['🌸 Player | Ayasaka']?.id;
@@ -77,46 +105,41 @@ function buildOverwrites(guild, roles, type = 'player') {
     PermissionFlagsBits.SendMessagesInThreads,
   ];
 
-  const MANAGER_EXTRA = [
+  const MANAGER_ALLOW = [
     ...PLAYER_ALLOW,
     PermissionFlagsBits.MentionEveryone,
     PermissionFlagsBits.ManageMessages,
   ];
 
-  // Canais públicos da categoria (visível para player e manager)
+  const base = [
+    { id: everyoneId, type: OverwriteType.Role, deny: [PermissionFlagsBits.ViewChannel] },
+  ];
+
   if (type === 'player') {
+    // Canais públicos: player e manager acessam
     return [
-      { id: everyoneId, type: OverwriteType.Role, deny: [PermissionFlagsBits.ViewChannel] },
-      ...(playerId   ? [{ id: playerId,  type: OverwriteType.Role, allow: PLAYER_ALLOW  }] : []),
-      ...(managerId  ? [{ id: managerId, type: OverwriteType.Role, allow: MANAGER_EXTRA }] : []),
-    ];
-  }
-
-  // Canais privados de trio (apenas manager e staff vêem)
-  if (type === 'trio') {
-    return [
-      { id: everyoneId, type: OverwriteType.Role, deny: [PermissionFlagsBits.ViewChannel] },
-      ...(managerId ? [{ id: managerId, type: OverwriteType.Role, allow: MANAGER_EXTRA }] : []),
-    ];
-  }
-
-  // Canais de voz: player e manager podem entrar
-  if (type === 'voice') {
-    return [
-      { id: everyoneId, type: OverwriteType.Role, deny: [PermissionFlagsBits.ViewChannel] },
+      ...base,
       ...(playerId  ? [{ id: playerId,  type: OverwriteType.Role, allow: PLAYER_ALLOW  }] : []),
-      ...(managerId ? [{ id: managerId, type: OverwriteType.Role, allow: MANAGER_EXTRA }] : []),
+      ...(managerId ? [{ id: managerId, type: OverwriteType.Role, allow: MANAGER_ALLOW }] : []),
     ];
   }
 
-  return [];
+  if (type === 'trio') {
+    // Canais de trio: apenas manager (representa a equipe)
+    return [
+      ...base,
+      ...(managerId ? [{ id: managerId, type: OverwriteType.Role, allow: MANAGER_ALLOW }] : []),
+    ];
+  }
+
+  return base;
 }
 
 // ── Comando ───────────────────────────────────────────────────────────────────
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('setup-ayasaka')
-    .setDescription('Cria a estrutura completa do AYASAKA PROTOCOL (cargos, canais, permissões)')
+    .setDescription('Cria a estrutura completa do 🌸 Ayasaka Protocol (duas categorias, Unicode, permissões)')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
@@ -129,7 +152,7 @@ module.exports = {
       await guild.roles.fetch();
       await guild.channels.fetch();
 
-      // ── 1. Criar cargos ────────────────────────────────────────────────────
+      // ── 1. Cargos ──────────────────────────────────────────────────────────
       log.push('**— Cargos —**');
       const roles = {};
       for (const def of ROLES_DEF) {
@@ -140,106 +163,51 @@ module.exports = {
           : `⏭️ Cargo já existe: **${def.name}**`);
       }
 
-      // ── 2. Criar categoria principal ───────────────────────────────────────
-      log.push('\n**— Categoria & Canais —**');
-      const CAT_NAME = '🌸 AYASAKA PROTOCOL';
-      const catOverwrites = buildOverwrites(guild, roles, 'player');
+      // ── 2. Categoria principal ─────────────────────────────────────────────
+      log.push('\n**— 🌸 Ayasaka Protocol —**');
+      const playerOverwrites = buildOverwrites(guild, roles, 'player');
+      const catMain = await upsertCategory(guild, CAT_MAIN, playerOverwrites, log);
 
-      let category = guild.channels.cache.find(
-        c => c.type === ChannelType.GuildCategory && c.name === CAT_NAME
-      );
-      if (category) {
-        await category.permissionOverwrites.set(catOverwrites, 'Setup Ayasaka');
-        log.push(`⏭️ Categoria já existe (permissões atualizadas): **${CAT_NAME}**`);
-      } else {
-        category = await guild.channels.create({
-          name:                 CAT_NAME,
-          type:                 ChannelType.GuildCategory,
-          permissionOverwrites: catOverwrites,
-          reason:               'Setup Ayasaka Protocol',
-        });
-        log.push(`✅ Categoria criada: **${CAT_NAME}**`);
-      }
-
-      // ── 3. Canais de texto públicos ────────────────────────────────────────
-      for (const chName of MAIN_CHANNELS) {
+      for (const name of MAIN_CHANNELS) {
         await upsertChannel(guild, {
-          name:   chName,
+          name,
           type:   ChannelType.GuildText,
-          parent: category.id,
+          parent: catMain.id,
           reason: 'Setup Ayasaka Protocol',
         }, log);
       }
 
-      // ── 4. Separador visual ────────────────────────────────────────────────
-      await upsertChannel(guild, {
-        name:   '━━━━━━━━━━━━━━━━',
-        type:   ChannelType.GuildText,
-        parent: category.id,
-        permissionOverwrites: [
-          { id: guild.roles.everyone.id, type: OverwriteType.Role,
-            deny: [PermissionFlagsBits.SendMessages, PermissionFlagsBits.ViewChannel] },
-          ...(roles['📋 Manager | Ayasaka']
-            ? [{ id: roles['📋 Manager | Ayasaka'].id, type: OverwriteType.Role,
-                deny: [PermissionFlagsBits.SendMessages],
-                allow: [PermissionFlagsBits.ViewChannel] }]
-            : []),
-          ...(roles['🌸 Player | Ayasaka']
-            ? [{ id: roles['🌸 Player | Ayasaka'].id, type: OverwriteType.Role,
-                deny: [PermissionFlagsBits.SendMessages],
-                allow: [PermissionFlagsBits.ViewChannel] }]
-            : []),
-        ],
-        reason: 'Setup Ayasaka Protocol',
-      }, log);
-
-      // ── 5. Canais privados de trio (texto) ─────────────────────────────────
+      // ── 3. Categoria de trios ──────────────────────────────────────────────
+      log.push('\n**— 🎀 Trios —**');
       const trioOverwrites = buildOverwrites(guild, roles, 'trio');
-      for (const chName of TRIO_TEXT) {
-        await upsertChannel(guild, {
-          name:                 chName,
-          type:                 ChannelType.GuildText,
-          parent:               category.id,
-          permissionOverwrites: trioOverwrites,
-          reason:               'Setup Ayasaka Protocol',
-        }, log);
-      }
+      const catTrios = await upsertCategory(guild, CAT_TRIOS, trioOverwrites, log);
 
-      // ── 6. Canais de voz dos trios ─────────────────────────────────────────
-      const voiceOverwrites = buildOverwrites(guild, roles, 'voice');
-      for (const chName of TRIO_VOICE) {
+      for (const ch of TRIO_PAIRS) {
         await upsertChannel(guild, {
-          name:                 chName,
-          type:                 ChannelType.GuildVoice,
-          parent:               category.id,
-          userLimit:            3,
-          permissionOverwrites: voiceOverwrites,
-          reason:               'Setup Ayasaka Protocol',
+          name:      ch.name,
+          type:      ch.type,
+          parent:    catTrios.id,
+          userLimit: ch.userLimit ?? 0,
+          reason:    'Setup Ayasaka Protocol',
         }, log);
       }
 
       // ── Resposta final ─────────────────────────────────────────────────────
-      // Discord embeds têm limite de 4096 caracteres; dividir se necessário
-      const description = log.join('\n');
       const chunks = [];
-      let current = '';
+      let current  = '';
       for (const line of log) {
-        if ((current + '\n' + line).length > 3800) {
-          chunks.push(current);
-          current = line;
-        } else {
-          current = current ? current + '\n' + line : line;
-        }
+        if ((current + '\n' + line).length > 3800) { chunks.push(current); current = line; }
+        else { current = current ? current + '\n' + line : line; }
       }
       if (current) chunks.push(current);
 
       const embeds = chunks.map((chunk, i) =>
         new EmbedBuilder()
-          .setTitle(i === 0 ? '🌸 Setup Ayasaka Protocol concluído' : null)
+          .setTitle(i === 0 ? '🌸 𝒜𝓎𝒶𝓈𝒶𝓀𝒶 𝒫𝓇𝑜𝓉𝑜𝒸𝑜𝓁 — Setup concluído' : null)
           .setColor(0xFF69B4)
           .setDescription(chunk)
           .setFooter(i === chunks.length - 1
-            ? { text: 'Ayasaka Protocol · Campeonato Feminino · COD Mobile 3x3' }
+            ? { text: 'Campeonato Feminino · COD Mobile 3x3 · Duas categorias criadas' }
             : null)
           .setTimestamp(i === chunks.length - 1 ? new Date() : null)
       );
@@ -248,17 +216,16 @@ module.exports = {
         {
           name:  '🔐 Isolamento',
           value:
-            '`🌸 Player | Ayasaka` → acessa canais públicos + voz\n' +
-            '`📋 Manager | Ayasaka` → acessa tudo, incluindo canais de trio\n' +
-            'Nenhum canal é visível para `@everyone` sem um desses cargos.',
+            '`🌸 Player | Ayasaka` → canais públicos + voz\n' +
+            '`📋 Manager | Ayasaka` → tudo, incluindo canais de trio\n' +
+            '`@everyone` não vê nenhum canal sem um desses cargos.',
           inline: false,
         },
         {
           name:  '📌 Próximos passos',
           value:
-            '1. Configure o **Carl-bot** com os botões de auto-role para `🌸 Player | Ayasaka` e `📋 Manager | Ayasaka`.\n' +
-            '2. Atribua os cargos de **Staff** com permissão de administrador para acesso total.\n' +
-            '3. Os canais `💗┃trio-XX` são visíveis apenas para Managers — atribua acesso individual conforme necessário.',
+            '1. Configure o **Carl-bot** com auto-role para `🌸 Player | Ayasaka` e `📋 Manager | Ayasaka`.\n' +
+            '2. A categoria `🎀 𝒯𝓇𝒾𝑜𝓈` tem 25 pares texto+voz — atribua acesso individual por equipe conforme necessário.',
           inline: false,
         }
       );
@@ -267,17 +234,14 @@ module.exports = {
 
     } catch (err) {
       console.error('[setup-ayasaka] Erro:', err);
-
-      const msg = err.code === 50013
-        ? 'O bot não tem permissão suficiente. Certifique-se de que o cargo do bot está **acima** dos cargos que ele vai criar.'
-        : err.message;
-
       await interaction.editReply({
         embeds: [
           new EmbedBuilder()
             .setTitle('❌ Erro durante o setup')
             .setColor(0xFF0000)
-            .setDescription(msg)
+            .setDescription(err.code === 50013
+              ? 'O bot não tem permissão suficiente. Certifique-se de que o cargo do bot está **acima** dos cargos que ele vai criar.'
+              : err.message)
             .setTimestamp(),
         ],
       });

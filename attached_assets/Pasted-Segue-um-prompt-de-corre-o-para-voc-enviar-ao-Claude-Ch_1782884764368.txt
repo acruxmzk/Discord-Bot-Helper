@@ -1,0 +1,129 @@
+Segue um prompt de correção para você enviar ao Claude/ChatGPT que já gerou a estrutura. Ele é específico e diz exatamente o que deve ser alterado, sem recriar tudo do zero.
+
+⸻
+
+PROMPT DE CORREÇÃO — AYASAKA PROTOCOL
+
+Faça as seguintes correções na estrutura do AYASAKA PROTOCOL.
+
+1. FONTE (OBRIGATÓRIO)
+
+Você não está utilizando uma tipografia Unicode estilizada.
+
+O Discord não permite alterar a fonte nativamente, portanto utilize caracteres Unicode em TODOS os nomes de categorias, canais, títulos e embeds.
+
+Não utilize texto comum.
+
+Exemplos do padrão esperado:
+
+* 𝒜𝓎𝒶𝓈𝒶𝓀𝒶
+* 𝒫𝓇𝑜𝓉𝑜𝒸𝑜𝓁
+* 𝓡𝓮𝓰𝓻𝓪𝓼
+* 𝓐𝓷ú𝓷𝓬𝓲𝓸𝓼
+* 𝓛𝓲𝓷𝓮𝓾𝓹𝓼
+* 𝓒𝓱𝓪𝓽
+* 𝓢𝓾𝓹𝓸𝓻𝓽𝓮
+
+Toda a identidade da Ayasaka deve transmitir uma estética feminina, elegante, premium e inspirada em organizações japonesas de esports.
+
+Não utilize nomes simples como:
+
+📜┃regras
+
+Utilize algo como:
+
+📜┃𝓡𝓮𝓰𝓻𝓪𝓼
+
+Esse padrão deve ser aplicado em toda a categoria.
+
+⸻
+
+2. LIMITE DE CANAIS DO DISCORD
+
+A estrutura atual ultrapassa o limite de 50 canais por categoria.
+
+Reorganize a arquitetura.
+
+Não coloque os canais de voz dentro da categoria principal.
+
+⸻
+
+3. NOVA ORGANIZAÇÃO
+
+A estrutura deverá ser dividida em duas categorias.
+
+🌸 𝒜𝓎𝒶𝓈𝒶𝓀𝒶 𝒫𝓇𝑜𝓉𝑜𝒸𝑜𝓁
+
+Contendo apenas os canais institucionais.
+
+Exemplo:
+
+📜┃𝓡𝓮𝓰𝓻𝓪𝓼
+
+📢┃𝓐𝓷ú𝓷𝓬𝓲𝓸𝓼
+
+👥┃𝓛𝓲𝓷𝓮𝓾𝓹𝓼
+
+🏆┃𝓡𝓮𝓼𝓾𝓵𝓽𝓪𝓭𝓸𝓼
+
+💬┃𝓒𝓱𝓪𝓽
+
+🎫┃𝓢𝓾𝓹𝓸𝓻𝓽𝓮
+
+📝┃𝓘𝓷𝓼𝓬𝓻𝓲çõ𝓮𝓼
+
+⸻
+
+🎀 𝒯𝓇𝒾𝑜𝓈
+
+Esta categoria conterá as salas das equipes.
+
+Cada equipe deverá possuir seu canal de texto seguido imediatamente pelo seu canal de voz.
+
+Exemplo:
+
+💗┃𝓽𝓻𝓲𝓸-01
+
+🔊┃𝓽𝓻𝓲𝓸-01
+
+💗┃𝓽𝓻𝓲𝓸-02
+
+🔊┃𝓽𝓻𝓲𝓸-02
+
+…
+
+💗┃𝓽𝓻𝓲𝓸-25
+
+🔊┃𝓽𝓻𝓲𝓸-25
+
+O canal de texto deve sempre ficar acima do respectivo canal de voz.
+
+⸻
+
+4. IDENTIDADE VISUAL
+
+A AYASAKA ainda está muito parecida com a Oblivion League.
+
+Ela precisa possuir personalidade própria.
+
+A identidade deve transmitir:
+
+* feminina
+* sofisticada
+* premium
+* moderna
+* minimalista
+* japonesa
+* cyberpunk
+* delicada
+* competitiva
+
+Evite copiar a estética da Oblivion.
+
+⸻
+
+5. RESULTADO ESPERADO
+
+Quero que a Ayasaka pareça um campeonato completamente independente, como se fosse um servidor exclusivo dentro do Discord.
+
+Ao entrar na categoria, o usuário deve perceber imediatamente que se trata de uma identidade visual diferente da Oblivion League, principalmente pela tipografia Unicode, organização dos canais e estética geral, mantendo uma aparência limpa, elegante e profissional.
