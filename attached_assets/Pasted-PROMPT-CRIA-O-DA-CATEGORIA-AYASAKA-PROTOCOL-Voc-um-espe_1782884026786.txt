@@ -1,0 +1,278 @@
+PROMPT — CRIAÇÃO DA CATEGORIA AYASAKA PROTOCOL
+
+Você é um especialista em arquitetura de servidores Discord para comunidades competitivas. Sua função é criar uma nova estrutura completa para um campeonato chamado AYASAKA PROTOCOL, utilizando como referência a organização da categoria existente OBLIVION LEAGUE, porém com identidade visual, cargos, permissões e experiência totalmente independentes.
+
+O objetivo é fazer com que o AYASAKA PROTOCOL pareça um segundo servidor dentro do mesmo Discord, sem que seus participantes tenham acesso ao campeonato da Oblivion League, e vice-versa.
+
+⸻
+
+OBJETIVO
+
+Criar uma categoria totalmente nova chamada:
+
+🌸 AYASAKA PROTOCOL
+
+Esta categoria deve ser exclusiva para o campeonato feminino de COD Mobile (3x3).
+
+Ela deve possuir:
+
+* estrutura completa de canais
+* permissões
+* cargos
+* Auto Role (Carl-bot)
+* canais privados
+* canais de voz
+* organização premium
+* identidade visual própria
+
+Tudo deve ser organizado de forma profissional e escalável.
+
+⸻
+
+ISOLAMENTO ENTRE CAMPEONATOS
+
+O servidor possuirá dois campeonatos:
+
+🏆 OBLIVION LEAGUE
+
+🌸 AYASAKA PROTOCOL
+
+Eles devem funcionar como se fossem dois servidores diferentes.
+
+Quem possuir acesso ao AYASAKA PROTOCOL não poderá visualizar absolutamente nenhuma categoria da Oblivion League.
+
+Quem possuir acesso à OBLIVION LEAGUE não poderá visualizar absolutamente nenhuma categoria do AYASAKA PROTOCOL.
+
+O isolamento deve ser total.
+
+Nenhum canal deverá aparecer para quem não possuir o cargo correspondente.
+
+⸻
+
+FLUXO DE ENTRADA
+
+Ao entrar no servidor, qualquer usuário visualizará apenas:
+
+• boas-vindas
+
+• regras gerais
+
+• auto role
+
+Nenhum campeonato deverá estar visível.
+
+Somente após escolher um campeonato no Carl-bot ele receberá acesso.
+
+⸻
+
+AUTO ROLE
+
+O Carl-bot deverá possuir um menu de seleção com os seguintes cargos.
+
+AYASAKA
+
+🎮 Player | Ayasaka
+
+📋 Manager | Ayasaka
+
+Esses cargos liberam toda a categoria AYASAKA PROTOCOL.
+
+⸻
+
+OBLIVION
+
+🎮 Player | Oblivion
+
+📋 Manager | Oblivion
+
+Esses cargos liberam apenas a categoria OBLIVION LEAGUE.
+
+⸻
+
+PERMISSÕES
+
+PLAYER
+
+Pode:
+
+* visualizar categoria
+* enviar mensagens
+* conectar em voz
+* participar normalmente
+* utilizar threads
+* anexar arquivos
+* reagir
+
+⸻
+
+MANAGER
+
+Possui todas as permissões do Player.
+
+Além disso:
+
+* enviar lineup
+* abrir tickets
+* representar oficialmente a equipe
+* receber marcações da staff
+* falar com organizadores
+
+⸻
+
+STAFF
+
+Criar cargos independentes para:
+
+Administrador
+
+Organizador
+
+Moderador
+
+Caster
+
+Todos possuem acesso completo aos dois campeonatos.
+
+⸻
+
+ESTRUTURA DA CATEGORIA
+
+A categoria deverá conter exatamente nesta ordem.
+
+📜┃regras
+
+📢┃anúncios
+
+👥┃lineups
+
+🏆┃resultados
+
+💬┃chat
+
+🎫┃suporte
+
+📝┃inscrição
+
+━━━━━━━━━━━━━━━━
+
+Depois criar os canais privados das equipes.
+
+💗┃trio-01
+
+💗┃trio-02
+
+…
+
+💗┃trio-25
+
+Cada canal será utilizado pela respectiva equipe.
+
+⸻
+
+CANAIS DE VOZ
+
+Criar:
+
+🎀 Trio 01
+
+🎀 Trio 02
+
+…
+
+🎀 Trio 25
+
+Todos limitados para:
+
+3 usuários.
+
+⸻
+
+ESTILO VISUAL
+
+O AYASAKA PROTOCOL NÃO deve possuir a mesma identidade visual da Oblivion League.
+
+A identidade deve transmitir um campeonato feminino elegante e sofisticado, evitando uma aparência infantil.
+
+Diretrizes:
+
+* utilizar emojis delicados
+* estética clean
+* visual premium
+* detalhes em rosa, lilás e branco
+* aparência inspirada em tecnologia futurista e anime cyberpunk
+* atmosfera feminina, porém competitiva
+
+⸻
+
+TIPOGRAFIA
+
+Toda a categoria deverá utilizar uma tipografia Unicode diferente da Oblivion League.
+
+A fonte deve transmitir uma sensação mais delicada e elegante.
+
+Exemplos:
+
+「𝒜𝓎𝒶𝓈𝒶𝓀𝒶」
+
+「𝓟𝓻𝓸𝓽𝓸𝓬𝓸𝓵」
+
+「𝒞𝒽𝒶𝓉」
+
+「𝓛𝓲𝓷𝓮𝓾𝓹𝓼」
+
+Utilizar esse padrão em títulos, embeds e mensagens importantes.
+
+Não exagerar para manter boa legibilidade.
+
+⸻
+
+IDENTIDADE DA CATEGORIA
+
+O AYASAKA PROTOCOL deve parecer um campeonato completamente diferente da Oblivion League.
+
+Sua identidade deve transmitir:
+
+* elegância
+* organização
+* exclusividade
+* tecnologia
+* delicadeza
+* competitividade
+* alto padrão
+
+Evitar uma aparência infantil.
+
+O estilo deve lembrar organizações de esports premium, com inspiração em estética japonesa, cyberpunk e tons pastel.
+
+⸻
+
+MENSAGEM DO AUTO ROLE
+
+Título:
+
+🌸 AYASAKA PROTOCOL
+
+Descrição:
+
+Bem-vinda ao Ayasaka Protocol.
+
+Escolha abaixo sua função para desbloquear automaticamente todos os canais do campeonato.
+
+Apenas participantes com o cargo correspondente terão acesso à categoria.
+
+Botões:
+
+🎮 Player | Ayasaka
+
+📋 Manager | Ayasaka
+
+⸻
+
+RESULTADO ESPERADO
+
+O servidor deverá oferecer a sensação de existirem dois servidores independentes dentro da mesma comunidade:
+
+* OBLIVION LEAGUE → campeonato masculino, identidade mais sóbria e competitiva.
+* AYASAKA PROTOCOL → campeonato feminino, identidade elegante, moderna, com inspiração japonesa/cyberpunk e visual mais delicado.
+
+A arquitetura deve seguir boas práticas de organização, escalabilidade e administração de ligas competitivas, mantendo permissões totalmente isoladas para evitar que participantes de um campeonato visualizem o outro.
