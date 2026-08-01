@@ -7,24 +7,47 @@ const {
   MessageFlags,
 } = require('discord.js');
 const { search, setNote } = require('../utils/movieDB');
-const { refreshPanel } = require('../utils/refreshPanel');
+const { refreshPanel }    = require('../utils/refreshPanel');
 
 function sep() { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true); }
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
 
+function stars(note) {
+  const n = parseFloat(note);
+  const full = Math.round(n / 2);
+  return '★'.repeat(Math.max(0, full)) + '☆'.repeat(Math.max(0, 5 - full));
+}
+
+function noteLabel(note) {
+  const n = parseFloat(note);
+  if (n >= 9)   return '🏆 Obra-prima!';
+  if (n >= 7.5) return '🔥 Excelente!';
+  if (n >= 6)   return '👍 Bom!';
+  if (n >= 4)   return '😐 Médio';
+  return '👎 Fraco';
+}
+
+function noteColor(note) {
+  const n = parseFloat(note);
+  if (n >= 8)  return 0x2ECC71;
+  if (n >= 6)  return 0xF39C12;
+  if (n >= 4)  return 0xE67E22;
+  return 0xE74C3C;
+}
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('nota')
-    .setDescription('Adiciona ou altera a nota de um filme (0–10)')
+    .setDescription('⭐ Registra ou atualiza a avaliação de um filme (0 a 10)')
     .addStringOption(o =>
       o.setName('filme')
-        .setDescription('Nome do filme')
+        .setDescription('Nome do filme (autocomplete ativo)')
         .setRequired(true)
         .setAutocomplete(true)
     )
     .addNumberOption(o =>
       o.setName('nota')
-        .setDescription('Nota de 0 a 10, ex: 6.8')
+        .setDescription('Sua avaliação — ex: 8.5 ou 7')
         .setRequired(true)
         .setMinValue(0)
         .setMaxValue(10)
@@ -42,46 +65,46 @@ module.exports = {
     const name = interaction.options.getString('filme');
     const nota = interaction.options.getNumber('nota');
 
-    if (nota === null || isNaN(nota) || nota < 0 || nota > 10) {
-      await interaction.editReply({
-        components: [
-          new ContainerBuilder()
-            .setAccentColor(0xFF4444)
-            .addTextDisplayComponents(txt(`### ❌ Nota inválida\nDigite um número entre **0** e **10**, ex: \`6.8\` ou \`6,8\`.`)),
-        ],
-        flags: MessageFlags.IsComponentsV2,
-      });
-      return;
-    }
-
     const movie = await setNote(name, nota);
 
     if (!movie) {
       await interaction.editReply({
         components: [
           new ContainerBuilder()
-            .setAccentColor(0xFF4444)
-            .addTextDisplayComponents(txt(`### ❌ Filme não encontrado\n\`${name}\``)),
+            .setAccentColor(0xE74C3C)
+            .addTextDisplayComponents(txt('## ❌  Filme não encontrado'))
+            .addSeparatorComponents(sep())
+            .addTextDisplayComponents(txt(
+              `> Não encontrei **${name}** na watchlist.\n` +
+              `> Use \`/adicionar\` para incluí-lo primeiro.`
+            ))
+            .addSeparatorComponents(sep())
+            .addTextDisplayComponents(txt(`-# 🍿  Premiere · Filme não encontrado`)),
         ],
         flags: MessageFlags.IsComponentsV2,
       });
       return;
     }
 
+    const n = parseFloat(movie.note);
+
     await interaction.editReply({
       components: [
         new ContainerBuilder()
-          .setAccentColor(0xFEE75C)
-          .addTextDisplayComponents(txt(`### ⭐ Nota registrada`))
+          .setAccentColor(noteColor(n))
+          .addTextDisplayComponents(txt('## ⭐  Avaliação registrada!'))
           .addSeparatorComponents(sep())
           .addTextDisplayComponents(txt(
-            `🎬 **${movie.name}**\n` +
-            `⭐ **${parseFloat(movie.note)}/10**`
-          )),
+            `🎬  **${movie.name}**\n\n` +
+            `⭐  **${n.toFixed(1)} / 10**\n` +
+            `${stars(n)}  ·  ${noteLabel(n)}`
+          ))
+          .addSeparatorComponents(sep())
+          .addTextDisplayComponents(txt(`-# ✨  Premiere · Painel atualizado automaticamente`)),
       ],
       flags: MessageFlags.IsComponentsV2,
     });
 
-    refreshPanel(interaction.guildId).catch(() => {});
+    refreshPanel(interaction.guildId).catch(e => console.error('[refreshPanel]', e));
   },
 };
