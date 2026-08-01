@@ -1,0 +1,127 @@
+Quero que você atue como um Product Designer Sênior especializado em UI/UX para Discord.
+
+Vou enviar uma imagem do meu sistema de catálogo de filmes. Não quero que você programe nada. Quero apenas redesenhar a interface.
+
+Meu problema é que ela transmite muita informação ao mesmo tempo. Quando olho a lista sinto que tudo compete pela minha atenção.
+
+Quero manter praticamente todas as informações, mas reorganizadas de uma forma extremamente minimalista.
+
+Minha referência de design é:
+
+- Apple
+- Arc Browser
+- Notion
+- Linear
+- Letterboxd
+- Spotify
+- Discord moderno
+
+O estilo deve ser premium, limpo, elegante e extremamente organizado.
+
+## O que quero manter
+
+- Número do filme
+- Status (assistido ou não)
+- Nome
+- Nota
+- Data em que assisti
+- Classificação
+
+## O que pode mudar completamente
+
+- Posição das informações
+- Ícones
+- Separadores
+- Espaçamentos
+- Hierarquia
+- Tipografia
+- Organização visual
+
+## Problemas atuais
+
+- Muitas estrelas.
+- Muitas datas.
+- Muitos emojis.
+- Muito peso visual.
+- Muitos elementos com a mesma importância.
+- Pouco espaço em branco.
+- A lista parece cansativa depois de alguns filmes.
+- Parece uma planilha e não um catálogo premium.
+
+## Objetivo
+
+Quando alguém abrir a lista, quero que consiga passar por 100 filmes sem cansar a visão.
+
+Quero que o olho encontre imediatamente:
+
+1. Nome
+2. Nota
+3. Status
+
+O resto deve ficar secundário.
+
+## Direção
+
+Prefiro:
+
+✓ pequeno
+
+em vez de
+
+✅ gigante
+
+Prefiro
+
+8.9
+
+do que
+
+★★★★★
+
+Prefiro
+
+17 Jul
+
+do que
+
+📅 17/07/2026
+
+Prefiro
+
+9.3
+
+do que uma caixa enorme em volta da nota.
+
+Quero poucos elementos na tela.
+
+Muito espaço entre um filme e outro.
+
+Nada de informações repetidas.
+
+Nada de caixas desnecessárias.
+
+Nada chamando atenção sem necessidade.
+
+## Quero que você faça
+
+1. Analise a imagem profundamente.
+2. Diga exatamente o que está poluindo a interface.
+3. Explique por que cada elemento atrapalha.
+4. Reorganize toda a hierarquia visual.
+5. Faça um wireframe em texto.
+6. Crie 3 versões diferentes:
+   - Minimal
+   - Premium
+   - Letterboxd Style
+7. Diga qual delas é a melhor.
+
+Não tenha medo de remover elementos ou reduzir informações visuais.
+
+A prioridade absoluta é:
+
+Menos ruído.
+Mais hierarquia.
+Mais espaço em branco.
+Mais elegância.
+
+Quero que pareça um produto feito por uma empresa de tecnologia de alto nível, e não apenas uma lista de filmes dentro do Discord.
