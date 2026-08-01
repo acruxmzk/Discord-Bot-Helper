@@ -8,24 +8,16 @@ const {
   ButtonStyle,
   MessageFlags,
 } = require('discord.js');
-const { getAll }             = require('../utils/movieDB');
+const { getAll }              = require('../utils/movieDB');
 const { buildPanelContainer } = require('../utils/buildPanelContainer');
 
 function sep() { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true); }
-function gap() { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large).setDivider(false); }
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
-
-function progressBar(percent, length = 18) {
-  const filled = Math.round((percent / 100) * length);
-  return '█'.repeat(filled) + '░'.repeat(length - filled);
-}
 
 function stars(note) {
   if (note === null) return '';
-  const n = parseFloat(note);
-  const full  = Math.round(n / 2);
-  const empty = 5 - full;
-  return '★'.repeat(Math.max(0, full)) + '☆'.repeat(Math.max(0, empty));
+  const full = Math.round(parseFloat(note) / 2);
+  return '★'.repeat(Math.max(0, full)) + '☆'.repeat(Math.max(0, 5 - full));
 }
 
 function noteLabel(note) {
@@ -44,12 +36,9 @@ function fmtDate(raw) {
   return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
 }
 
-function formatMovieRow(m, index) {
-  if (!m.watched) return `\`${String(index).padStart(2,'0')}\`  ◻️  ${m.name}`;
-  const n    = m.note !== null ? parseFloat(m.note) : null;
-  const star = n !== null ? `  ${stars(n)} \`${n.toFixed(1)}\`  ${noteLabel(n)}` : '';
-  const date = m.watched_at ? `  ·  📅 ${fmtDate(m.watched_at)}` : '';
-  return `\`${String(index).padStart(2,'0')}\`  ✅  **${m.name}**${star}${date}`;
+function progressBar(percent, length = 16) {
+  const filled = Math.round((percent / 100) * length);
+  return '█'.repeat(filled) + '░'.repeat(length - filled);
 }
 
 function accentColor(filter, percent) {
@@ -60,13 +49,20 @@ function accentColor(filter, percent) {
   return 0x6C5CE7;
 }
 
+function movieRow(m) {
+  if (!m.watched) return `◻  ${m.name}`;
+  const n    = m.note !== null ? parseFloat(m.note) : null;
+  const star = n !== null ? `  ${stars(n)}  ${n.toFixed(1)}` : '';
+  return `✅  **${m.name}**${star}`;
+}
+
 function buildFilmesContainer(movies, filter) {
   const total   = movies.length;
   const watched = movies.filter(m =>  m.watched);
   const pending = movies.filter(m => !m.watched);
   const percent = total > 0 ? Math.round((watched.length / total) * 100) : 0;
   const rated   = watched.filter(m => m.note !== null);
-  const avgNote = rated.length > 0
+  const avg     = rated.length > 0
     ? (rated.reduce((s, m) => s + parseFloat(m.note), 0) / rated.length).toFixed(1)
     : null;
 
@@ -74,121 +70,92 @@ function buildFilmesContainer(movies, filter) {
                : filter === 'pending' ? pending
                : movies;
 
-  const accent = accentColor(filter, percent);
-  const c = new ContainerBuilder().setAccentColor(accent);
+  const c = new ContainerBuilder().setAccentColor(accentColor(filter, percent));
 
-  // ── Cabeçalho ────────────────────────────────────────────────────────────────
+  // ── Cabeçalho + stats ────────────────────────────────────────────────────────
+  const avgStr = avg ? `  ·  ★ ${avg}` : '';
   c.addTextDisplayComponents(txt(
-    `# 🎬  P R E M I E R E\n` +
-    `-# 🍿  Sala de cinema · Temporada 2026`
+    `🎬  **Premiere**\n` +
+    `${watched.length}/${total} assistidos  ·  ${pending.length} pendentes${avgStr}\n` +
+    `-# \`${progressBar(percent)}\`  ${percent}%`
   ));
-  c.addSeparatorComponents(sep());
 
-  // ── Painel de stats ───────────────────────────────────────────────────────────
-  c.addTextDisplayComponents(txt(
-    `> 📽️  **${total}** filmes  ·  ` +
-    `✅  **${watched.length}** assistidos  ·  ` +
-    `⏳  **${pending.length}** pendentes\n` +
-    (avgNote
-      ? `> ⭐  Nota média  **${avgNote} / 10**  ${stars(avgNote)}\n`
-      : `> ⭐  Nenhum filme avaliado ainda\n`) +
-    `> \`${progressBar(percent)}\`  **${percent}%**`
-  ));
-  c.addSeparatorComponents(sep());
+  // ── Seção extra por aba ───────────────────────────────────────────────────────
+  if (filter === 'watched' && avg) {
+    const top = [...watched]
+      .filter(m => m.note !== null)
+      .sort((a, b) => parseFloat(b.note) - parseFloat(a.note))
+      .slice(0, 3);
 
-  // ── Aba: Assistidos ───────────────────────────────────────────────────────────
-  if (filter === 'watched') {
-    if (avgNote) {
-      const top = [...watched]
-        .filter(m => m.note !== null)
-        .sort((a, b) => parseFloat(b.note) - parseFloat(a.note))
-        .slice(0, 3);
-
-      if (top.length > 0) {
-        const medals = ['🥇', '🥈', '🥉'];
-        const topLines = top.map((m, i) => {
-          const n = parseFloat(m.note);
-          return `${medals[i]}  **${m.name}**  ${stars(n)} \`${n.toFixed(1)}\`  ${noteLabel(n)}`;
-        }).join('\n');
-        c.addTextDisplayComponents(txt(`**🏆  Top avaliados**\n${topLines}`));
-        c.addSeparatorComponents(sep());
-      }
+    if (top.length > 0) {
+      const medals = ['🥇', '🥈', '🥉'];
+      const lines = top.map((m, i) => {
+        const n = parseFloat(m.note);
+        return `${medals[i]}  **${m.name}**  ${stars(n)}  ${n.toFixed(1)}  ${noteLabel(n)}`;
+      }).join('\n');
+      c.addSeparatorComponents(sep());
+      c.addTextDisplayComponents(txt(`-# Mais bem avaliados\n${lines}`));
     }
   }
 
-  // ── Aba: Pendentes ────────────────────────────────────────────────────────────
-  if (filter === 'pending' && pending.length > 0) {
-    c.addTextDisplayComponents(txt(
-      `**🎯  Próximo na fila**\n🍿  *${pending[0].name}*`
-    ));
-    c.addSeparatorComponents(sep());
-  }
-
-  // ── Aba: Todos — recentes ─────────────────────────────────────────────────────
   if (filter === 'all' && watched.length > 0) {
-    const recent = [...watched]
+    const last = [...watched]
       .sort((a, b) => {
         if (a.watched_at && b.watched_at) return new Date(b.watched_at) - new Date(a.watched_at);
         return b.id - a.id;
-      })
-      .slice(0, 3);
-
-    const lines = recent.map(m => {
-      const n    = m.note !== null ? parseFloat(m.note) : null;
-      const star = n !== null ? `  ${stars(n)} \`${n.toFixed(1)}\`  ${noteLabel(n)}` : '';
-      const date = m.watched_at ? `  ·  📅 ${fmtDate(m.watched_at)}` : '';
-      return `🎞️  **${m.name}**${star}${date}`;
-    }).join('\n');
-
-    c.addTextDisplayComponents(txt(`**🕐  Vistos por último**\n${lines}`));
+      })[0];
+    const n    = last.note !== null ? parseFloat(last.note) : null;
+    const star = n !== null ? `  ${stars(n)}  ${n.toFixed(1)}  ${noteLabel(n)}` : '';
+    const date = last.watched_at ? `  ·  ${fmtDate(last.watched_at)}` : '';
     c.addSeparatorComponents(sep());
+    c.addTextDisplayComponents(txt(`-# Último assistido\n🎞  **${last.name}**${star}${date}`));
+  }
+
+  if (filter === 'pending' && pending.length > 0) {
+    c.addSeparatorComponents(sep());
+    c.addTextDisplayComponents(txt(`-# Próximo na fila\n🍿  ${pending[0].name}`));
   }
 
   // ── Botões ────────────────────────────────────────────────────────────────────
+  c.addSeparatorComponents(sep());
   c.addActionRowComponents(
     new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId('filmes:all')
-        .setLabel(`🎬  Todos  (${total})`)
+        .setLabel(`Todos  ${total}`)
         .setStyle(filter === 'all' ? ButtonStyle.Primary : ButtonStyle.Secondary),
       new ButtonBuilder()
         .setCustomId('filmes:watched')
-        .setLabel(`✅  Assistidos  (${watched.length})`)
+        .setLabel(`✅  ${watched.length}`)
         .setStyle(filter === 'watched' ? ButtonStyle.Success : ButtonStyle.Secondary),
       new ButtonBuilder()
         .setCustomId('filmes:pending')
-        .setLabel(`⏳  Pendentes  (${pending.length})`)
+        .setLabel(`⏳  ${pending.length}`)
         .setStyle(filter === 'pending' ? ButtonStyle.Danger : ButtonStyle.Secondary),
     )
   );
-  c.addSeparatorComponents(sep());
 
   // ── Lista ─────────────────────────────────────────────────────────────────────
+  c.addSeparatorComponents(sep());
+
   if (list.length === 0) {
-    c.addSeparatorComponents(gap());
     c.addTextDisplayComponents(txt(
       filter === 'watched'
-        ? `*📭  Nenhum filme assistido ainda — use \`/assistido\` para registrar!*`
-        : `*🎉  Todos os filmes já foram assistidos!*`
+        ? `*Nenhum filme assistido ainda.*`
+        : `*Todos os filmes já foram assistidos!*`
     ));
-    c.addSeparatorComponents(gap());
   } else {
     const chunks = [];
     for (let i = 0; i < list.length; i += 10) chunks.push(list.slice(i, i + 10));
-    let idx = 1;
     for (let ci = 0; ci < chunks.length; ci++) {
-      const lines = chunks[ci].map((m, li) => formatMovieRow(m, idx + li)).join('\n');
-      idx += chunks[ci].length;
-      c.addTextDisplayComponents(txt(lines));
+      c.addTextDisplayComponents(txt(chunks[ci].map(movieRow).join('\n')));
       if (ci < chunks.length - 1) c.addSeparatorComponents(sep());
     }
   }
 
   // ── Rodapé ────────────────────────────────────────────────────────────────────
   c.addSeparatorComponents(sep());
-  c.addTextDisplayComponents(txt(
-    `-# 🎬  Premiere  ·  /adicionar  ·  /assistido  ·  /nota  ·  /remover`
-  ));
+  c.addTextDisplayComponents(txt(`-# Premiere  ·  /adicionar  /assistido  /nota  /remover`));
 
   return c;
 }

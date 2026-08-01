@@ -14,8 +14,7 @@ function txt(c) { return new TextDisplayBuilder().setContent(c); }
 
 function stars(note) {
   if (note === null) return '';
-  const n = parseFloat(note);
-  const full = Math.round(n / 2);
+  const full = Math.round(parseFloat(note) / 2);
   return '★'.repeat(Math.max(0, full)) + '☆'.repeat(Math.max(0, 5 - full));
 }
 
@@ -25,14 +24,13 @@ module.exports = {
     .setDescription('🗑️ Remove um filme da watchlist do Premiere')
     .addStringOption(o =>
       o.setName('filme')
-        .setDescription('Nome do filme (autocomplete ativo)')
+        .setDescription('Nome do filme (autocomplete)')
         .setRequired(true)
         .setAutocomplete(true)
     ),
 
   async autocomplete(interaction) {
-    const query = interaction.options.getFocused();
-    const results = await search(query || '');
+    const results = await search(interaction.options.getFocused() || '');
     await interaction.respond(results.map(m => ({ name: m.name, value: m.name })));
   },
 
@@ -47,42 +45,28 @@ module.exports = {
         components: [
           new ContainerBuilder()
             .setAccentColor(0xE74C3C)
-            .addTextDisplayComponents(txt('## ❌  Filme não encontrado'))
-            .addSeparatorComponents(sep())
             .addTextDisplayComponents(txt(
-              `> Não encontrei **${name}** na watchlist.\n` +
-              `> Verifique o nome ou use \`/filmes\` para ver a lista.`
-            ))
-            .addSeparatorComponents(sep())
-            .addTextDisplayComponents(txt(`-# 🍿  Premiere · Filme não encontrado`)),
+              `**${name}** não encontrado.\n` +
+              `-# Use /filmes para ver a lista completa.`
+            )),
         ],
         flags: MessageFlags.IsComponentsV2,
       });
       return;
     }
 
-    const wasWatched = movie.watched;
-    const hasNote    = movie.note !== null;
-    const noteStr    = hasNote
-      ? `\n⭐  Tinha nota:  **${parseFloat(movie.note).toFixed(1)} / 10**  ${stars(movie.note)}`
+    const statusStr = movie.watched ? `assistido` : `na fila`;
+    const noteStr   = movie.note !== null
+      ? `  ·  ${stars(movie.note)}  ${parseFloat(movie.note).toFixed(1)}`
       : '';
-    const statusStr  = wasWatched ? `✅  Estava assistido` : `⏳  Estava na fila de espera`;
 
     await interaction.editReply({
       components: [
         new ContainerBuilder()
           .setAccentColor(0xE74C3C)
-          .addTextDisplayComponents(txt('## 🗑️  Filme removido'))
-          .addSeparatorComponents(sep())
           .addTextDisplayComponents(txt(
-            `🎬  **${movie.name}**\n\n` +
-            `📌  ${statusStr}` +
-            noteStr
-          ))
-          .addSeparatorComponents(sep())
-          .addTextDisplayComponents(txt(
-            `> ⚠️  Esta ação não pode ser desfeita.\n` +
-            `-# ✨  Premiere · Painel atualizado automaticamente`
+            `🗑️  **${movie.name}**  removido\n` +
+            `-# estava ${statusStr}${noteStr}`
           )),
       ],
       flags: MessageFlags.IsComponentsV2,

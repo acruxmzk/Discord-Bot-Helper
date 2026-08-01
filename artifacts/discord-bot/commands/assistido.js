@@ -13,16 +13,15 @@ function sep() { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.S
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
 
 function stars(note) {
-  const n = parseFloat(note);
-  const full = Math.round(n / 2);
+  const full = Math.round(parseFloat(note) / 2);
   return '★'.repeat(Math.max(0, full)) + '☆'.repeat(Math.max(0, 5 - full));
 }
 
 function noteLabel(note) {
   const n = parseFloat(note);
-  if (n >= 9)   return '🏆 Obra-prima!';
-  if (n >= 7.5) return '🔥 Excelente!';
-  if (n >= 6)   return '👍 Bom!';
+  if (n >= 9)   return '🏆 Obra-prima';
+  if (n >= 7.5) return '🔥 Excelente';
+  if (n >= 6)   return '👍 Bom';
   if (n >= 4)   return '😐 Médio';
   return '👎 Fraco';
 }
@@ -33,21 +32,20 @@ module.exports = {
     .setDescription('✅ Marca um filme como assistido e registra a nota')
     .addStringOption(o =>
       o.setName('filme')
-        .setDescription('Nome do filme (autocomplete ativo)')
+        .setDescription('Nome do filme (autocomplete)')
         .setRequired(true)
         .setAutocomplete(true)
     )
     .addNumberOption(o =>
       o.setName('nota')
-        .setDescription('Avaliação de 0 a 10 — ex: 8.5 (opcional)')
+        .setDescription('Avaliação de 0 a 10')
         .setMinValue(0)
         .setMaxValue(10)
         .setRequired(false)
     ),
 
   async autocomplete(interaction) {
-    const query = interaction.options.getFocused();
-    const results = await search(query || '');
+    const results = await search(interaction.options.getFocused() || '');
     await interaction.respond(results.map(m => ({ name: m.name, value: m.name })));
   },
 
@@ -64,14 +62,10 @@ module.exports = {
         components: [
           new ContainerBuilder()
             .setAccentColor(0xE74C3C)
-            .addTextDisplayComponents(txt('## ❌  Filme não encontrado'))
-            .addSeparatorComponents(sep())
             .addTextDisplayComponents(txt(
-              `> Não encontrei **${name}** na watchlist.\n` +
-              `> Use \`/adicionar\` para incluí-lo primeiro.`
-            ))
-            .addSeparatorComponents(sep())
-            .addTextDisplayComponents(txt(`-# 🍿  Premiere · Filme não encontrado`)),
+              `**${name}** não encontrado.\n` +
+              `-# Use /adicionar para incluí-lo primeiro.`
+            )),
         ],
         flags: MessageFlags.IsComponentsV2,
       });
@@ -79,40 +73,28 @@ module.exports = {
     }
 
     const alreadyWatched = movie.already_watched === true;
+    if (nota !== null) movie = await setNote(movie.name, nota) ?? movie;
 
-    // Atualiza nota se informada
-    if (nota !== null) {
-      movie = await setNote(movie.name, nota) ?? movie;
-    }
-
-    const hasNote  = movie.note !== null;
-    const dateStr  = movie.watched_at
+    const hasNote = movie.note !== null;
+    const dateStr = movie.watched_at
       ? new Date(movie.watched_at).toLocaleDateString('pt-BR', { timeZone: 'UTC' })
       : null;
 
-    const noteLine = hasNote
-      ? `⭐  **${parseFloat(movie.note).toFixed(1)} / 10**  ${stars(movie.note)}  ·  ${noteLabel(movie.note)}`
-      : `💡  *Sem nota — use \`/nota\` para avaliar!*`;
-
-    // Já estava assistido + nenhuma nota nova
+    // Já assistido, sem nota nova
     if (alreadyWatched && nota === null) {
+      const noteStr = hasNote
+        ? `${stars(movie.note)}  ${parseFloat(movie.note).toFixed(1)}`
+        : `*sem nota — passe a opção nota para avaliar*`;
       await interaction.editReply({
         components: [
           new ContainerBuilder()
             .setAccentColor(0xF39C12)
-            .addTextDisplayComponents(txt('## ⚠️  Já estava assistido'))
-            .addSeparatorComponents(sep())
             .addTextDisplayComponents(txt(
-              `🎬  **${movie.name}**\n\n` +
-              (dateStr ? `📅  Assistido em  **${dateStr}**\n` : '') +
-              noteLine
+              `**${movie.name}**  já estava assistido\n` +
+              (dateStr ? `📅 ${dateStr}  ·  ` : '') + noteStr
             ))
             .addSeparatorComponents(sep())
-            .addTextDisplayComponents(txt(
-              `> 💡  Use a opção \`nota\` neste comando para atualizar a avaliação.`
-            ))
-            .addSeparatorComponents(sep())
-            .addTextDisplayComponents(txt(`-# 🍿  Premiere · Nenhuma alteração realizada`)),
+            .addTextDisplayComponents(txt(`-# Premiere`)),
         ],
         flags: MessageFlags.IsComponentsV2,
       });
@@ -120,23 +102,22 @@ module.exports = {
       return;
     }
 
-    const title = alreadyWatched
-      ? '## 📝  Nota atualizada!'
-      : '## ✅  Marcado como assistido!';
+    const noteStr = hasNote
+      ? `${stars(movie.note)}  ${parseFloat(movie.note).toFixed(1)}  ·  ${noteLabel(movie.note)}`
+      : `*sem nota — use /nota para avaliar*`;
+
+    const title = alreadyWatched ? `nota atualizada` : `marcado como assistido`;
 
     await interaction.editReply({
       components: [
         new ContainerBuilder()
           .setAccentColor(0x2ECC71)
-          .addTextDisplayComponents(txt(title))
-          .addSeparatorComponents(sep())
           .addTextDisplayComponents(txt(
-            `🎬  **${movie.name}**\n\n` +
-            (dateStr ? `📅  Data:  **${dateStr}**\n` : '') +
-            noteLine
+            `✅  **${movie.name}**  —  ${title}\n` +
+            (dateStr ? `📅 ${dateStr}  ·  ` : '') + noteStr
           ))
           .addSeparatorComponents(sep())
-          .addTextDisplayComponents(txt(`-# ✨  Premiere · Painel atualizado automaticamente`)),
+          .addTextDisplayComponents(txt(`-# Premiere`)),
       ],
       flags: MessageFlags.IsComponentsV2,
     });

@@ -13,16 +13,15 @@ function sep() { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.S
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
 
 function stars(note) {
-  const n = parseFloat(note);
-  const full = Math.round(n / 2);
+  const full = Math.round(parseFloat(note) / 2);
   return '★'.repeat(Math.max(0, full)) + '☆'.repeat(Math.max(0, 5 - full));
 }
 
 function noteLabel(note) {
   const n = parseFloat(note);
-  if (n >= 9)   return '🏆 Obra-prima!';
-  if (n >= 7.5) return '🔥 Excelente!';
-  if (n >= 6)   return '👍 Bom!';
+  if (n >= 9)   return '🏆 Obra-prima';
+  if (n >= 7.5) return '🔥 Excelente';
+  if (n >= 6)   return '👍 Bom';
   if (n >= 4)   return '😐 Médio';
   return '👎 Fraco';
 }
@@ -41,21 +40,20 @@ module.exports = {
     .setDescription('⭐ Registra ou atualiza a avaliação de um filme (0 a 10)')
     .addStringOption(o =>
       o.setName('filme')
-        .setDescription('Nome do filme (autocomplete ativo)')
+        .setDescription('Nome do filme (autocomplete)')
         .setRequired(true)
         .setAutocomplete(true)
     )
     .addNumberOption(o =>
       o.setName('nota')
-        .setDescription('Sua avaliação — ex: 8.5 ou 7')
+        .setDescription('Avaliação de 0 a 10')
         .setRequired(true)
         .setMinValue(0)
         .setMaxValue(10)
     ),
 
   async autocomplete(interaction) {
-    const query = interaction.options.getFocused();
-    const results = await search(query || '');
+    const results = await search(interaction.options.getFocused() || '');
     await interaction.respond(results.map(m => ({ name: m.name, value: m.name })));
   },
 
@@ -64,7 +62,6 @@ module.exports = {
 
     const name = interaction.options.getString('filme');
     const nota = interaction.options.getNumber('nota');
-
     const movie = await setNote(name, nota);
 
     if (!movie) {
@@ -72,14 +69,10 @@ module.exports = {
         components: [
           new ContainerBuilder()
             .setAccentColor(0xE74C3C)
-            .addTextDisplayComponents(txt('## ❌  Filme não encontrado'))
-            .addSeparatorComponents(sep())
             .addTextDisplayComponents(txt(
-              `> Não encontrei **${name}** na watchlist.\n` +
-              `> Use \`/adicionar\` para incluí-lo primeiro.`
-            ))
-            .addSeparatorComponents(sep())
-            .addTextDisplayComponents(txt(`-# 🍿  Premiere · Filme não encontrado`)),
+              `**${name}** não encontrado.\n` +
+              `-# Use /adicionar para incluí-lo primeiro.`
+            )),
         ],
         flags: MessageFlags.IsComponentsV2,
       });
@@ -92,15 +85,12 @@ module.exports = {
       components: [
         new ContainerBuilder()
           .setAccentColor(noteColor(n))
-          .addTextDisplayComponents(txt('## ⭐  Avaliação registrada!'))
-          .addSeparatorComponents(sep())
           .addTextDisplayComponents(txt(
-            `🎬  **${movie.name}**\n\n` +
-            `⭐  **${n.toFixed(1)} / 10**\n` +
-            `${stars(n)}  ·  ${noteLabel(n)}`
+            `⭐  **${movie.name}**\n` +
+            `${stars(n)}  ${n.toFixed(1)}  ·  ${noteLabel(n)}`
           ))
           .addSeparatorComponents(sep())
-          .addTextDisplayComponents(txt(`-# ✨  Premiere · Painel atualizado automaticamente`)),
+          .addTextDisplayComponents(txt(`-# Premiere`)),
       ],
       flags: MessageFlags.IsComponentsV2,
     });
