@@ -14,8 +14,8 @@ function txt(c) { return new TextDisplayBuilder().setContent(c); }
 function fmtDate(raw) {
   if (!raw) return '';
   const d = new Date(raw);
-  const m = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  return `${d.getDate()} ${m[d.getMonth()]}`;
+  const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  return `${d.getDate()} ${months[d.getMonth()]}`;
 }
 
 function stars(note) {
@@ -44,8 +44,8 @@ function milestone(percent) {
   if (percent >= 75)   return 'Reta final!';
   if (percent >= 50)   return 'Passou da metade!';
   if (percent >= 25)   return 'Avançando bem!';
-  if (percent > 0)     return 'Começando a jornada...';
-  return 'Nenhum filme assistido ainda';
+  if (percent > 0)     return 'Começando...';
+  return 'Nenhum assistido ainda';
 }
 
 function accentColor(filter, percent) {
@@ -59,7 +59,7 @@ function accentColor(filter, percent) {
 // `01`  ✅  **Nome**  ★★★☆☆  7.5  ·  28 Jul
 // `02`  ☐  Nome pendente
 function movieRow(m, index) {
-  const num = String(index).padStart(2, '0');
+  const num  = String(index).padStart(2, '0');
   if (!m.watched) return `\`${num}\`  ☐  ${m.name}`;
 
   const n    = m.note !== null ? parseFloat(m.note) : null;
@@ -84,26 +84,29 @@ function buildPanelContainer(movies, filter = 'all') {
              : filter === 'pending' ? pending
              : movies;
 
-  const c = new ContainerBuilder().setAccentColor(accentColor(filter, percent));
+  const year = new Date().getFullYear();
+  const c    = new ContainerBuilder().setAccentColor(accentColor(filter, percent));
 
   // ── Cabeçalho ────────────────────────────────────────────────────────────────
   c.addTextDisplayComponents(txt(
     `# 🎬  P R E M I E R E\n` +
-    `-# 🍿  Sala de cinema · Temporada 2026`
+    `-# 🍿  Sala de cinema  ·  Temporada ${year}`
   ));
   c.addSeparatorComponents(sep());
 
   // ── Stats ─────────────────────────────────────────────────────────────────────
+  // Linha 1: contagens
+  // Linha 2: nota média com estrelas (sem label — contexto é claro)
+  // Linha 3: barra + % + marco (tudo numa linha)
   c.addTextDisplayComponents(txt(
-    `🎭  **${total}** filmes na lista  ·  ✅  **${watched.length}** assistidos  ·  ⏳  **${pending.length}** pendentes\n` +
+    `**${watched.length}** assistidos  ·  **${pending.length}** pendentes  ·  **${total}** no total\n` +
     (avg
-      ? `⭐  Nota média  **${avg} / 10**  ${stars(avg)}  ·  ${rated.length} avaliados\n`
-      : `⭐  Nenhum filme avaliado ainda\n`) +
-    `\`${progressBar(percent)}\`  **${percent}%**\n` +
-    `-# ${milestone(percent)}`
+      ? `${stars(avg)}  **${avg}**  ·  ${rated.length} avaliados\n`
+      : `*nenhum filme avaliado ainda*\n`) +
+    `\`${progressBar(percent)}\`  ${percent}%  ·  -# ${milestone(percent)}`
   ));
 
-  // ── Visto por último (aba todos e assistidos) ─────────────────────────────────
+  // ── Visto por último ──────────────────────────────────────────────────────────
   if (filter !== 'pending' && watched.length > 0) {
     const recent = [...watched]
       .sort((a, b) => {
@@ -112,22 +115,23 @@ function buildPanelContainer(movies, filter = 'all') {
       })
       .slice(0, 3);
 
+    // Sem emoji por linha — o título da seção já contextualiza
     const lines = recent.map(m => {
       const n    = m.note !== null ? parseFloat(m.note) : null;
       const star = n !== null ? `  ${stars(n)}  ${n.toFixed(1)}  ${noteLabel(n)}` : '';
       const date = m.watched_at ? `  ·  ${fmtDate(m.watched_at)}` : '';
-      return `🎞  **${m.name}**${star}${date}`;
+      return `**${m.name}**${star}${date}`;
     }).join('\n');
 
     c.addSeparatorComponents(sep());
     c.addTextDisplayComponents(txt(`🕐  **Visto por último**\n${lines}`));
   }
 
-  // ── Próximo na fila (aba todos e pendentes) ───────────────────────────────────
+  // ── Próximo na fila ───────────────────────────────────────────────────────────
   if (filter !== 'watched' && pending.length > 0) {
     c.addSeparatorComponents(sep());
     c.addTextDisplayComponents(txt(
-      `🎯  **Próximo na fila**\n🍿  *${pending[0].name}*`
+      `🎯  **Próximo na fila**\n*${pending[0].name}*`
     ));
   }
 
