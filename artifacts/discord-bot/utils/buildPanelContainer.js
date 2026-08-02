@@ -99,11 +99,12 @@ function buildPanelContainer(movies, filter = 'all') {
   // Linha 2: nota média com estrelas (sem label — contexto é claro)
   // Linha 3: barra + % + marco (tudo numa linha)
   c.addTextDisplayComponents(txt(
-    `**${watched.length}** assistidos  ·  **${pending.length}** pendentes  ·  **${total}** no total\n` +
+    `**${watched.length}** assistidos  ·  **${pending.length}** pendentes  ·  **${total}** filmes\n` +
     (avg
       ? `${stars(avg)}  **${avg}**  ·  ${rated.length} avaliados\n`
-      : `*nenhum filme avaliado ainda*\n`) +
-    `\`${progressBar(percent)}\`  ${percent}%  ·  -# ${milestone(percent)}`
+      : `*nenhum avaliado ainda*\n`) +
+    `\`${progressBar(percent)}\`  ${percent}%\n` +
+    `-# ${milestone(percent)}`
   ));
 
   // ── Visto por último ──────────────────────────────────────────────────────────

@@ -97,11 +97,12 @@ function buildFilmesContainer(movies, filter) {
 
   // ── Stats ─────────────────────────────────────────────────────────────────────
   c.addTextDisplayComponents(txt(
-    `**${watched.length}** assistidos  ·  **${pending.length}** pendentes  ·  **${total}** no total\n` +
+    `**${watched.length}** assistidos  ·  **${pending.length}** pendentes  ·  **${total}** filmes\n` +
     (avg
       ? `${stars(avg)}  **${avg}**  ·  ${rated.length} avaliados\n`
-      : `*nenhum filme avaliado ainda*\n`) +
-    `\`${progressBar(percent)}\`  ${percent}%  ·  -# ${milestone(percent)}`
+      : `*nenhum avaliado ainda*\n`) +
+    `\`${progressBar(percent)}\`  ${percent}%\n` +
+    `-# ${milestone(percent)}`
   ));
 
   // ── Seção contextual por aba ──────────────────────────────────────────────────
