@@ -19,8 +19,33 @@ function fmtDate(raw) {
 }
 
 function stars(note) {
+  if (note === null) return '';
   const full = Math.round(parseFloat(note) / 2);
   return '★'.repeat(Math.max(0, full)) + '☆'.repeat(Math.max(0, 5 - full));
+}
+
+function noteLabel(note) {
+  if (note === null) return '';
+  const n = parseFloat(note);
+  if (n >= 9)   return '🏆';
+  if (n >= 7.5) return '🔥';
+  if (n >= 6)   return '👍';
+  if (n >= 4)   return '😐';
+  return '👎';
+}
+
+function progressBar(percent, length = 18) {
+  const filled = Math.round((percent / 100) * length);
+  return '█'.repeat(filled) + '░'.repeat(length - filled);
+}
+
+function milestone(percent) {
+  if (percent === 100) return 'Coleção completa!';
+  if (percent >= 75)   return 'Reta final!';
+  if (percent >= 50)   return 'Passou da metade!';
+  if (percent >= 25)   return 'Avançando bem!';
+  if (percent > 0)     return 'Começando a jornada...';
+  return 'Nenhum filme assistido ainda';
 }
 
 function accentColor(filter, percent) {
@@ -31,16 +56,16 @@ function accentColor(filter, percent) {
   return 0x6C5CE7;
 }
 
-// ── Linha: `01`  ✅  **Nome**  ★★★☆☆  7.5  ·  28 Jul
-//           `02`  ☐  Nome pendente
+// `01`  ✅  **Nome**  ★★★☆☆  7.5  ·  28 Jul
+// `02`  ☐  Nome pendente
 function movieRow(m, index) {
   const num = String(index).padStart(2, '0');
   if (!m.watched) return `\`${num}\`  ☐  ${m.name}`;
 
-  const n      = m.note !== null ? parseFloat(m.note) : null;
-  const star   = n !== null ? `  ${stars(n)}` : '';
-  const note   = n !== null ? `  ${n.toFixed(1)}` : '';
-  const date   = m.watched_at ? `  ·  ${fmtDate(m.watched_at)}` : '';
+  const n    = m.note !== null ? parseFloat(m.note) : null;
+  const star = n !== null ? `  ${stars(n)}` : '';
+  const note = n !== null ? `  ${n.toFixed(1)}` : '';
+  const date = m.watched_at ? `  ·  ${fmtDate(m.watched_at)}` : '';
 
   return `\`${num}\`  ✅  **${m.name}**${star}${note}${date}`;
 }
@@ -61,12 +86,50 @@ function buildPanelContainer(movies, filter = 'all') {
 
   const c = new ContainerBuilder().setAccentColor(accentColor(filter, percent));
 
-  // ── Header ───────────────────────────────────────────────────────────────────
-  const avgStr = avg ? `  ·  ★ ${avg}` : '';
+  // ── Cabeçalho ────────────────────────────────────────────────────────────────
   c.addTextDisplayComponents(txt(
-    `🎬  **Premiere**\n` +
-    `-# ${watched.length}/${total} assistidos  ·  ${pending.length} pendentes${avgStr}`
+    `# 🎬  P R E M I E R E\n` +
+    `-# 🍿  Sala de cinema · Temporada 2026`
   ));
+  c.addSeparatorComponents(sep());
+
+  // ── Stats ─────────────────────────────────────────────────────────────────────
+  c.addTextDisplayComponents(txt(
+    `🎭  **${total}** filmes na lista  ·  ✅  **${watched.length}** assistidos  ·  ⏳  **${pending.length}** pendentes\n` +
+    (avg
+      ? `⭐  Nota média  **${avg} / 10**  ${stars(avg)}  ·  ${rated.length} avaliados\n`
+      : `⭐  Nenhum filme avaliado ainda\n`) +
+    `\`${progressBar(percent)}\`  **${percent}%**\n` +
+    `-# ${milestone(percent)}`
+  ));
+
+  // ── Visto por último (aba todos e assistidos) ─────────────────────────────────
+  if (filter !== 'pending' && watched.length > 0) {
+    const recent = [...watched]
+      .sort((a, b) => {
+        if (a.watched_at && b.watched_at) return new Date(b.watched_at) - new Date(a.watched_at);
+        return b.id - a.id;
+      })
+      .slice(0, 3);
+
+    const lines = recent.map(m => {
+      const n    = m.note !== null ? parseFloat(m.note) : null;
+      const star = n !== null ? `  ${stars(n)}  ${n.toFixed(1)}  ${noteLabel(n)}` : '';
+      const date = m.watched_at ? `  ·  ${fmtDate(m.watched_at)}` : '';
+      return `🎞  **${m.name}**${star}${date}`;
+    }).join('\n');
+
+    c.addSeparatorComponents(sep());
+    c.addTextDisplayComponents(txt(`🕐  **Visto por último**\n${lines}`));
+  }
+
+  // ── Próximo na fila (aba todos e pendentes) ───────────────────────────────────
+  if (filter !== 'watched' && pending.length > 0) {
+    c.addSeparatorComponents(sep());
+    c.addTextDisplayComponents(txt(
+      `🎯  **Próximo na fila**\n🍿  *${pending[0].name}*`
+    ));
+  }
 
   // ── Botões ────────────────────────────────────────────────────────────────────
   c.addSeparatorComponents(sep());
@@ -74,15 +137,15 @@ function buildPanelContainer(movies, filter = 'all') {
     new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId('painel:all')
-        .setLabel(`Todos  ${total}`)
+        .setLabel(`🎬  Todos  (${total})`)
         .setStyle(filter === 'all' ? ButtonStyle.Primary : ButtonStyle.Secondary),
       new ButtonBuilder()
         .setCustomId('painel:watched')
-        .setLabel(`Assistidos  ${watched.length}`)
+        .setLabel(`✅  Assistidos  (${watched.length})`)
         .setStyle(filter === 'watched' ? ButtonStyle.Success : ButtonStyle.Secondary),
       new ButtonBuilder()
         .setCustomId('painel:pending')
-        .setLabel(`Pendentes  ${pending.length}`)
+        .setLabel(`⏳  Pendentes  (${pending.length})`)
         .setStyle(filter === 'pending' ? ButtonStyle.Danger : ButtonStyle.Secondary),
     )
   );
