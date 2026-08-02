@@ -12,11 +12,6 @@ const { refreshPanel }    = require('../utils/refreshPanel');
 function sep() { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true); }
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
 
-function stars(note) {
-  const full = Math.round(parseFloat(note) / 2);
-  return '★'.repeat(Math.max(0, full)) + '☆'.repeat(Math.max(0, 5 - full));
-}
-
 function noteLabel(note) {
   const n = parseFloat(note);
   if (n >= 9)   return '🏆 Obra-prima';
@@ -39,17 +34,10 @@ module.exports = {
     .setName('nota')
     .setDescription('⭐ Registra ou atualiza a avaliação de um filme (0 a 10)')
     .addStringOption(o =>
-      o.setName('filme')
-        .setDescription('Nome do filme (autocomplete)')
-        .setRequired(true)
-        .setAutocomplete(true)
+      o.setName('filme').setDescription('Nome do filme (autocomplete)').setRequired(true).setAutocomplete(true)
     )
     .addNumberOption(o =>
-      o.setName('nota')
-        .setDescription('Avaliação de 0 a 10')
-        .setRequired(true)
-        .setMinValue(0)
-        .setMaxValue(10)
+      o.setName('nota').setDescription('Avaliação de 0 a 10').setRequired(true).setMinValue(0).setMaxValue(10)
     ),
 
   async autocomplete(interaction) {
@@ -60,8 +48,8 @@ module.exports = {
   async execute(interaction) {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-    const name = interaction.options.getString('filme');
-    const nota = interaction.options.getNumber('nota');
+    const name  = interaction.options.getString('filme');
+    const nota  = interaction.options.getNumber('nota');
     const movie = await setNote(name, nota);
 
     if (!movie) {
@@ -70,8 +58,8 @@ module.exports = {
           new ContainerBuilder()
             .setAccentColor(0xE74C3C)
             .addTextDisplayComponents(txt(
-              `**${name}** não encontrado.\n` +
-              `-# Use /adicionar para incluí-lo primeiro.`
+              `**${name}**\n` +
+              `-# não encontrado  ·  use /adicionar para incluí-lo`
             )),
         ],
         flags: MessageFlags.IsComponentsV2,
@@ -86,11 +74,9 @@ module.exports = {
         new ContainerBuilder()
           .setAccentColor(noteColor(n))
           .addTextDisplayComponents(txt(
-            `⭐  **${movie.name}**\n` +
-            `${stars(n)}  ${n.toFixed(1)}  ·  ${noteLabel(n)}`
-          ))
-          .addSeparatorComponents(sep())
-          .addTextDisplayComponents(txt(`-# Premiere`)),
+            `**${movie.name}**\n` +
+            `-# ${n.toFixed(1)}  ·  ${noteLabel(n)}`
+          )),
       ],
       flags: MessageFlags.IsComponentsV2,
     });
