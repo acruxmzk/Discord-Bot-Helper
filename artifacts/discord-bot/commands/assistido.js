@@ -2,14 +2,11 @@ const {
   SlashCommandBuilder,
   ContainerBuilder,
   TextDisplayBuilder,
-  SeparatorBuilder,
-  SeparatorSpacingSize,
   MessageFlags,
 } = require('discord.js');
 const { search, markWatched, setNote } = require('../utils/movieDB');
 const { refreshPanel } = require('../utils/refreshPanel');
 
-function sep() { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true); }
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
 
 function fmtDate(raw) {
@@ -17,6 +14,11 @@ function fmtDate(raw) {
   const d = new Date(raw);
   const m = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
   return `${d.getDate()} ${m[d.getMonth()]}`;
+}
+
+function stars(note) {
+  const full = Math.round(parseFloat(note) / 2);
+  return '★'.repeat(Math.max(0, full)) + '☆'.repeat(Math.max(0, 5 - full));
 }
 
 function noteLabel(note) {
@@ -73,10 +75,10 @@ module.exports = {
     const n       = movie.note !== null ? parseFloat(movie.note) : null;
     const dateStr = movie.watched_at ? fmtDate(movie.watched_at) : null;
 
-    // Já assistido e sem nota nova — só avisa
+    // Já estava assistido e não passou nota — informa sem alterar nada
     if (alreadyWatched && nota === null) {
       const details = [
-        n !== null ? n.toFixed(1) : null,
+        n !== null ? `${stars(n)}  ${n.toFixed(1)}` : 'sem nota',
         dateStr,
       ].filter(Boolean).join('  ·  ');
 
@@ -86,7 +88,7 @@ module.exports = {
             .setAccentColor(0xF39C12)
             .addTextDisplayComponents(txt(
               `**${movie.name}**\n` +
-              `-# já estava assistido${details ? '  ·  ' + details : ''}  ·  passe a opção nota para atualizar`
+              `-# já assistido  ·  ${details}`
             )),
         ],
         flags: MessageFlags.IsComponentsV2,
@@ -96,7 +98,7 @@ module.exports = {
     }
 
     const details = [
-      n !== null ? n.toFixed(1) : null,
+      n !== null ? `${stars(n)}  ${n.toFixed(1)}` : null,
       dateStr,
       n !== null ? noteLabel(n) : null,
     ].filter(Boolean).join('  ·  ');
@@ -109,7 +111,7 @@ module.exports = {
           .setAccentColor(0x2ECC71)
           .addTextDisplayComponents(txt(
             `**${movie.name}**\n` +
-            `-# ${action}${details ? '  ·  ' + details : ''}`
+            `-# ✅  ${action}${details ? '  ·  ' + details : ''}`
           )),
       ],
       flags: MessageFlags.IsComponentsV2,

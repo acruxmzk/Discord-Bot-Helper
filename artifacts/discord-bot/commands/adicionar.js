@@ -2,15 +2,17 @@ const {
   SlashCommandBuilder,
   ContainerBuilder,
   TextDisplayBuilder,
-  SeparatorBuilder,
-  SeparatorSpacingSize,
   MessageFlags,
 } = require('discord.js');
 const { addMovie, markWatched, setNote } = require('../utils/movieDB');
 const { refreshPanel } = require('../utils/refreshPanel');
 
-function sep() { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true); }
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
+
+function stars(note) {
+  const full = Math.round(parseFloat(note) / 2);
+  return '★'.repeat(Math.max(0, full)) + '☆'.repeat(Math.max(0, 5 - full));
+}
 
 function noteLabel(note) {
   const n = parseFloat(note);
@@ -69,7 +71,10 @@ module.exports = {
     const n         = movie.note !== null ? parseFloat(movie.note) : null;
 
     const details = isWatched
-      ? [n !== null ? `${n.toFixed(1)}` : null, n !== null ? noteLabel(n) : null].filter(Boolean).join('  ·  ')
+      ? [
+          n !== null ? `${stars(n)}  ${n.toFixed(1)}` : null,
+          n !== null ? noteLabel(n) : null,
+        ].filter(Boolean).join('  ·  ')
       : 'na fila';
 
     await interaction.editReply({
@@ -78,7 +83,7 @@ module.exports = {
           .setAccentColor(isWatched ? 0x2ECC71 : 0x9B59B6)
           .addTextDisplayComponents(txt(
             `**${movie.name}**\n` +
-            `-# ${details}`
+            `-# ${isWatched ? '✅' : '⏳'}  ${details}`
           )),
       ],
       flags: MessageFlags.IsComponentsV2,

@@ -2,15 +2,17 @@ const {
   SlashCommandBuilder,
   ContainerBuilder,
   TextDisplayBuilder,
-  SeparatorBuilder,
-  SeparatorSpacingSize,
   MessageFlags,
 } = require('discord.js');
 const { search, setNote } = require('../utils/movieDB');
 const { refreshPanel }    = require('../utils/refreshPanel');
 
-function sep() { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true); }
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
+
+function stars(note) {
+  const full = Math.round(parseFloat(note) / 2);
+  return '★'.repeat(Math.max(0, full)) + '☆'.repeat(Math.max(0, 5 - full));
+}
 
 function noteLabel(note) {
   const n = parseFloat(note);
@@ -75,7 +77,7 @@ module.exports = {
           .setAccentColor(noteColor(n))
           .addTextDisplayComponents(txt(
             `**${movie.name}**\n` +
-            `-# ${n.toFixed(1)}  ·  ${noteLabel(n)}`
+            `-# ${stars(n)}  ${n.toFixed(1)}  ·  ${noteLabel(n)}`
           )),
       ],
       flags: MessageFlags.IsComponentsV2,
