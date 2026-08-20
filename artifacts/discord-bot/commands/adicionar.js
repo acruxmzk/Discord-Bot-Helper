@@ -4,7 +4,8 @@ const {
   TextDisplayBuilder,
   MessageFlags,
 } = require('discord.js');
-const { addMovie, markWatched, setNote } = require('../utils/movieDB');
+const { addMovie, getByTmdbId, markWatched, setNote, updateTmdbMetadata } = require('../utils/movieDB');
+const { findTitle, lookupMovie } = require('../utils/tmdb');
 const { refreshPanel } = require('../utils/refreshPanel');
 
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
@@ -46,7 +47,15 @@ module.exports = {
     const watched = interaction.options.getBoolean('assistido') ?? false;
     const nota    = interaction.options.getNumber('nota') ?? null;
 
-    const added = await addMovie(name);
+    let tmdbMatch = null;
+    try {
+      tmdbMatch = await findTitle(name);
+    } catch (error) {
+      console.error('[TMDB] Falha ao buscar no /adicionar:', error.message);
+    }
+
+    const equivalent = tmdbMatch ? await getByTmdbId(tmdbMatch.id) : null;
+    const added = equivalent ?? await addMovie(name);
 
     if (!added) {
       await interaction.editReply({
@@ -64,6 +73,30 @@ module.exports = {
     }
 
     let movie = added;
+    if (!equivalent && tmdbMatch) {
+      try {
+        const metadata = await lookupMovie(name);
+        movie = await updateTmdbMetadata(added.id, metadata) ?? movie;
+      } catch (error) {
+        console.error('[TMDB] Falha ao enriquecer filme:', error.message);
+      }
+    }
+
+    if (equivalent) {
+      await interaction.editReply({
+        components: [
+          new ContainerBuilder()
+            .setAccentColor(0xF39C12)
+            .addTextDisplayComponents(txt(
+              `**${equivalent.name}**\n` +
+              `-# já existe na watchlist  ·  título equivalente encontrado no TMDB`
+            )),
+        ],
+        flags: MessageFlags.IsComponentsV2,
+      });
+      return;
+    }
+
     if (watched || nota !== null) movie = await markWatched(name) ?? movie;
     if (nota !== null)            movie = await setNote(name, nota) ?? movie;
 

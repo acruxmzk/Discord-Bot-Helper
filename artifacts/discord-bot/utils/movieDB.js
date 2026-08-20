@@ -72,6 +72,7 @@ async function init() {
       note       NUMERIC(4,1),
       watched_at TIMESTAMP WITHOUT TIME ZONE,
       tmdb_id    INTEGER,
+      tmdb_media_type VARCHAR(10),
       genres     TEXT[]       NOT NULL DEFAULT '{}',
       category   VARCHAR(80)  NOT NULL DEFAULT 'Outros',
       tmdb_synced_at TIMESTAMP WITHOUT TIME ZONE
@@ -79,6 +80,7 @@ async function init() {
   `);
 
   await pool.query(`ALTER TABLE movies ADD COLUMN IF NOT EXISTS tmdb_id INTEGER`);
+  await pool.query(`ALTER TABLE movies ADD COLUMN IF NOT EXISTS tmdb_media_type VARCHAR(10)`);
   await pool.query(`ALTER TABLE movies ADD COLUMN IF NOT EXISTS genres TEXT[] NOT NULL DEFAULT '{}'`);
   await pool.query(`ALTER TABLE movies ADD COLUMN IF NOT EXISTS category VARCHAR(80) NOT NULL DEFAULT 'Outros'`);
   await pool.query(`ALTER TABLE movies ADD COLUMN IF NOT EXISTS tmdb_synced_at TIMESTAMP WITHOUT TIME ZONE`);
@@ -111,6 +113,35 @@ async function getByName(name) {
   const res = await pool.query(
     `SELECT * FROM movies WHERE LOWER(BTRIM(name)) = LOWER(BTRIM($1)) LIMIT 1`,
     [name ?? '']
+  );
+  return res.rows[0] ?? null;
+}
+
+async function getByTmdbId(tmdbId) {
+  const res = await pool.query(
+    `SELECT * FROM movies WHERE tmdb_id = $1 LIMIT 1`,
+    [tmdbId]
+  );
+  return res.rows[0] ?? null;
+}
+
+async function updateTmdbMetadata(id, metadata) {
+  const res = await pool.query(
+    `UPDATE movies
+        SET tmdb_id = $2,
+            tmdb_media_type = $3,
+            genres = $4,
+            category = $5,
+            tmdb_synced_at = CURRENT_TIMESTAMP
+      WHERE id = $1
+      RETURNING *`,
+    [
+      id,
+      metadata.tmdbId ?? null,
+      metadata.mediaType ?? null,
+      metadata.genres ?? [],
+      metadata.category ?? 'Outros',
+    ]
   );
   return res.rows[0] ?? null;
 }
@@ -178,4 +209,7 @@ async function removeMovie(name) {
   return res.rows[0] ?? null;
 }
 
-module.exports = { init, getAll, getByName, search, markWatched, setNote, addMovie, removeMovie };
+module.exports = {
+  init, getAll, getByName, getByTmdbId, updateTmdbMetadata,
+  search, markWatched, setNote, addMovie, removeMovie,
+};

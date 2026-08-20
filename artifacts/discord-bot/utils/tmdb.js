@@ -122,7 +122,7 @@ async function lookupMovie(title) {
     getGenres(language),
   ]);
   if (!item) {
-    return { tmdbId: null, genres: [], category: 'Outros' };
+    return { tmdbId: null, mediaType: null, genres: [], category: 'Outros' };
   }
 
   const names = (item.genre_ids ?? [])
@@ -130,9 +130,53 @@ async function lookupMovie(title) {
     .filter(Boolean);
   return {
     tmdbId: item.id ?? null,
+    mediaType: item.media_type ?? null,
     genres: [...new Set(names)],
     category: GENRE_LABELS[names[0]] ?? names[0] ?? 'Outros',
   };
+}
+
+async function getDetails(movie) {
+  if (!movie?.tmdb_id) return null;
+  const type = movie.tmdb_media_type === 'tv' ? 'tv' : 'movie';
+  return tmdbFetch(`/${type}/${movie.tmdb_id}`, {
+    language: 'pt-BR',
+    append_to_response: 'credits,watch/providers',
+  });
+}
+
+async function getSimilar(movie) {
+  if (!movie?.tmdb_id) return [];
+  const type = movie.tmdb_media_type === 'tv' ? 'tv' : 'movie';
+  const result = await tmdbFetch(`/${type}/${movie.tmdb_id}/similar`, {
+    language: 'pt-BR',
+    page: 1,
+  });
+  return (result.results ?? []).slice(0, 10);
+}
+
+async function getRecommendations(movies) {
+  const watched = movies
+    .filter(movie => movie.watched && movie.tmdb_id)
+    .sort((a, b) => Number(b.note ?? 0) - Number(a.note ?? 0))
+    .slice(0, 3);
+  if (!watched.length) return [];
+
+  const existing = new Set(movies.map(movie => cleanTitle(movie.name)));
+  const recommendations = [];
+  const seen = new Set();
+  for (const movie of watched) {
+    const similar = await getSimilar(movie);
+    for (const item of similar) {
+      const title = item.title ?? item.name;
+      if (!title || seen.has(item.id) || existing.has(cleanTitle(title))) continue;
+      seen.add(item.id);
+      recommendations.push({ ...item, source: movie.name });
+    }
+  }
+  return recommendations
+    .sort((a, b) => Number(b.vote_average ?? 0) - Number(a.vote_average ?? 0))
+    .slice(0, 8);
 }
 
 async function syncAllMovies() {
@@ -157,11 +201,12 @@ async function syncAllMovies() {
       await pool.query(`
         UPDATE movies
         SET tmdb_id = $2,
-            genres = $3,
-            category = $4,
+            tmdb_media_type = $3,
+            genres = $4,
+            category = $5,
             tmdb_synced_at = CURRENT_TIMESTAMP
         WHERE id = $1
-      `, [movie.id, metadata.tmdbId, metadata.genres, metadata.category]);
+      `, [movie.id, metadata.tmdbId, metadata.mediaType, metadata.genres, metadata.category]);
       synced++;
       console.log(`[TMDB] ${movie.name} → ${metadata.category}`);
     } catch (error) {
@@ -172,4 +217,6 @@ async function syncAllMovies() {
   return { synced, skipped: 0, failed };
 }
 
-module.exports = { syncAllMovies, lookupMovie };
+module.exports = {
+  syncAllMovies, lookupMovie, findTitle, getDetails, getSimilar, getRecommendations,
+};
