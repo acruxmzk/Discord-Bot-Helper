@@ -100,8 +100,8 @@ async function getAll() {
 
 async function getByName(name) {
   const res = await pool.query(
-    `SELECT * FROM movies WHERE LOWER(name) = LOWER($1) LIMIT 1`,
-    [name]
+    `SELECT * FROM movies WHERE LOWER(BTRIM(name)) = LOWER(BTRIM($1)) LIMIT 1`,
+    [name ?? '']
   );
   return res.rows[0] ?? null;
 }
@@ -120,12 +120,12 @@ async function search(query) {
 async function markWatched(name) {
   const res = await pool.query(
     `WITH before AS (
-       SELECT watched FROM movies WHERE LOWER(name) = LOWER($1)
+       SELECT watched FROM movies WHERE LOWER(BTRIM(name)) = LOWER(BTRIM($1))
      )
      UPDATE movies SET
        watched    = true,
        watched_at = CASE WHEN (SELECT watched FROM before) THEN watched_at ELSE CURRENT_TIMESTAMP END
-     WHERE LOWER(name) = LOWER($1)
+      WHERE LOWER(BTRIM(name)) = LOWER(BTRIM($1))
      RETURNING *, (SELECT watched FROM before) AS already_watched`,
     [name]
   );
@@ -135,7 +135,7 @@ async function markWatched(name) {
 async function setNote(name, note) {
   const res = await pool.query(
     `UPDATE movies SET note = $2
-     WHERE LOWER(name) = LOWER($1)
+      WHERE LOWER(BTRIM(name)) = LOWER(BTRIM($1))
      RETURNING *`,
     [name, note]
   );
@@ -143,18 +143,24 @@ async function setNote(name, note) {
 }
 
 async function addMovie(name) {
+  const cleanName = String(name ?? '').trim().replace(/\s+/g, ' ');
+  if (!cleanName) return null;
+
   const res = await pool.query(
-    `INSERT INTO movies (name) VALUES ($1)
-     ON CONFLICT (name) DO NOTHING
+    `INSERT INTO movies (name)
+     SELECT $1::varchar
+     WHERE NOT EXISTS (
+       SELECT 1 FROM movies WHERE LOWER(BTRIM(name)) = LOWER(BTRIM($1::varchar))
+     )
      RETURNING *`,
-    [name.trim()]
+    [cleanName]
   );
   return res.rows[0] ?? null;
 }
 
 async function removeMovie(name) {
   const res = await pool.query(
-    `DELETE FROM movies WHERE LOWER(name) = LOWER($1) RETURNING *`,
+    `DELETE FROM movies WHERE LOWER(BTRIM(name)) = LOWER(BTRIM($1)) RETURNING *`,
     [name]
   );
   return res.rows[0] ?? null;

@@ -61,7 +61,7 @@ function resolveButtonHandler(customId) {
 }
 
 // ── Ready ─────────────────────────────────────────────────────────────────────
-client.once('ready', () => {
+client.once('clientReady', () => {
   console.log(`[BOT] Online como ${client.user.tag}`);
   console.log(`[BOT] Servidores: ${client.guilds.cache.size}`);
 });
