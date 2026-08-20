@@ -36,6 +36,8 @@ const INITIAL_MOVIES = [
 ];
 
 async function init() {
+  await pool.query(`CREATE EXTENSION IF NOT EXISTS unaccent`);
+
   await pool.query(`
     CREATE TABLE IF NOT EXISTS movies (
       id         SERIAL       PRIMARY KEY,
@@ -80,7 +82,10 @@ async function getByName(name) {
 
 async function search(query) {
   const res = await pool.query(
-    `SELECT * FROM movies WHERE name ILIKE $1 ORDER BY id ASC LIMIT 25`,
+    `SELECT * FROM movies
+     WHERE unaccent(name) ILIKE unaccent($1)
+     ORDER BY id ASC
+     LIMIT 25`,
     [`%${query}%`]
   );
   return res.rows;
