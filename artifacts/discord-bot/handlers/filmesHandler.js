@@ -125,7 +125,12 @@ function buildFilmesContainer(movies, filter) {
   if (filter !== 'pending' && watched.length > 0) {
     const recent = [...watched]
       .sort((a, b) => {
-        if (a.watched_at && b.watched_at) return new Date(b.watched_at) - new Date(a.watched_at);
+        if (a.watched_at && b.watched_at) {
+          const byDate = new Date(b.watched_at) - new Date(a.watched_at);
+          return byDate !== 0 ? byDate : b.id - a.id;
+        }
+        if (a.watched_at) return -1;
+        if (b.watched_at) return 1;
         return b.id - a.id;
       })
       .slice(0, 3);

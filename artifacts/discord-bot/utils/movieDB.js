@@ -42,9 +42,20 @@ async function init() {
       name       VARCHAR(200) UNIQUE NOT NULL,
       watched    BOOLEAN      NOT NULL DEFAULT false,
       note       NUMERIC(4,1),
-      watched_at DATE
+      watched_at TIMESTAMP WITHOUT TIME ZONE
     )
   `);
+
+  // Atualiza instalações antigas para registrar também o horário em que
+  // o filme foi assistido. Datas já existentes continuam preservadas.
+  await pool.query(`
+    ALTER TABLE movies
+    ALTER COLUMN watched_at TYPE TIMESTAMP WITHOUT TIME ZONE
+    USING watched_at::timestamp
+  `).catch(err => {
+    // A coluna já está no tipo correto nas execuções seguintes.
+    if (err.code !== '42804') throw err;
+  });
 
   for (const name of INITIAL_MOVIES) {
     await pool.query(
@@ -82,7 +93,7 @@ async function markWatched(name) {
      )
      UPDATE movies SET
        watched    = true,
-       watched_at = CASE WHEN (SELECT watched FROM before) THEN watched_at ELSE CURRENT_DATE END
+       watched_at = CASE WHEN (SELECT watched FROM before) THEN watched_at ELSE CURRENT_TIMESTAMP END
      WHERE LOWER(name) = LOWER($1)
      RETURNING *, (SELECT watched FROM before) AS already_watched`,
     [name]

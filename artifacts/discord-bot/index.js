@@ -69,6 +69,18 @@ client.once('ready', () => {
 // ── Interações ────────────────────────────────────────────────────────────────
 client.on('interactionCreate', async interaction => {
 
+  if (interaction.isAutocomplete()) {
+    const command = client.commands.get(interaction.commandName);
+    if (!command?.autocomplete) return;
+    try {
+      await command.autocomplete(interaction);
+    } catch (err) {
+      console.error(`[ERRO] Autocomplete /${interaction.commandName}:`, err);
+      if (!interaction.responded) await interaction.respond([]);
+    }
+    return;
+  }
+
   if (interaction.isChatInputCommand()) {
     const command = client.commands.get(interaction.commandName);
     if (!command) return;
