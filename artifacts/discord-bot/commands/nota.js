@@ -75,6 +75,11 @@ module.exports = {
 
     const n = parseFloat(movie.note);
 
+    // Atualiza o painel antes de confirmar para o usuário, garantindo que
+    // a nova nota apareça imediatamente na mensagem fixa.
+    await refreshPanel(interaction.guildId)
+      .catch(e => console.error('[refreshPanel]', e));
+
     await interaction.editReply({
       components: [
         new ContainerBuilder()
@@ -86,7 +91,5 @@ module.exports = {
       ],
       flags: MessageFlags.IsComponentsV2,
     });
-
-    refreshPanel(interaction.guildId).catch(e => console.error('[refreshPanel]', e));
   },
 };
