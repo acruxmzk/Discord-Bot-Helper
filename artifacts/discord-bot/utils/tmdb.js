@@ -3,6 +3,21 @@ const pool = require('./pgPool');
 const API_BASE = 'https://api.themoviedb.org/3';
 const SYNC_AFTER_DAYS = 30;
 const genreCache = new Map();
+const SEARCH_ALIASES = {
+  Frozen: ['Frozen: Uma Aventura Congelante'],
+  'Frozen 2': ['Frozen II', 'Frozen 2'],
+  'Para todos os garotos que já amei 2': [
+    'Para todos os garotos: P.S. Ainda amo você',
+    'To All the Boys: P.S. I Still Love You',
+  ],
+  'Masterchef Brasil: Season 3': ['MasterChef Brasil'],
+  'Masterchef Profissionais: Season 2': ['MasterChef Profissionais', 'MasterChef: The Professionals'],
+  'Dexter: Season 1': ['Dexter'],
+};
+const GENRE_LABELS = {
+  'Action & Adventure': 'Ação e aventura',
+  'Sci-Fi & Fantasy': 'Ficção científica e fantasia',
+};
 
 function apiKey() {
   return process.env.TMDB_API_KEY;
@@ -54,25 +69,44 @@ async function getGenres(language) {
     tmdbFetch('/genre/tv/list', { language }),
   ]);
   const genres = new Map();
+  // Prefer the movie translation when an ID is shared by movie and TV
+  // catalogs. Some TMDB responses otherwise replace Portuguese labels with
+  // the TV catalog's English name.
   for (const genre of [...(movies.genres ?? []), ...(tv.genres ?? [])]) {
-    genres.set(genre.id, genre.name);
+    if (!genres.has(genre.id)) genres.set(genre.id, GENRE_LABELS[genre.name] ?? genre.name);
   }
   genreCache.set(language, genres);
   return genres;
 }
 
-async function findTitle(title, language = 'pt-BR') {
+async function searchCandidates(query, language) {
   const result = await tmdbFetch('/search/multi', {
-    query: title,
+    query,
     language,
     include_adult: 'false',
     page: 1,
   });
-
-  const candidates = (result.results ?? [])
+  return (result.results ?? [])
     .filter(item => item.media_type === 'movie' || item.media_type === 'tv')
-    .map(item => ({ item, score: similarity(title, item.title ?? item.name) }))
-    .sort((a, b) => b.score - a.score);
+    .map(item => {
+      const localized = item.title ?? item.name ?? '';
+      const original = item.original_title ?? item.original_name ?? '';
+      let score = similarity(query, localized);
+      if (cleanTitle(localized) === cleanTitle(query)) score = 1;
+      else if (cleanTitle(original) === cleanTitle(query)) score = Math.max(score, 0.84);
+      // For ambiguous names such as "Os Vingadores", prefer a movie match
+      // over an old TV series when the watchlist is a film list.
+      if (item.media_type === 'movie') score += 0.15;
+      score += Math.min(Number(item.popularity ?? 0) / 1000, 0.05);
+      return { item, score };
+    });
+}
+
+async function findTitle(title, language = 'pt-BR') {
+  const queries = [title, ...(SEARCH_ALIASES[title] ?? [])];
+  const candidates = [];
+  for (const query of queries) candidates.push(...await searchCandidates(query, language));
+  candidates.sort((a, b) => b.score - a.score);
 
   const best = candidates[0];
   // For sequels and localized titles, TMDB can return a valid result with a
@@ -97,7 +131,7 @@ async function lookupMovie(title) {
   return {
     tmdbId: item.id ?? null,
     genres: [...new Set(names)],
-    category: names[0] ?? 'Outros',
+    category: GENRE_LABELS[names[0]] ?? names[0] ?? 'Outros',
   };
 }
 
