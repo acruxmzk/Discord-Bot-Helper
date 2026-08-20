@@ -5,6 +5,7 @@ const path = require('path');
 const movieDB    = require('./utils/movieDB');
 const panelStore = require('./utils/panelStore');
 const clientRef  = require('./utils/clientRef');
+const { syncAllMovies } = require('./utils/tmdb');
 
 const { handleFilmesButton, handlePainelButton } = require('./handlers/filmesHandler');
 
@@ -64,6 +65,9 @@ function resolveButtonHandler(customId) {
 client.once('clientReady', () => {
   console.log(`[BOT] Online como ${client.user.tag}`);
   console.log(`[BOT] Servidores: ${client.guilds.cache.size}`);
+  syncAllMovies()
+    .then(result => console.log(`[TMDB] Sincronização concluída: ${result.synced} atualizados, ${result.failed} falhas.`))
+    .catch(err => console.error('[TMDB] Erro na sincronização:', err.message));
 });
 
 // ── Interações ────────────────────────────────────────────────────────────────

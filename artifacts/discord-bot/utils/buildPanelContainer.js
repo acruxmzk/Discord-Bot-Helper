@@ -70,6 +70,21 @@ function movieRow(m, index) {
   return `\`${num}\`  ✅  **${m.name}**${star}${note}${date}`;
 }
 
+function categoryGroups(list) {
+  const groups = new Map();
+  for (const movie of list) {
+    const category = movie.category || movie.genres?.[0] || 'Outros';
+    if (!groups.has(category)) groups.set(category, []);
+    groups.get(category).push(movie);
+  }
+
+  return [...groups.entries()].sort(([a], [b]) => {
+    if (a === 'Outros') return 1;
+    if (b === 'Outros') return -1;
+    return a.localeCompare(b, 'pt-BR');
+  });
+}
+
 function buildPanelContainer(movies, filter = 'all') {
   const total   = movies.length;
   const watched = movies.filter(m =>  m.watched);
@@ -170,17 +185,19 @@ function buildPanelContainer(movies, filter = 'all') {
         : `*Todos os filmes foram assistidos.*`
     ));
   } else {
-    const chunks = [];
-    for (let i = 0; i < list.length; i += 10) chunks.push(list.slice(i, i + 10));
     let idx = 1;
-    for (let ci = 0; ci < chunks.length; ci++) {
-      c.addTextDisplayComponents(txt(chunks[ci].map((m, li) => movieRow(m, idx + li)).join('\n')));
-      idx += chunks[ci].length;
-      if (ci < chunks.length - 1) c.addSeparatorComponents(sep());
+    for (const [category, categoryMovies] of categoryGroups(list)) {
+      const rows = categoryMovies.map(movie => movieRow(movie, idx++));
+      const heading = category === 'Outros' ? '🎞️' : '🎭';
+      // Keep each category in its own display. This makes the panel readable
+      // without adding one Discord component for every individual movie.
+      c.addTextDisplayComponents(txt(
+        `### ${heading}  ${category}  ·  ${categoryMovies.length}\n${rows.join('\n')}`
+      ));
     }
   }
 
   return c;
 }
 
-module.exports = { buildPanelContainer };
+module.exports = { buildPanelContainer, categoryGroups };

@@ -9,7 +9,7 @@ const {
   MessageFlags,
 } = require('discord.js');
 const { getAll }              = require('../utils/movieDB');
-const { buildPanelContainer } = require('../utils/buildPanelContainer');
+const { categoryGroups }      = require('../utils/buildPanelContainer');
 
 function sep() { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true); }
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
@@ -182,13 +182,13 @@ function buildFilmesContainer(movies, filter) {
         : `*Todos os filmes já foram assistidos.*`
     ));
   } else {
-    const chunks = [];
-    for (let i = 0; i < list.length; i += 10) chunks.push(list.slice(i, i + 10));
     let idx = 1;
-    for (let ci = 0; ci < chunks.length; ci++) {
-      c.addTextDisplayComponents(txt(chunks[ci].map((m, li) => movieRow(m, idx + li)).join('\n')));
-      idx += chunks[ci].length;
-      if (ci < chunks.length - 1) c.addSeparatorComponents(sep());
+    for (const [category, categoryMovies] of categoryGroups(list)) {
+      const rows = categoryMovies.map(movie => movieRow(movie, idx++));
+      const heading = category === 'Outros' ? '🎞️' : '🎭';
+      c.addTextDisplayComponents(txt(
+        `### ${heading}  ${category}  ·  ${categoryMovies.length}\n${rows.join('\n')}`
+      ));
     }
   }
 

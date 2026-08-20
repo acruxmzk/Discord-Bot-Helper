@@ -70,9 +70,18 @@ async function init() {
       name       VARCHAR(200) UNIQUE NOT NULL,
       watched    BOOLEAN      NOT NULL DEFAULT false,
       note       NUMERIC(4,1),
-      watched_at TIMESTAMP WITHOUT TIME ZONE
+      watched_at TIMESTAMP WITHOUT TIME ZONE,
+      tmdb_id    INTEGER,
+      genres     TEXT[]       NOT NULL DEFAULT '{}',
+      category   VARCHAR(80)  NOT NULL DEFAULT 'Outros',
+      tmdb_synced_at TIMESTAMP WITHOUT TIME ZONE
     )
   `);
+
+  await pool.query(`ALTER TABLE movies ADD COLUMN IF NOT EXISTS tmdb_id INTEGER`);
+  await pool.query(`ALTER TABLE movies ADD COLUMN IF NOT EXISTS genres TEXT[] NOT NULL DEFAULT '{}'`);
+  await pool.query(`ALTER TABLE movies ADD COLUMN IF NOT EXISTS category VARCHAR(80) NOT NULL DEFAULT 'Outros'`);
+  await pool.query(`ALTER TABLE movies ADD COLUMN IF NOT EXISTS tmdb_synced_at TIMESTAMP WITHOUT TIME ZONE`);
 
   // Atualiza instalações antigas para registrar também o horário em que
   // o filme foi assistido. Datas já existentes continuam preservadas.
