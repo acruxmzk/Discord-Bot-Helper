@@ -157,25 +157,65 @@ async function getSimilar(movie) {
 
 async function getRecommendations(movies) {
   const watched = movies
-    .filter(movie => movie.watched && movie.tmdb_id)
+    .filter(movie => movie.watched && movie.tmdb_id && movie.note !== null)
     .sort((a, b) => Number(b.note ?? 0) - Number(a.note ?? 0))
-    .slice(0, 3);
+    .slice(0, 5);
   if (!watched.length) return [];
 
   const existing = new Set(movies.map(movie => cleanTitle(movie.name)));
-  const recommendations = [];
-  const seen = new Set();
+  const existingIds = new Set(movies.map(movie => movie.tmdb_id).filter(Boolean));
+  const genres = await getGenres('pt-BR');
+  const genreFrequency = new Map();
   for (const movie of watched) {
-    const similar = await getSimilar(movie);
-    for (const item of similar) {
-      const title = item.title ?? item.name;
-      if (!title || seen.has(item.id) || existing.has(cleanTitle(title))) continue;
-      seen.add(item.id);
-      recommendations.push({ ...item, source: movie.name });
+    for (const genre of movie.genres ?? []) {
+      genreFrequency.set(genre, (genreFrequency.get(genre) ?? 0) + Number(movie.note ?? 0));
     }
   }
-  return recommendations
-    .sort((a, b) => Number(b.vote_average ?? 0) - Number(a.vote_average ?? 0))
+
+  const candidates = new Map();
+  for (const movie of watched) {
+    const type = movie.tmdb_media_type === 'tv' ? 'tv' : 'movie';
+    const [similar, recommended] = await Promise.all([
+      getSimilar(movie),
+      tmdbFetch(`/${type}/${movie.tmdb_id}/recommendations`, { language: 'pt-BR', page: 1 })
+        .then(result => result.results ?? []),
+    ]);
+    for (const item of [...recommended, ...similar]) {
+      const title = item.title ?? item.name;
+      if (
+        !title ||
+        existingIds.has(item.id) ||
+        existing.has(cleanTitle(title)) ||
+        Number(item.vote_count ?? 0) < 20
+      ) continue;
+
+      const itemGenres = (item.genre_ids ?? [])
+        .map(id => genres.get(id))
+        .filter(Boolean);
+      const matchedFavoriteGenres = itemGenres.filter(genre => genreFrequency.has(genre));
+      const current = candidates.get(item.id);
+      const sourceScore = Number(movie.note ?? 0) / 10;
+      const popularityScore = Math.min(Math.log10(Number(item.popularity ?? 0) + 1), 2);
+      const score = Number(item.vote_average ?? 0) * 2
+        + popularityScore
+        + matchedFavoriteGenres.length * 1.5
+        + sourceScore;
+
+      if (!current || score > current.score) {
+        candidates.set(item.id, {
+          ...item,
+          media_type: type,
+          score,
+          source: movie.name,
+          sourceNote: Number(movie.note),
+          matchedFavoriteGenres: [...new Set(matchedFavoriteGenres)],
+        });
+      }
+    }
+  }
+
+  return [...candidates.values()]
+    .sort((a, b) => b.score - a.score)
     .slice(0, 8);
 }
 
