@@ -4,7 +4,7 @@ const {
   TextDisplayBuilder,
   MessageFlags,
 } = require('discord.js');
-const { search, setNote } = require('../utils/movieDB');
+const { search, setNote, markWatched } = require('../utils/movieDB');
 const { refreshPanel }    = require('../utils/refreshPanel');
 
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
@@ -50,9 +50,13 @@ module.exports = {
   async execute(interaction) {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-    const name  = interaction.options.getString('filme');
-    const nota  = interaction.options.getNumber('nota');
-    const movie = await setNote(name, nota);
+    const name = interaction.options.getString('filme');
+    const nota = interaction.options.getNumber('nota');
+
+    // Dar uma nota pressupõe que o filme foi assistido. Para filmes já
+    // assistidos, markWatched preserva a data original.
+    let movie = await markWatched(name);
+    if (movie) movie = await setNote(movie.name, nota) ?? movie;
 
     if (!movie) {
       await interaction.editReply({

@@ -120,12 +120,13 @@ async function search(query) {
 async function markWatched(name) {
   const res = await pool.query(
     `WITH before AS (
-       SELECT watched FROM movies WHERE LOWER(BTRIM(name)) = LOWER(BTRIM($1))
+       SELECT watched FROM movies
+       WHERE unaccent(LOWER(BTRIM(name))) = unaccent(LOWER(BTRIM($1)))
      )
      UPDATE movies SET
        watched    = true,
        watched_at = CASE WHEN (SELECT watched FROM before) THEN watched_at ELSE CURRENT_TIMESTAMP END
-      WHERE LOWER(BTRIM(name)) = LOWER(BTRIM($1))
+      WHERE unaccent(LOWER(BTRIM(name))) = unaccent(LOWER(BTRIM($1)))
      RETURNING *, (SELECT watched FROM before) AS already_watched`,
     [name]
   );
@@ -135,7 +136,7 @@ async function markWatched(name) {
 async function setNote(name, note) {
   const res = await pool.query(
     `UPDATE movies SET note = $2
-      WHERE LOWER(BTRIM(name)) = LOWER(BTRIM($1))
+      WHERE unaccent(LOWER(BTRIM(name))) = unaccent(LOWER(BTRIM($1)))
      RETURNING *`,
     [name, note]
   );
@@ -160,7 +161,9 @@ async function addMovie(name) {
 
 async function removeMovie(name) {
   const res = await pool.query(
-    `DELETE FROM movies WHERE LOWER(BTRIM(name)) = LOWER(BTRIM($1)) RETURNING *`,
+    `DELETE FROM movies
+     WHERE unaccent(LOWER(BTRIM(name))) = unaccent(LOWER(BTRIM($1)))
+     RETURNING *`,
     [name]
   );
   return res.rows[0] ?? null;
