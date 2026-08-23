@@ -155,7 +155,7 @@ async function getSimilar(movie) {
   return (result.results ?? []).slice(0, 10);
 }
 
-async function getRecommendations(movies) {
+async function getRecommendations(movies, { limit = 8 } = {}) {
   const watched = movies
     .filter(movie => movie.watched && movie.tmdb_id && movie.note !== null)
     .sort((a, b) => Number(b.note ?? 0) - Number(a.note ?? 0))
@@ -214,9 +214,37 @@ async function getRecommendations(movies) {
     }
   }
 
-  return [...candidates.values()]
+  const pool = [...candidates.values()]
     .sort((a, b) => b.score - a.score)
-    .slice(0, 8);
+    .slice(0, 30);
+  const selected = [];
+  const usedGenres = new Set();
+
+  // Sorteio ponderado: títulos bem avaliados continuam tendo vantagem, mas
+  // cada execução pode trazer uma combinação diferente e mais variada.
+  while (selected.length < Math.min(limit, pool.length)) {
+    const available = pool.filter(item => !selected.some(choice => choice.id === item.id));
+    if (!available.length) break;
+
+    const weighted = available.map(item => {
+      const genrePenalty = item.matchedFavoriteGenres?.some(genre => usedGenres.has(genre)) ? 0.65 : 1;
+      return { item, weight: Math.max(0.1, item.score * genrePenalty) };
+    });
+    const totalWeight = weighted.reduce((sum, entry) => sum + entry.weight, 0);
+    let cursor = Math.random() * totalWeight;
+    let chosen = weighted[weighted.length - 1].item;
+    for (const entry of weighted) {
+      cursor -= entry.weight;
+      if (cursor <= 0) {
+        chosen = entry.item;
+        break;
+      }
+    }
+    selected.push(chosen);
+    for (const genre of chosen.matchedFavoriteGenres ?? []) usedGenres.add(genre);
+  }
+
+  return selected;
 }
 
 async function syncAllMovies() {

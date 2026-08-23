@@ -34,8 +34,8 @@ module.exports = {
       components: [
         new ContainerBuilder()
           .setAccentColor(0x9B59B6)
-          .addTextDisplayComponents(txt(`## ✨ Recomendações para você\n-# Baseadas nas suas melhores notas, gêneros favoritos e avaliação do TMDB\n\n${lines.join('\n')}`))
-          .addTextDisplayComponents(txt('-# Títulos que já estão na watchlist são removidos automaticamente · TMDB')),
+          .addTextDisplayComponents(txt(`## ✨ Recomendações para você\n-# Seleção dinâmica baseada nas suas melhores notas, gêneros favoritos e avaliação do TMDB\n\n${lines.join('\n')}`))
+          .addTextDisplayComponents(txt('-# Cada execução pode trazer uma combinação diferente · títulos da watchlist são removidos automaticamente')),
       ],
       flags: MessageFlags.IsComponentsV2,
     });
