@@ -155,12 +155,19 @@ async function getSimilar(movie) {
   return (result.results ?? []).slice(0, 10);
 }
 
-async function getRecommendations(movies, { limit = 8 } = {}) {
+async function getRecommendations(movies, { limit = 8, anchorName = null } = {}) {
   const watched = movies
     .filter(movie => movie.watched && movie.tmdb_id && movie.note !== null)
     .sort((a, b) => Number(b.note ?? 0) - Number(a.note ?? 0))
     .slice(0, 5);
-  if (!watched.length) return [];
+  const requestedAnchor = anchorName
+    ? movies.find(movie => cleanTitle(movie.name) === cleanTitle(anchorName) && movie.tmdb_id)
+    : null;
+  if (!watched.length && !requestedAnchor) return [];
+
+  // Um único filme-foco por execução mantém a relação temática entre as
+  // indicações. Sem argumento, escolhemos dinamicamente entre os favoritos.
+  const focus = requestedAnchor ?? watched[Math.floor(Math.random() * Math.min(watched.length, 3))];
 
   const existing = new Set(movies.map(movie => cleanTitle(movie.name)));
   const existingIds = new Set(movies.map(movie => movie.tmdb_id).filter(Boolean));
@@ -173,14 +180,17 @@ async function getRecommendations(movies, { limit = 8 } = {}) {
   }
 
   const candidates = new Map();
-  for (const movie of watched) {
-    const type = movie.tmdb_media_type === 'tv' ? 'tv' : 'movie';
-    const [similar, recommended] = await Promise.all([
-      getSimilar(movie),
-      tmdbFetch(`/${type}/${movie.tmdb_id}/recommendations`, { language: 'pt-BR', page: 1 })
-        .then(result => result.results ?? []),
-    ]);
-    for (const item of [...recommended, ...similar]) {
+  const focusGenres = new Set(focus.genres ?? []);
+  const type = focus.tmdb_media_type === 'tv' ? 'tv' : 'movie';
+  const [similar, recommended] = await Promise.all([
+    getSimilar(focus),
+    tmdbFetch(`/${type}/${focus.tmdb_id}/recommendations`, { language: 'pt-BR', page: 1 })
+      .then(result => result.results ?? []),
+  ]);
+  for (const [item, relation] of [
+    ...recommended.map(item => [item, 'recommendation']),
+    ...similar.map(item => [item, 'similar']),
+  ]) {
       const title = item.title ?? item.name;
       if (
         !title ||
@@ -193,12 +203,19 @@ async function getRecommendations(movies, { limit = 8 } = {}) {
         .map(id => genres.get(id))
         .filter(Boolean);
       const matchedFavoriteGenres = itemGenres.filter(genre => genreFrequency.has(genre));
+      const matchedFocusGenres = itemGenres.filter(genre => (focus.genres ?? []).includes(genre));
       const current = candidates.get(item.id);
-      const sourceScore = Number(movie.note ?? 0) / 10;
-      const popularityScore = Math.min(Math.log10(Number(item.popularity ?? 0) + 1), 2);
-      const score = Number(item.vote_average ?? 0) * 2
+      const sourceScore = Number(focus.note ?? 7) / 10;
+      const popularityScore = Math.min(Math.log10(Number(item.popularity ?? 0) + 1), 2) * 0.35;
+      const relationScore = relation === 'recommendation' ? 6 : 4;
+      const genreScore = matchedFocusGenres.length * 4
+        + matchedFavoriteGenres.length * (anchorName ? 0.4 : 1);
+      const unrelatedPenalty = focusGenres.size > 0 && matchedFocusGenres.length === 0 ? 3 : 0;
+      const score = Number(item.vote_average ?? 0) * 1.5
         + popularityScore
-        + matchedFavoriteGenres.length * 1.5
+        + relationScore
+        + genreScore
+        - unrelatedPenalty
         + sourceScore;
 
       if (!current || score > current.score) {
@@ -206,17 +223,16 @@ async function getRecommendations(movies, { limit = 8 } = {}) {
           ...item,
           media_type: type,
           score,
-          source: movie.name,
-          sourceNote: Number(movie.note),
-          matchedFavoriteGenres: [...new Set(matchedFavoriteGenres)],
+          source: focus.name,
+          sourceNote: Number(focus.note ?? 0),
+          matchedFavoriteGenres: [...new Set([...matchedFocusGenres, ...matchedFavoriteGenres])],
         });
       }
-    }
   }
 
   const pool = [...candidates.values()]
     .sort((a, b) => b.score - a.score)
-    .slice(0, 30);
+    .slice(0, 15);
   const selected = [];
   const usedGenres = new Set();
 
@@ -244,7 +260,7 @@ async function getRecommendations(movies, { limit = 8 } = {}) {
     for (const genre of chosen.matchedFavoriteGenres ?? []) usedGenres.add(genre);
   }
 
-  return selected;
+  return selected.sort((a, b) => b.score - a.score);
 }
 
 async function syncAllMovies() {

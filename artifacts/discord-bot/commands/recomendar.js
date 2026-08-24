@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, ContainerBuilder, TextDisplayBuilder, MessageFlags } = require('discord.js');
-const { getAll } = require('../utils/movieDB');
+const { getAll, search } = require('../utils/movieDB');
 const { getRecommendations } = require('../utils/tmdb');
 
 const txt = content => new TextDisplayBuilder().setContent(content);
@@ -7,12 +7,32 @@ const txt = content => new TextDisplayBuilder().setContent(content);
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('recomendar')
-    .setDescription('✨ Recomenda títulos com base nas suas melhores avaliações'),
+    .setDescription('✨ Recomenda títulos parecidos com um filme específico')
+    .addStringOption(option =>
+      option
+        .setName('filme')
+        .setDescription('Filme-foco (opcional; sem ele escolhe um favorito)')
+        .setRequired(false)
+        .setAutocomplete(true)
+    ),
+
+  async autocomplete(interaction) {
+    const results = await search(interaction.options.getFocused() || '');
+    await interaction.respond(results.map(movie => ({ name: movie.name, value: movie.name })));
+  },
 
   async execute(interaction) {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     const movies = await getAll();
-    const results = await getRecommendations(movies);
+    const anchorName = interaction.options.getString('filme');
+    const anchor = anchorName
+      ? movies.find(movie => movie.name.toLowerCase() === anchorName.toLowerCase() && movie.tmdb_id)
+      : null;
+    if (anchorName && !anchor) {
+      await interaction.editReply({ content: '❌ Escolha um título da watchlist com dados disponíveis no TMDB.' });
+      return;
+    }
+    const results = await getRecommendations(movies, { anchorName });
     if (!results.length) {
       await interaction.editReply({
         content: '⚠️ Marque alguns títulos como assistidos e dê notas para receber recomendações personalizadas.',
@@ -20,6 +40,7 @@ module.exports = {
       return;
     }
 
+    const focus = results[0]?.source;
     const lines = results.map((item, index) => {
       const title = item.title ?? item.name;
       const year = (item.release_date ?? item.first_air_date ?? '').slice(0, 4);
@@ -27,14 +48,16 @@ module.exports = {
       const genres = item.matchedFavoriteGenres?.length
         ? ` · ${item.matchedFavoriteGenres.slice(0, 2).join(', ')}`
         : '';
-      const source = item.source ? `\n   -# porque você avaliou **${item.source}** com ${item.sourceNote.toFixed(1)}` : '';
+      const source = item.source && item.sourceNote > 0
+        ? `\n   -# relacionado a **${item.source}** · sua nota ${item.sourceNote.toFixed(1)}`
+        : '';
       return `**${index + 1}. [${title}](https://www.themoviedb.org/${item.media_type === 'tv' ? 'tv' : 'movie'}/${item.id})**${year ? ` · ${year}` : ''}${score}${genres}${source}`;
     });
     await interaction.editReply({
       components: [
         new ContainerBuilder()
           .setAccentColor(0x9B59B6)
-          .addTextDisplayComponents(txt(`## ✨ Recomendações para você\n-# Seleção dinâmica baseada nas suas melhores notas, gêneros favoritos e avaliação do TMDB\n\n${lines.join('\n')}`))
+          .addTextDisplayComponents(txt(`## ✨ Recomendações${focus ? ` parecidas com ${focus}` : ''}\n-# Um filme-foco por execução · similares, recomendações e avaliação do TMDB\n\n${lines.join('\n')}`))
           .addTextDisplayComponents(txt('-# Cada execução pode trazer uma combinação diferente · títulos da watchlist são removidos automaticamente')),
       ],
       flags: MessageFlags.IsComponentsV2,
