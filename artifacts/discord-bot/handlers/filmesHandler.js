@@ -9,6 +9,7 @@ const {
   MessageFlags,
 } = require('discord.js');
 const { getAll }              = require('../utils/movieDB');
+const { buildPanelContainer } = require('../utils/buildPanelContainer');
 
 function sep() { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true); }
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
