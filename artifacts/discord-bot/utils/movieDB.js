@@ -59,6 +59,11 @@ const INITIAL_MOVIES = [
   'Misterio no Mediterrâneo',
   'Misterio em Paris',
   'O homem de toronto',
+  'Barbie: Escola de princesas',
+  'Malévola',
+  '2012',
+  'Um contratempo',
+  'Nosferatu',
 ];
 
 async function init() {
