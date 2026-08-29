@@ -30,6 +30,7 @@ module.exports = {
             `/nota       ·  avalia um filme de 0 a 10\n` +
             `/remover    ·  remove da lista\n` +
             `/filmes     ·  sua watchlist com filtros\n` +
+            `/duracao    ·  calcula o tempo pelo TMDB\n` +
             `/painel     ·  posta o painel fixo no canal\n` +
             `/help       ·  este menu`
           ))

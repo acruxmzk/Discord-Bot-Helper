@@ -80,6 +80,12 @@ async function init() {
       tmdb_media_type VARCHAR(10),
       genres     TEXT[]       NOT NULL DEFAULT '{}',
       category   VARCHAR(80)  NOT NULL DEFAULT 'Outros',
+       runtime_minutes INTEGER,
+       episode_runtime_minutes INTEGER,
+       episode_count INTEGER,
+       season_count INTEGER,
+       season_number INTEGER,
+       duration_minutes INTEGER,
       tmdb_synced_at TIMESTAMP WITHOUT TIME ZONE
     )
   `);
@@ -88,6 +94,12 @@ async function init() {
   await pool.query(`ALTER TABLE movies ADD COLUMN IF NOT EXISTS tmdb_media_type VARCHAR(10)`);
   await pool.query(`ALTER TABLE movies ADD COLUMN IF NOT EXISTS genres TEXT[] NOT NULL DEFAULT '{}'`);
   await pool.query(`ALTER TABLE movies ADD COLUMN IF NOT EXISTS category VARCHAR(80) NOT NULL DEFAULT 'Outros'`);
+  await pool.query(`ALTER TABLE movies ADD COLUMN IF NOT EXISTS runtime_minutes INTEGER`);
+  await pool.query(`ALTER TABLE movies ADD COLUMN IF NOT EXISTS episode_runtime_minutes INTEGER`);
+  await pool.query(`ALTER TABLE movies ADD COLUMN IF NOT EXISTS episode_count INTEGER`);
+  await pool.query(`ALTER TABLE movies ADD COLUMN IF NOT EXISTS season_count INTEGER`);
+  await pool.query(`ALTER TABLE movies ADD COLUMN IF NOT EXISTS season_number INTEGER`);
+  await pool.query(`ALTER TABLE movies ADD COLUMN IF NOT EXISTS duration_minutes INTEGER`);
   await pool.query(`ALTER TABLE movies ADD COLUMN IF NOT EXISTS tmdb_synced_at TIMESTAMP WITHOUT TIME ZONE`);
 
   // Atualiza instalações antigas para registrar também o horário em que
@@ -137,7 +149,13 @@ async function updateTmdbMetadata(id, metadata) {
             tmdb_media_type = $3,
             genres = $4,
             category = $5,
-            tmdb_synced_at = CURRENT_TIMESTAMP
+             runtime_minutes = $6,
+             episode_runtime_minutes = $7,
+             episode_count = $8,
+             season_count = $9,
+             season_number = $10,
+             duration_minutes = $11,
+             tmdb_synced_at = CURRENT_TIMESTAMP
       WHERE id = $1
       RETURNING *`,
     [
@@ -146,6 +164,12 @@ async function updateTmdbMetadata(id, metadata) {
       metadata.mediaType ?? null,
       metadata.genres ?? [],
       metadata.category ?? 'Outros',
+      metadata.runtimeMinutes ?? null,
+      metadata.episodeRuntimeMinutes ?? null,
+      metadata.episodeCount ?? null,
+      metadata.seasonCount ?? null,
+      metadata.seasonNumber ?? null,
+      metadata.durationMinutes ?? null,
     ]
   );
   return res.rows[0] ?? null;

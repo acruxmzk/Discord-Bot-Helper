@@ -79,33 +79,40 @@ async function getGenres(language) {
   return genres;
 }
 
-async function searchCandidates(query, language) {
-  const result = await tmdbFetch('/search/multi', {
+async function searchCandidates(query, language, preferSeries = false) {
+  const likelySeries = preferSeries || /\b(season|temporada|s[ée]rie|programa)\b/i.test(query);
+  const result = await tmdbFetch(likelySeries ? '/search/tv' : '/search/multi', {
     query,
     language,
     include_adult: 'false',
     page: 1,
   });
   return (result.results ?? [])
-    .filter(item => item.media_type === 'movie' || item.media_type === 'tv')
+    .filter(item => likelySeries || item.media_type === 'movie' || item.media_type === 'tv')
     .map(item => {
+      const mediaType = item.media_type ?? (likelySeries ? 'tv' : 'movie');
       const localized = item.title ?? item.name ?? '';
       const original = item.original_title ?? item.original_name ?? '';
       let score = similarity(query, localized);
       if (cleanTitle(localized) === cleanTitle(query)) score = 1;
       else if (cleanTitle(original) === cleanTitle(query)) score = Math.max(score, 0.84);
+      if (likelySeries && mediaType === 'tv') score += 0.4;
+      if (likelySeries && mediaType === 'movie') score -= 0.2;
       // For ambiguous names such as "Os Vingadores", prefer a movie match
       // over an old TV series when the watchlist is a film list.
-      if (item.media_type === 'movie') score += 0.15;
+      if (mediaType === 'movie') score += 0.15;
       score += Math.min(Number(item.popularity ?? 0) / 1000, 0.05);
-      return { item, score };
+      return { item: { ...item, media_type: mediaType }, score };
     });
 }
 
 async function findTitle(title, language = 'pt-BR') {
   const queries = [title, ...(SEARCH_ALIASES[title] ?? [])];
+  const preferSeries = /\b(season|temporada|s[ée]rie|programa)\b/i.test(title);
   const candidates = [];
-  for (const query of queries) candidates.push(...await searchCandidates(query, language));
+  for (const query of queries) {
+    candidates.push(...await searchCandidates(query, language, preferSeries));
+  }
   candidates.sort((a, b) => b.score - a.score);
 
   const best = candidates[0];
@@ -122,26 +129,150 @@ async function lookupMovie(title) {
     getGenres(language),
   ]);
   if (!item) {
-    return { tmdbId: null, mediaType: null, genres: [], category: 'Outros' };
+    return {
+      tmdbId: null,
+      mediaType: null,
+      genres: [],
+      category: 'Outros',
+      runtimeMinutes: null,
+      episodeRuntimeMinutes: null,
+      episodeCount: null,
+      seasonCount: null,
+      durationMinutes: null,
+    };
   }
 
   const names = (item.genre_ids ?? [])
     .map(id => genres.get(id))
     .filter(Boolean);
+  const details = await getDetails({
+    tmdb_id: item.id,
+    tmdb_media_type: item.media_type,
+  }, { append: '' });
+  const seasonNumber = getSeasonNumber(title);
+  let seasonDetails = null;
+  if (item.media_type === 'tv' && seasonNumber !== null) {
+    try {
+      const candidate = await getSeasonDetails(item.id, seasonNumber);
+      if (candidate?.episodes?.length) seasonDetails = candidate;
+    } catch (error) {
+      console.warn(`[TMDB] Temporada ${seasonNumber} não disponível para "${title}": ${error.message}`);
+    }
+  }
+  const duration = durationFromDetails(details, item.media_type, seasonDetails);
   return {
     tmdbId: item.id ?? null,
     mediaType: item.media_type ?? null,
     genres: [...new Set(names)],
     category: GENRE_LABELS[names[0]] ?? names[0] ?? 'Outros',
+    ...duration,
   };
 }
 
-async function getDetails(movie) {
+function getSeasonNumber(title) {
+  const match = String(title ?? '').match(/\b(?:season|temporada)\s*(\d+)\b/i);
+  return match ? Number(match[1]) : null;
+}
+
+function durationFromDetails(details, mediaType, seasonDetails = null) {
+  if (!details) {
+    return {
+      runtimeMinutes: null,
+      episodeRuntimeMinutes: null,
+      episodeCount: null,
+      seasonCount: null,
+      seasonNumber: null,
+      durationMinutes: null,
+    };
+  }
+
+  const isSeries = mediaType === 'tv' || details.number_of_episodes !== undefined;
+  if (isSeries) {
+    if (seasonDetails) {
+      const episodes = seasonDetails.episodes ?? [];
+      const runtimes = episodes
+        .map(episode => Number(episode.runtime))
+        .filter(value => Number.isFinite(value) && value > 0);
+      const parentRuntimes = (details.episode_run_time ?? [])
+        .map(Number)
+        .filter(value => Number.isFinite(value) && value > 0);
+      const episodeRuntimeMinutes = runtimes.length
+        ? Math.round(runtimes.reduce((sum, value) => sum + value, 0) / runtimes.length)
+        : parentRuntimes.length
+          ? Math.round(parentRuntimes.reduce((sum, value) => sum + value, 0) / parentRuntimes.length)
+          : null;
+      const episodeCount = episodes.length || null;
+      return {
+        runtimeMinutes: null,
+        episodeRuntimeMinutes,
+        episodeCount,
+        seasonCount: 1,
+        seasonNumber: Number.isFinite(Number(seasonDetails.season_number))
+          ? Number(seasonDetails.season_number)
+          : null,
+        durationMinutes: runtimes.length
+          ? runtimes.reduce((sum, value) => sum + value, 0)
+          : episodeRuntimeMinutes && episodeCount
+            ? episodeRuntimeMinutes * episodeCount
+            : null,
+      };
+    }
+
+    const runtimes = (details.episode_run_time ?? [])
+      .map(Number)
+      .filter(value => Number.isFinite(value) && value > 0);
+    const episodeRuntimeMinutes = runtimes.length
+      ? Math.round(runtimes.reduce((sum, value) => sum + value, 0) / runtimes.length)
+      : null;
+    const episodeCount = Number.isFinite(Number(details.number_of_episodes)) && Number(details.number_of_episodes) > 0
+      ? Number(details.number_of_episodes)
+      : null;
+    const seasonCount = Number.isFinite(Number(details.number_of_seasons)) && Number(details.number_of_seasons) > 0
+      ? Number(details.number_of_seasons)
+      : null;
+
+    return {
+      runtimeMinutes: null,
+      episodeRuntimeMinutes,
+      episodeCount,
+      seasonCount,
+      seasonNumber: null,
+      durationMinutes: episodeRuntimeMinutes && episodeCount
+        ? episodeRuntimeMinutes * episodeCount
+        : null,
+    };
+  }
+
+  const runtimeMinutes = Number(details.runtime);
+  return {
+    runtimeMinutes: Number.isFinite(runtimeMinutes) && runtimeMinutes > 0
+      ? Math.round(runtimeMinutes)
+      : null,
+    episodeRuntimeMinutes: null,
+    episodeCount: null,
+    seasonCount: null,
+    seasonNumber: null,
+    durationMinutes: Number.isFinite(runtimeMinutes) && runtimeMinutes > 0
+      ? Math.round(runtimeMinutes)
+      : null,
+  };
+}
+
+async function getDetails(movie, { append = 'credits,watch/providers' } = {}) {
   if (!movie?.tmdb_id) return null;
   const type = movie.tmdb_media_type === 'tv' ? 'tv' : 'movie';
   return tmdbFetch(`/${type}/${movie.tmdb_id}`, {
     language: 'pt-BR',
-    append_to_response: 'credits,watch/providers',
+    append_to_response: append,
+  });
+}
+
+async function getSeasonDetails(tmdbId, seasonNumber) {
+  if (!tmdbId || !Number.isInteger(Number(seasonNumber)) || Number(seasonNumber) < 0) {
+    return null;
+  }
+  return tmdbFetch(`/tv/${tmdbId}/season/${Number(seasonNumber)}`, {
+    language: 'pt-BR',
   });
 }
 
@@ -263,34 +394,68 @@ async function getRecommendations(movies, { limit = 8, anchorName = null } = {})
   return selected.sort((a, b) => b.score - a.score);
 }
 
-async function syncAllMovies() {
+async function saveTmdbMetadata(id, metadata) {
+  const result = await pool.query(`
+    UPDATE movies
+    SET tmdb_id = $2,
+        tmdb_media_type = $3,
+        genres = $4,
+        category = $5,
+        runtime_minutes = $6,
+        episode_runtime_minutes = $7,
+        episode_count = $8,
+        season_count = $9,
+        season_number = $10,
+        duration_minutes = $11,
+        tmdb_synced_at = CURRENT_TIMESTAMP
+    WHERE id = $1
+    RETURNING *
+  `, [
+    id,
+    metadata.tmdbId ?? null,
+    metadata.mediaType ?? null,
+    metadata.genres ?? [],
+    metadata.category ?? 'Outros',
+    metadata.runtimeMinutes ?? null,
+    metadata.episodeRuntimeMinutes ?? null,
+    metadata.episodeCount ?? null,
+    metadata.seasonCount ?? null,
+    metadata.seasonNumber ?? null,
+    metadata.durationMinutes ?? null,
+  ]);
+  return result.rows[0] ?? null;
+}
+
+async function syncMovie(movie) {
+  if (!apiKey()) throw new Error('TMDB_API_KEY não configurada');
+  const metadata = await lookupMovie(movie.name);
+  const updated = await saveTmdbMetadata(movie.id, metadata);
+  return { movie: updated, metadata };
+}
+
+async function syncAllMovies({ watchedOnly = false, force = false } = {}) {
   if (!apiKey()) {
     console.warn('[TMDB] TMDB_API_KEY não configurada; sincronização ignorada.');
     return { synced: 0, skipped: 0, failed: 0 };
   }
 
-  const movies = (await pool.query(`
+  const syncQuery = `
     SELECT id, name, tmdb_synced_at
     FROM movies
-    WHERE tmdb_synced_at IS NULL
-       OR tmdb_synced_at < CURRENT_TIMESTAMP - ($1 * INTERVAL '1 day')
+    WHERE ${watchedOnly ? 'watched AND' : ''}
+      (${force ? 'TRUE' : `duration_minutes IS NULL
+       OR tmdb_synced_at IS NULL
+       OR tmdb_synced_at < CURRENT_TIMESTAMP - ($1 * INTERVAL '1 day')`})
     ORDER BY id ASC
-  `, [SYNC_AFTER_DAYS])).rows;
+  `;
+  const movies = (await pool.query(syncQuery, force ? [] : [SYNC_AFTER_DAYS])).rows;
 
   let synced = 0;
   let failed = 0;
   for (const movie of movies) {
     try {
       const metadata = await lookupMovie(movie.name);
-      await pool.query(`
-        UPDATE movies
-        SET tmdb_id = $2,
-            tmdb_media_type = $3,
-            genres = $4,
-            category = $5,
-            tmdb_synced_at = CURRENT_TIMESTAMP
-        WHERE id = $1
-      `, [movie.id, metadata.tmdbId, metadata.mediaType, metadata.genres, metadata.category]);
+      await saveTmdbMetadata(movie.id, metadata);
       synced++;
       console.log(`[TMDB] ${movie.name} → ${metadata.category}`);
     } catch (error) {
@@ -302,5 +467,6 @@ async function syncAllMovies() {
 }
 
 module.exports = {
-  syncAllMovies, lookupMovie, findTitle, getDetails, getSimilar, getRecommendations,
+  syncAllMovies, syncMovie, lookupMovie, findTitle, getDetails, getSeasonDetails, durationFromDetails,
+  getSimilar, getRecommendations,
 };

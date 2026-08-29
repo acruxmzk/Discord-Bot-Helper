@@ -10,6 +10,12 @@ const {
 } = require('discord.js');
 const { getAll }              = require('../utils/movieDB');
 const { buildPanelContainer } = require('../utils/buildPanelContainer');
+const {
+  formatMinutes,
+  formatMovieDuration,
+  sumDurations,
+  countKnownDurations,
+} = require('../utils/duration');
 
 function sep() { return new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true); }
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
@@ -61,14 +67,16 @@ function accentColor(filter, percent) {
 
 function movieRow(m, index) {
   const num  = String(index).padStart(2, '0');
-  if (!m.watched) return `\`${num}\`  ☐  ${m.name}`;
+  const duration = formatMovieDuration(m);
+  const durationLabel = duration ? `  ·  ⏱ ${duration}` : '';
+  if (!m.watched) return `\`${num}\`  ☐  ${m.name}${durationLabel}`;
 
   const n    = m.note !== null ? parseFloat(m.note) : null;
   const star = n !== null ? `  ${stars(n)}` : '';
   const note = n !== null ? `  ${n.toFixed(1)}` : '';
   const date = m.watched_at ? `  ·  ${fmtDate(m.watched_at)}` : '';
 
-  return `\`${num}\`  ✅  **${m.name}**${star}${note}${date}`;
+  return `\`${num}\`  ✅  **${m.name}**${star}${note}${date}${durationLabel}`;
 }
 
 function buildFilmesContainer(movies, filter) {
@@ -80,6 +88,13 @@ function buildFilmesContainer(movies, filter) {
   const avg     = rated.length > 0
     ? (rated.reduce((s, m) => s + parseFloat(m.note), 0) / rated.length).toFixed(1)
     : null;
+  const knownDurations = countKnownDurations(movies);
+  const totalDuration = formatMinutes(sumDurations(movies));
+  const watchedDuration = formatMinutes(sumDurations(watched));
+  const durationLine = knownDurations > 0
+    ? `⏱ ${totalDuration} catalogados · ${watchedDuration ?? '0 min'} assistidos` +
+      (knownDurations < total ? ` · ${knownDurations}/${total} sincronizados` : '')
+    : `⏱ duração pendente · use /duracao para sincronizar com o TMDB`;
 
   const list = filter === 'watched' ? watched
              : filter === 'pending' ? pending
@@ -101,6 +116,7 @@ function buildFilmesContainer(movies, filter) {
     (avg
       ? `${stars(avg)}  **${avg}**  ·  ${rated.length} avaliados\n`
       : `*nenhum avaliado ainda*\n`) +
+    `${durationLine}\n` +
     `\`${progressBar(percent)}\`  ${percent}%\n` +
     `-# ${milestone(percent)}`
   ));
