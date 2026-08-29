@@ -4,7 +4,7 @@ const {
   TextDisplayBuilder,
   MessageFlags,
 } = require('discord.js');
-const { search, setNote, markWatched } = require('../utils/movieDB');
+const { search, getByName, setNote, markWatched } = require('../utils/movieDB');
 const { refreshPanel }    = require('../utils/refreshPanel');
 
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
@@ -53,9 +53,26 @@ module.exports = {
     const name = interaction.options.getString('filme');
     const nota = interaction.options.getNumber('nota');
 
+    // Nota só pode ser aplicada a um título já existente na watchlist.
+    const listedMovie = await getByName(name);
+    if (!listedMovie) {
+      await interaction.editReply({
+        components: [
+          new ContainerBuilder()
+            .setAccentColor(0xE74C3C)
+            .addTextDisplayComponents(txt(
+              `**${name}**\n` +
+              `-# não está na lista  ·  escolha um título do autocomplete ou use /adicionar`
+            )),
+        ],
+        flags: MessageFlags.IsComponentsV2,
+      });
+      return;
+    }
+
     // Dar uma nota pressupõe que o filme foi assistido. Para filmes já
     // assistidos, markWatched preserva a data original.
-    let movie = await markWatched(name);
+    let movie = await markWatched(listedMovie.name);
     if (movie) movie = await setNote(movie.name, nota) ?? movie;
 
     if (!movie) {

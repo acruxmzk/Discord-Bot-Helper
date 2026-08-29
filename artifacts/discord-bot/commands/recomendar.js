@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, ContainerBuilder, TextDisplayBuilder, MessageFlags } = require('discord.js');
 const { getAll, search } = require('../utils/movieDB');
-const { getRecommendations } = require('../utils/tmdb');
+const { getRecommendations, syncAllMovies } = require('../utils/tmdb');
 
 const txt = content => new TextDisplayBuilder().setContent(content);
 
@@ -23,6 +23,12 @@ module.exports = {
 
   async execute(interaction) {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+    // A lista pode ter sido importada sem metadados do TMDB. Sincronizar aqui
+    // uma vez (o próprio sync usa tmdb_synced_at para evitar repetição)
+    // garante que qualquer título assistido e avaliado possa ser usado como
+    // base, não apenas os primeiros itens antigos da lista.
+    const sync = await syncAllMovies();
     const movies = await getAll();
     const anchorName = interaction.options.getString('filme');
     const anchor = anchorName
@@ -35,7 +41,9 @@ module.exports = {
     const results = await getRecommendations(movies, { anchorName });
     if (!results.length) {
       await interaction.editReply({
-        content: '⚠️ Marque alguns títulos como assistidos e dê notas para receber recomendações personalizadas.',
+        content: sync.failed
+          ? `⚠️ Não foi possível sincronizar ${sync.failed} título(s) com o TMDB. Marque títulos como assistidos e dê notas para receber recomendações personalizadas.`
+          : '⚠️ Marque alguns títulos como assistidos e dê notas para receber recomendações personalizadas.',
       });
       return;
     }

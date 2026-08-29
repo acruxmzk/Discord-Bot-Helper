@@ -147,12 +147,21 @@ async function updateTmdbMetadata(id, metadata) {
 }
 
 async function search(query) {
+  const text = String(query ?? '').trim();
   const res = await pool.query(
     `SELECT * FROM movies
-     WHERE unaccent(name) ILIKE unaccent($1)
-     ORDER BY id ASC
+     WHERE unaccent(LOWER(name)) LIKE unaccent(LOWER($1))
+     ORDER BY
+       CASE
+         WHEN $2 <> '' AND unaccent(LOWER(name)) = unaccent(LOWER($2)) THEN 0
+         WHEN $2 <> '' AND unaccent(LOWER(name)) LIKE unaccent(LOWER($2)) || '%' THEN 1
+         WHEN $2 <> '' THEN 2
+         ELSE 3
+       END,
+       CASE WHEN $2 = '' THEN unaccent(LOWER(name)) ELSE name END ASC,
+       id ASC
      LIMIT 25`,
-    [`%${query}%`]
+    [`%${text}%`, text]
   );
   return res.rows;
 }

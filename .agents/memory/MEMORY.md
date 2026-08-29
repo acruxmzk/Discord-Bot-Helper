@@ -1,1 +1,2 @@
 - [Discord movie search and recency](discord-movie-search.md) — autocomplete routing, accent-insensitive search, and timestamp ordering are all required.
+- [Discord autocomplete limit](discord-autocomplete-limit.md) — Discord shows at most 25 choices; rank relevant matches and require typing to reach the full list.

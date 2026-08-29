@@ -4,7 +4,7 @@ const {
   TextDisplayBuilder,
   MessageFlags,
 } = require('discord.js');
-const { search, markWatched, setNote } = require('../utils/movieDB');
+const { search, getByName, markWatched, setNote } = require('../utils/movieDB');
 const { refreshPanel } = require('../utils/refreshPanel');
 
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
@@ -52,7 +52,26 @@ module.exports = {
     const name = interaction.options.getString('filme');
     const nota = interaction.options.getNumber('nota') ?? null;
 
-    let movie = await markWatched(name);
+    // O título precisa existir na watchlist. Validamos antes do UPDATE para
+    // impedir que uma entrada digitada livremente crie/avalie um filme fora
+    // da lista oficial.
+    const listedMovie = await getByName(name);
+    if (!listedMovie) {
+      await interaction.editReply({
+        components: [
+          new ContainerBuilder()
+            .setAccentColor(0xE74C3C)
+            .addTextDisplayComponents(txt(
+              `**${name}**\n` +
+              `-# não está na lista  ·  escolha um título do autocomplete ou use /adicionar`
+            )),
+        ],
+        flags: MessageFlags.IsComponentsV2,
+      });
+      return;
+    }
+
+    let movie = await markWatched(listedMovie.name);
 
     if (!movie) {
       await interaction.editReply({
