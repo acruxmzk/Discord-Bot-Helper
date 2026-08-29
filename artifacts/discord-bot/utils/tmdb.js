@@ -14,6 +14,15 @@ const SEARCH_ALIASES = {
   'Masterchef Profissionais: Season 2': ['MasterChef Profissionais', 'MasterChef: The Professionals'],
   'Dexter: Season 1': ['Dexter'],
 };
+const TMDB_OVERRIDES = {
+  'masterchef brasil season 3': {
+    id: 64203,
+    media_type: 'tv',
+    name: 'MasterChef',
+    original_name: 'MasterChef',
+    genre_ids: [],
+  },
+};
 const GENRE_LABELS = {
   'Action & Adventure': 'Ação e aventura',
   'Sci-Fi & Fantasy': 'Ficção científica e fantasia',
@@ -107,6 +116,9 @@ async function searchCandidates(query, language, preferSeries = false) {
 }
 
 async function findTitle(title, language = 'pt-BR') {
+  const override = TMDB_OVERRIDES[cleanTitle(title)];
+  if (override) return { ...override };
+
   const queries = [title, ...(SEARCH_ALIASES[title] ?? [])];
   const preferSeries = /\b(season|temporada|s[ée]rie|programa)\b/i.test(title);
   const candidates = [];
@@ -142,13 +154,16 @@ async function lookupMovie(title) {
     };
   }
 
-  const names = (item.genre_ids ?? [])
-    .map(id => genres.get(id))
-    .filter(Boolean);
   const details = await getDetails({
     tmdb_id: item.id,
     tmdb_media_type: item.media_type,
   }, { append: '' });
+  const namesFromSearch = (item.genre_ids ?? [])
+    .map(id => genres.get(id))
+    .filter(Boolean);
+  const names = namesFromSearch.length
+    ? namesFromSearch
+    : (details?.genres ?? []).map(genre => genre.name).filter(Boolean);
   const seasonNumber = getSeasonNumber(title);
   let seasonDetails = null;
   if (item.media_type === 'tv' && seasonNumber !== null) {
