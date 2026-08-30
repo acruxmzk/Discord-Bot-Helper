@@ -14,6 +14,17 @@ function formatMinutes(value) {
   return `${hours}h ${remainder}min`;
 }
 
+function formatCompactMinutes(value) {
+  const minutes = asPositiveInteger(value);
+  if (!minutes) return null;
+
+  const hours = Math.floor(minutes / 60);
+  const remainder = minutes % 60;
+  if (!hours) return `${remainder}m`;
+  if (!remainder) return `${hours}h`;
+  return `${hours}h${String(remainder).padStart(2, '0')}`;
+}
+
 function formatMovieDuration(movie) {
   const total = formatMinutes(movie?.duration_minutes);
   if (!total) return null;
@@ -46,6 +57,7 @@ function countKnownDurations(movies) {
 
 module.exports = {
   formatMinutes,
+  formatCompactMinutes,
   formatMovieDuration,
   sumDurations,
   countKnownDurations,

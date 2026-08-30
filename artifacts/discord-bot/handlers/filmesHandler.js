@@ -12,7 +12,7 @@ const { getAll }              = require('../utils/movieDB');
 const { buildPanelContainer } = require('../utils/buildPanelContainer');
 const {
   formatMinutes,
-  formatMovieDuration,
+  formatCompactMinutes,
   sumDurations,
   countKnownDurations,
 } = require('../utils/duration');
@@ -67,7 +67,7 @@ function accentColor(filter, percent) {
 
 function movieRow(m, index) {
   const num  = String(index).padStart(2, '0');
-  const duration = formatMovieDuration(m);
+  const duration = formatCompactMinutes(m.duration_minutes);
   const durationLabel = duration ? `  ·  ⏱ ${duration}` : '';
   if (!m.watched) return `\`${num}\`  ☐  ${m.name}${durationLabel}`;
 
