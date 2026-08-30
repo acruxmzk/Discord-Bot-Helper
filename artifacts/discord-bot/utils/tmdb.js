@@ -52,6 +52,22 @@ function similarity(a, b) {
   return intersection / Math.max(leftWords.size, rightWords.size);
 }
 
+function titleWithoutSeason(title) {
+  return String(title ?? '')
+    .replace(/\s*(?:[:\-–—]\s*)?(?:season|temporada)\s*\.?\s*\d+\s*$/i, '')
+    .replace(/\s*(?:[:\-–—]\s*)?s\s*\.?\s*\d+\s*$/i, '')
+    .trim();
+}
+
+function searchQueriesForTitle(title) {
+  const queries = [title, ...(SEARCH_ALIASES[title] ?? [])];
+  const baseTitle = titleWithoutSeason(title);
+  if (baseTitle && cleanTitle(baseTitle) !== cleanTitle(title)) {
+    queries.push(baseTitle);
+  }
+  return [...new Set(queries.filter(Boolean))];
+}
+
 async function tmdbFetch(path, params = {}) {
   const key = apiKey();
   if (!key) throw new Error('TMDB_API_KEY não configurada');
@@ -119,7 +135,7 @@ async function findTitle(title, language = 'pt-BR') {
   const override = TMDB_OVERRIDES[cleanTitle(title)];
   if (override) return { ...override };
 
-  const queries = [title, ...(SEARCH_ALIASES[title] ?? [])];
+  const queries = searchQueriesForTitle(title);
   const preferSeries = /\b(season|temporada|s[ée]rie|programa)\b/i.test(title);
   const candidates = [];
   for (const query of queries) {
@@ -185,8 +201,11 @@ async function lookupMovie(title) {
 }
 
 function getSeasonNumber(title) {
-  const match = String(title ?? '').match(/\b(?:season|temporada)\s*(\d+)\b/i);
-  return match ? Number(match[1]) : null;
+  const match = String(title ?? '').match(
+    /\b(?:season|temporada)\s*\.?\s*(\d+)\b|\btemporada\s*(\d+)\b|\bs\s*\.?\s*(\d+)\b/i
+  );
+  const season = match?.slice(1).find(Boolean);
+  return season ? Number(season) : null;
 }
 
 function durationFromDetails(details, mediaType, seasonDetails = null) {
