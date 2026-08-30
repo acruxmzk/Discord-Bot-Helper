@@ -5,6 +5,7 @@ const {
   MessageFlags,
 } = require('discord.js');
 const { search, getByName, setNote, markWatched } = require('../utils/movieDB');
+const { syncMovieIfMissing } = require('../utils/tmdb');
 const { refreshPanel }    = require('../utils/refreshPanel');
 
 function txt(c) { return new TextDisplayBuilder().setContent(c); }
@@ -88,6 +89,12 @@ module.exports = {
         flags: MessageFlags.IsComponentsV2,
       });
       return;
+    }
+
+    const durationSync = await syncMovieIfMissing(movie);
+    movie = durationSync.movie;
+    if (durationSync.error) {
+      console.error(`[TMDB] Falha ao buscar duração de "${movie.name}":`, durationSync.error.message);
     }
 
     const n = parseFloat(movie.note);

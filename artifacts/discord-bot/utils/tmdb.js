@@ -15,6 +15,20 @@ const SEARCH_ALIASES = {
   'Dexter: Season 1': ['Dexter'],
 };
 const TMDB_OVERRIDES = {
+  'os vingadores': {
+    id: 24428,
+    media_type: 'movie',
+    title: 'Os Vingadores',
+    original_title: 'The Avengers',
+    genre_ids: [],
+  },
+  zootopia: {
+    id: 269149,
+    media_type: 'movie',
+    title: 'Zootopia',
+    original_title: 'Zootopia',
+    genre_ids: [],
+  },
   'masterchef brasil season 3': {
     id: 64203,
     media_type: 'tv',
@@ -467,6 +481,19 @@ async function syncMovie(movie) {
   return { movie: updated, metadata };
 }
 
+async function syncMovieIfMissing(movie) {
+  if (!movie || Number(movie.duration_minutes) > 0) {
+    return { movie, synced: false, error: null };
+  }
+
+  try {
+    const result = await syncMovie(movie);
+    return { movie: result.movie ?? movie, synced: true, error: null };
+  } catch (error) {
+    return { movie, synced: false, error };
+  }
+}
+
 async function syncAllMovies({ watchedOnly = false, force = false } = {}) {
   if (!apiKey()) {
     console.warn('[TMDB] TMDB_API_KEY não configurada; sincronização ignorada.');
@@ -501,6 +528,6 @@ async function syncAllMovies({ watchedOnly = false, force = false } = {}) {
 }
 
 module.exports = {
-  syncAllMovies, syncMovie, lookupMovie, findTitle, getDetails, getSeasonDetails, durationFromDetails,
+  syncAllMovies, syncMovie, syncMovieIfMissing, lookupMovie, findTitle, getDetails, getSeasonDetails, durationFromDetails,
   getSimilar, getRecommendations,
 };

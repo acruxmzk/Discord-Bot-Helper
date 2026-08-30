@@ -8,3 +8,9 @@ When a watchlist title includes “Season” or “Temporada”, prefer TMDB’s
 **Why:** TMDB’s multi-search can rank an unrelated movie above the intended series, and a series-details response describes the entire show rather than the requested season.
 
 **How to apply:** Keep the season number in stored metadata, calculate totals from episode runtimes when the season endpoint is available, and make missing-season fallbacks visible to the user. Normalize common `S2` notation when extracting the season number.
+
+When a title is marked as watched, attempt a missing-duration sync immediately; keep a small set of curated overrides for ambiguous franchise titles where TMDB's popularity ranking selects a sequel or remake.
+
+**Why:** A duration can be correct for the wrong work, and delaying lookup until a later report lets missing metadata go unnoticed.
+
+**How to apply:** Treat watched-state transitions as a synchronization trigger, and audit ambiguous names against the surrounding watchlist context rather than trusting a literal search result alone.
