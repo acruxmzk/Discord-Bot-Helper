@@ -118,7 +118,7 @@ module.exports = {
         ],
         flags: MessageFlags.IsComponentsV2,
       });
-      refreshPanel(interaction.guildId).catch(e => console.error('[refreshPanel]', e));
+      await refreshPanel(interaction.guildId, interaction.channelId);
       return;
     }
 
@@ -143,6 +143,6 @@ module.exports = {
       flags: MessageFlags.IsComponentsV2,
     });
 
-    refreshPanel(interaction.guildId).catch(e => console.error('[refreshPanel]', e));
+    await refreshPanel(interaction.guildId, interaction.channelId);
   },
 };

@@ -101,7 +101,7 @@ module.exports = {
 
     // Atualiza o painel antes de confirmar para o usuário, garantindo que
     // a nova nota apareça imediatamente na mensagem fixa.
-    await refreshPanel(interaction.guildId)
+    await refreshPanel(interaction.guildId, interaction.channelId)
       .catch(e => console.error('[refreshPanel]', e));
 
     await interaction.editReply({

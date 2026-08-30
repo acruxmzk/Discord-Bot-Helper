@@ -1,3 +1,4 @@
 - [Discord movie search and recency](discord-movie-search.md) — autocomplete routing, accent-insensitive search, and timestamp ordering are all required.
 - [Discord autocomplete limit](discord-autocomplete-limit.md) — Discord shows at most 25 choices; rank relevant matches and require typing to reach the full list.
 - [TMDB season durations](tmdb-season-durations.md) — season-labeled titles need TV search and season endpoints; TMDB may return misleading movie matches or missing seasons.
+- [Automatic panel refresh](panel-refresh.md) — watchlist mutations must await editing the registered Discord panel message, with recovery when its record is missing.
